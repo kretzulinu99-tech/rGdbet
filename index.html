@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>rGdbet Elite PRO</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ng:#00ff88;--nb:#00c8ff;--np:#bf5fff;--gold:#ffcc00;--danger:#ff3366;
+  --bg:#080b10;--bg2:#0d1117;--card:rgba(13,17,23,0.97);--card2:rgba(20,26,35,0.95);
+  --border:rgba(255,255,255,0.07);--text:#fff;--text2:#8899aa;--text3:#445566;
+  --stat-bg:rgba(255,255,255,0.06);--input-bg:rgba(255,255,255,0.04);
+  --shadow:0 8px 32px rgba(0,0,0,0.5);
+}
+[data-theme="light"]{
+  --bg:#f0f4f8;--bg2:#e4ecf4;--card:rgba(255,255,255,0.97);--card2:rgba(240,248,255,0.98);
+  --border:rgba(0,0,0,0.09);--text:#0d1117;--text2:#445566;--text3:#aabbcc;
+  --stat-bg:rgba(0,0,0,0.05);--input-bg:rgba(0,0,0,0.04);--shadow:0 8px 32px rgba(0,0,0,0.12);
+}
+/* LEGEND MODE */
+body.legend-mode{--bg:#0a0800;--bg2:#120e00;}
+body.legend-mode::before{
+  background:radial-gradient(ellipse at 50% 30%,rgba(255,204,0,0.18) 0%,transparent 60%),
+             radial-gradient(ellipse at 20% 80%,rgba(255,153,0,0.10) 0%,transparent 50%),
+             radial-gradient(ellipse at 80% 10%,rgba(255,100,0,0.08) 0%,transparent 40%)!important;
+  animation:legend-breathe 4s ease-in-out infinite alternate!important;
+}
+@keyframes legend-breathe{0%{opacity:1}100%{opacity:.7}}
+body.legend-mode .logo-main span{background:linear-gradient(90deg,#ffcc00,#ff9900,#ffcc00)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;}
+input[type=number]{-moz-appearance:textfield;}
+
+body{
+  min-height:100vh;color:var(--text);font-family:'Rajdhani',sans-serif;
+  background:var(--bg);overflow-x:hidden;transition:background 0.4s,color 0.4s;
+}
+[data-theme="dark"] body::before{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at 15% 15%,rgba(0,255,136,0.10) 0%,transparent 50%),
+              radial-gradient(ellipse at 85% 85%,rgba(0,200,255,0.08) 0%,transparent 50%),
+              radial-gradient(ellipse at 60% 5%,rgba(191,95,255,0.07) 0%,transparent 40%);
+  animation:bg-breathe 9s ease-in-out infinite alternate;pointer-events:none;z-index:0;
+}
+@keyframes bg-breathe{0%{opacity:1;transform:scale(1)}100%{opacity:.6;transform:scale(1.04)}}
+*{position:relative;z-index:1;}
+
+/* ═══ BIOMETRIC SCREEN ═══ */
+#bio-screen{
+  position:fixed;inset:0;background:#000;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Rajdhani',sans-serif;
+}
+.bio-title{font-family:'Syncopate';font-size:22px;color:#fff;margin-bottom:6px;letter-spacing:3px;}
+.bio-sub{font-size:13px;color:#445566;letter-spacing:2px;margin-bottom:50px;font-family:'Syncopate';}
+.fingerprint-wrap{position:relative;width:140px;height:140px;margin-bottom:40px;}
+.fingerprint-svg{width:140px;height:140px;opacity:0.25;transition:opacity 0.4s;}
+.fp-ring{
+  position:absolute;inset:-15px;border-radius:50%;border:2px solid var(--nb);
+  animation:fp-scan 2s ease-in-out infinite;opacity:0;
+}
+.fp-ring2{animation-delay:0.5s;}
+.fp-ring3{animation-delay:1s;}
+@keyframes fp-scan{0%{transform:scale(0.8);opacity:0}50%{opacity:0.6}100%{transform:scale(1.4);opacity:0}}
+.fp-scan-line{
+  position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--nb),transparent);
+  animation:scan-move 2s ease-in-out infinite;top:0;
+}
+@keyframes scan-move{0%{top:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+.bio-status{
+  font-family:'Syncopate';font-size:11px;letter-spacing:3px;color:var(--text3);
+  height:20px;transition:all 0.4s;
+}
+.bio-status.scanning{color:var(--nb);animation:blink 1s infinite;}
+.bio-status.granted{color:var(--ng);}
+.bio-status.denied{color:var(--danger);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.bio-granted-ring{
+  position:absolute;inset:-15px;border-radius:50%;border:3px solid var(--ng);
+  transform:scale(0);transition:transform 0.4s cubic-bezier(.175,.885,.32,1.275),opacity 0.4s;opacity:0;
+}
+#bio-screen.granted .fingerprint-svg{opacity:0.9;filter:drop-shadow(0 0 20px var(--ng));}
+#bio-screen.granted .bio-granted-ring{transform:scale(1);opacity:1;}
+
+/* ═══ TOP BAR ═══ */
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0;}
+.top-bar-right{display:flex;gap:9px;align-items:center;}
+.icon-btn{
+  width:38px;height:38px;border-radius:11px;border:1px solid var(--border);
+  background:var(--stat-bg);color:var(--text2);cursor:pointer;display:flex;
+  align-items:center;justify-content:center;font-size:15px;transition:all 0.2s;backdrop-filter:blur(10px);
+}
+.icon-btn:hover{border-color:var(--nb);color:var(--nb);}
+.lang-wrapper{position:relative;}
+.lang-dropdown{
+  position:absolute;top:46px;right:0;width:190px;background:var(--card);
+  border:1px solid var(--border);border-radius:16px;padding:7px;
+  box-shadow:var(--shadow);display:none;z-index:999;backdrop-filter:blur(20px);
+  max-height:280px;overflow-y:auto;
+}
+.lang-dropdown.open{display:block;}
+.lang-opt{
+  display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:9px;
+  cursor:pointer;font-size:13px;transition:background 0.15s;color:var(--text2);
+}
+.lang-opt:hover,.lang-opt.active{background:rgba(0,200,255,0.1);color:var(--nb);}
+
+/* ═══ HEADER ═══ */
+.app-header{padding:10px 20px 6px;text-align:center;}
+.logo-main{font-family:'Rajdhani',sans-serif;font-size:38px;font-weight:700;letter-spacing:1px;line-height:1;}
+.logo-main .r{color:var(--text);}
+.logo-main .G{color:var(--ng);}
+.logo-main .d{color:var(--text2);}
+.logo-main .bet{background:linear-gradient(90deg,var(--ng),var(--nb));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-line{height:2px;background:transparent;overflow:hidden;margin-top:4px;position:relative;}
+.logo-line::after{content:'';position:absolute;top:0;width:60%;height:100%;background:linear-gradient(90deg,transparent,var(--nb),var(--ng),transparent);animation:sweep 2.8s infinite ease-in-out;}
+@keyframes sweep{0%{left:-100%}50%{left:100%}100%{left:-100%}}
+
+/* ═══ STREAK FLAMES ═══ */
+.streak-bar{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 16px 0;min-height:48px;
+}
+.flame-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.flame{
+  font-size:20px;transition:all 0.5s;filter:grayscale(1) opacity(0.2);
+  animation:none;
+}
+.flame.lit{filter:none;animation:flame-dance 1.2s ease-in-out infinite alternate;}
+.flame.hot{font-size:26px;animation:flame-hot 0.8s ease-in-out infinite alternate;}
+.flame.mega{font-size:34px;animation:flame-mega 0.6s ease-in-out infinite alternate;}
+@keyframes flame-dance{0%{transform:scale(1) rotate(-2deg)}100%{transform:scale(1.1) rotate(2deg)}}
+@keyframes flame-hot{0%{transform:scale(1) rotate(-3deg);filter:drop-shadow(0 0 8px orange)}100%{transform:scale(1.15) rotate(3deg);filter:drop-shadow(0 0 16px #ff6600)}}
+@keyframes flame-mega{0%{transform:scale(1) rotate(-4deg);filter:drop-shadow(0 0 20px var(--gold))}100%{transform:scale(1.2) rotate(4deg);filter:drop-shadow(0 0 35px var(--gold))}}
+.streak-count{font-family:'Syncopate';font-size:9px;color:var(--text3);letter-spacing:1px;text-align:center;}
+
+@keyframes icon-glow{0%,100%{transform:scale(1);filter:drop-shadow(0 0 3px currentColor)}50%{transform:scale(1.18);filter:drop-shadow(0 0 14px currentColor)}}
+.social-row{margin:8px 0 5px;}
+.social-icon{display:inline-block;font-size:21px;margin:0 8px;animation:icon-glow 2.4s infinite ease-in-out;text-decoration:none;}
+.fa-instagram{color:#ff0080!important}.fa-facebook{color:#1877F2!important}.fa-tiktok{color:var(--text)!important}
+
+.btn-donate{
+  display:block;margin:7px 20px 14px;padding:13px;
+  background:linear-gradient(90deg,var(--gold),#ff9900);
+  border-radius:14px;font-family:'Syncopate';font-size:10px;font-weight:900;
+  color:#000;text-decoration:none;text-align:center;
+  animation:pulse-gold 2.2s infinite;box-shadow:0 0 20px rgba(255,204,0,0.25);
+}
+@keyframes pulse-gold{0%,100%{transform:scale(1)}70%{transform:scale(1.02);box-shadow:0 0 28px rgba(255,153,0,.5)}}
+
+/* ═══ STATS ═══ */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px 12px;}
+.stat-card{
+  background:var(--stat-bg);padding:13px 10px;border-radius:18px;
+  border:1px solid var(--border);text-align:center;backdrop-filter:blur(10px);transition:border-color 0.3s;
+}
+.stat-card:hover{border-color:rgba(0,200,255,0.3);}
+.stat-val{display:block;font-size:22px;font-weight:700;font-family:'Syncopate';}
+.stat-label{font-size:8px;color:var(--text3);text-transform:uppercase;margin-top:3px;letter-spacing:1.5px;}
+.pos{color:var(--ng);text-shadow:0 0 12px rgba(0,255,136,0.4);}
+.neg{color:var(--danger);text-shadow:0 0 12px rgba(255,51,102,0.4);}
+.editable-input{
+  background:none!important;border:none!important;
+  border-bottom:1px solid var(--nb)!important;color:var(--nb);
+  font-family:'Syncopate';font-size:17px;width:95px;text-align:center;
+  padding:3px 0!important;border-radius:0!important;margin:0;
+}
+#form-circles{display:flex;gap:6px;justify-content:center;min-height:30px;margin-bottom:3px;flex-wrap:wrap;}
+
+/* ═══ CHART ═══ */
+.chart-wrap{background:var(--card);padding:13px;border-radius:20px;margin:0 16px 11px;border:1px solid var(--border);height:165px;}
+
+/* ═══ FILTERS ═══ */
+.filter-bar{display:flex;gap:7px;margin:0 16px 10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.filter-bar::-webkit-scrollbar{display:none;}
+.filter-btn{
+  background:var(--stat-bg);border:1px solid var(--border);color:var(--text3);
+  padding:6px 14px;border-radius:30px;font-family:'Syncopate';font-size:8px;
+  cursor:pointer;white-space:nowrap;transition:all 0.22s;letter-spacing:1px;
+}
+.filter-btn.active{background:rgba(0,200,255,0.1);border-color:var(--nb);color:var(--nb);}
+.filter-btn.f-win.active{background:rgba(0,255,136,0.1);border-color:var(--ng);color:var(--ng);}
+.filter-btn.f-loss.active{background:rgba(255,51,102,0.1);border-color:var(--danger);color:var(--danger);}
+.filter-btn.f-pending.active{background:rgba(255,204,0,0.1);border-color:var(--gold);color:var(--gold);}
+
+/* ═══ FORM ═══ */
+.form-card{background:var(--card);padding:18px;border-radius:22px;margin:0 16px 12px;border:1px solid var(--border);}
+.sec-title{font-family:'Syncopate';font-size:9px;color:var(--text3);letter-spacing:2px;margin-bottom:13px;}
+input,select{
+  width:100%;background:var(--input-bg);border:1px solid var(--border);
+  color:var(--text);padding:11px 13px;border-radius:11px;margin-bottom:9px;
+  outline:none;font-family:'Rajdhani';font-size:14px;transition:border-color 0.2s;
+}
+[data-theme="light"] input,[data-theme="light"] select{color:#0d1117;}
+input:focus,select:focus{border-color:var(--nb);}
+input::placeholder{color:var(--text3);}
+select option{background:var(--bg2);color:var(--text);}
+.row{display:flex;gap:9px;margin-bottom:9px;}
+.row input{margin-bottom:0;}
+
+/* ═══ SPORT PILLS ═══ */
+.sport-pills{display:flex;gap:7px;margin-bottom:11px;overflow-x:auto;scrollbar-width:none;}
+.sport-pill{
+  background:var(--stat-bg);border:1px solid var(--border);color:var(--text3);
+  padding:7px 12px;border-radius:30px;font-family:'Rajdhani';font-size:13px;font-weight:600;
+  cursor:pointer;white-space:nowrap;transition:all 0.2s;flex-shrink:0;
+}
+.sport-pill.sel{background:rgba(191,95,255,0.12);border-color:var(--np);color:var(--np);}
+
+/* ═══ CONFIDENCE STARS ═══ */
+.confidence-wrap{margin-bottom:11px;}
+.confidence-label{font-family:'Syncopate';font-size:8px;color:var(--text3);letter-spacing:1.5px;margin-bottom:7px;display:block;}
+.stars-row{display:flex;gap:8px;}
+.star-btn{
+  font-size:24px;cursor:pointer;transition:all 0.2s;filter:grayscale(1) opacity(0.3);
+  background:none;border:none;padding:0;line-height:1;
+}
+.star-btn.active{filter:none;transform:scale(1.15);animation:star-pop 0.3s ease-out;}
+@keyframes star-pop{0%{transform:scale(0.8)}60%{transform:scale(1.3)}100%{transform:scale(1.15)}}
+
+/* ═══ MULTI-EVENT BUILDER ═══ */
+.events-builder{margin-bottom:11px;}
+.events-list{margin-bottom:9px;}
+.event-item{
+  display:flex;align-items:center;gap:8px;background:rgba(0,200,255,0.05);
+  border:1px solid rgba(0,200,255,0.15);border-radius:10px;padding:9px 11px;margin-bottom:7px;
+}
+.event-item-name{flex:1;font-size:13px;font-weight:600;}
+.event-item-odds{font-family:'Syncopate';font-size:10px;color:var(--nb);margin-right:4px;}
+.event-del{background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:0;flex-shrink:0;}
+.add-event-row{display:flex;gap:7px;margin-bottom:7px;}
+.add-event-row input{margin-bottom:0;}
+.btn-add-event{
+  background:rgba(0,200,255,0.1);border:1px solid rgba(0,200,255,0.3);color:var(--nb);
+  border-radius:10px;padding:0 14px;cursor:pointer;white-space:nowrap;font-family:'Syncopate';font-size:9px;flex-shrink:0;
+  transition:all 0.2s;
+}
+.btn-add-event:hover{background:rgba(0,200,255,0.2);}
+.total-odds-bar{
+  background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);
+  border-radius:10px;padding:9px 13px;display:flex;justify-content:space-between;align-items:center;
+}
+.total-odds-label{font-size:12px;color:var(--text3);}
+.total-odds-val{font-family:'Syncopate';font-size:13px;color:var(--ng);}
+
+/* ═══ RISK BAR ═══ */
+.risk-section{margin:2px 0 11px;}
+.risk-bar{height:6px;background:rgba(255,255,255,0.05);border-radius:10px;overflow:hidden;margin-top:7px;}
+.risk-fill{height:100%;width:0%;border-radius:10px;transition:0.5s cubic-bezier(.175,.885,.32,1.275);}
+.risk-labels{display:flex;justify-content:space-between;font-size:9px;font-family:'Syncopate';color:var(--text3);letter-spacing:1px;}
+
+.btn-upload{display:block;background:var(--input-bg);border:1px dashed rgba(255,255,255,0.12);padding:10px;text-align:center;border-radius:11px;font-size:11px;margin-bottom:9px;color:var(--text3);cursor:pointer;transition:all 0.2s;}
+.btn-upload:hover{border-color:var(--nb);color:var(--nb);}
+
+.btn-primary{
+  background:linear-gradient(90deg,var(--ng),var(--nb));color:#000;border:none;
+  width:100%;padding:14px;border-radius:13px;font-family:'Syncopate';font-weight:900;
+  cursor:pointer;margin-top:7px;font-size:11px;letter-spacing:1px;
+  box-shadow:0 4px 22px rgba(0,200,255,0.22);transition:transform 0.15s;
+}
+.btn-primary:active{transform:scale(0.98);}
+
+/* ═══ BET ITEMS ═══ */
+.bet-item{
+  background:rgba(255,255,255,0.025);padding:13px;border-radius:14px;
+  margin:0 16px 10px;border:1px solid var(--border);border-left-width:4px;transition:transform 0.2s;
+}
+[data-theme="light"] .bet-item{background:rgba(0,0,0,0.025);}
+.bet-item:hover{transform:translateY(-1px);}
+.bet-match{font-weight:700;font-size:15px;}
+.bet-meta{font-size:12px;color:var(--text3);margin-top:1px;}
+.sport-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(191,95,255,0.12);color:var(--np);font-weight:600;margin-top:4px;}
+.confidence-badge{display:inline-block;font-size:11px;margin-left:6px;letter-spacing:1px;}
+.bet-sum{font-family:'Syncopate';font-size:10px;font-weight:700;margin-top:5px;text-align:right;display:block;}
+.s-win{color:var(--ng);} .s-loss{color:var(--danger);}
+.status-btn{border:none;border-radius:8px;padding:6px 12px;font-weight:bold;cursor:pointer;color:#000;font-family:'Syncopate';font-size:9px;transition:transform 0.1s;}
+.del-btn{background:var(--stat-bg);border:1px solid var(--border);border-radius:8px;padding:4px 9px;color:var(--text3);cursor:pointer;font-size:12px;}
+.no-bets{text-align:center;padding:45px 20px;color:var(--text3);font-family:'Syncopate';font-size:10px;letter-spacing:2px;}
+
+/* Multi-event in bet item */
+.event-sub-list{margin-top:8px;border-top:1px solid var(--border);padding-top:8px;}
+.event-sub-item{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:var(--text2);}
+.event-sub-odds{font-family:'Syncopate';font-size:10px;color:var(--nb);}
+
+@keyframes win-pulse{0%{box-shadow:0 0 0 rgba(0,255,136,0)}50%{transform:scale(1.02);box-shadow:0 0 25px rgba(0,255,136,.6)}100%{box-shadow:0 0 0 rgba(0,255,136,0)}}
+.win-anim{animation:win-pulse 0.9s ease-out;}
+
+/* ═══ INFO PAGE ═══ */
+.info-hero{margin:0 16px 14px;padding:26px 20px;border-radius:22px;background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,200,255,0.08),rgba(191,95,255,0.07));border:1px solid rgba(0,255,136,0.2);text-align:center;}
+.info-hero h2{font-family:'Syncopate';font-size:15px;margin-bottom:7px;}
+.info-hero p{color:var(--text2);font-size:13px;line-height:1.6;}
+.tip-card{background:var(--card);margin:0 16px 11px;padding:17px 19px;border-radius:19px;border:1px solid var(--border);border-left:4px solid var(--ng);}
+.tip-card.blue{border-left-color:var(--nb);} .tip-card.purple{border-left-color:var(--np);} .tip-card.gold{border-left-color:var(--gold);} .tip-card.danger{border-left-color:var(--danger);}
+.tip-icon{font-size:24px;margin-bottom:7px;}
+.tip-title{font-family:'Syncopate';font-size:10px;margin-bottom:7px;letter-spacing:1px;}
+.tip-body{font-size:13px;line-height:1.6;color:var(--text2);}
+.section-header{font-family:'Syncopate';font-size:9px;color:var(--text3);letter-spacing:2px;margin:18px 16px 11px;text-transform:uppercase;}
+.addiction-box{background:linear-gradient(135deg,rgba(255,51,102,0.08),rgba(255,51,102,0.04));border:1px solid rgba(255,51,102,0.2);margin:0 16px 11px;padding:17px 19px;border-radius:19px;}
+.addiction-box .tip-title{color:var(--danger);}
+.hotline{margin-top:10px;background:rgba(255,51,102,0.1);border-radius:11px;padding:9px 13px;}
+.hotline a{color:var(--danger);font-family:'Syncopate';font-size:10px;text-decoration:none;}
+
+/* ═══ LOGIN PAGE ═══ */
+.login-wrap{padding:28px 16px;text-align:center;}
+.login-avatar{width:86px;height:86px;border-radius:50%;margin:0 auto 18px;background:linear-gradient(135deg,var(--ng),var(--nb));display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 0 28px rgba(0,200,255,0.3);}
+.login-title{font-family:'Syncopate';font-size:17px;margin-bottom:5px;}
+.login-sub{color:var(--text2);font-size:13px;margin-bottom:26px;}
+.login-card{background:var(--card);border-radius:22px;border:1px solid var(--border);padding:22px;margin-bottom:14px;}
+.social-login-btn{display:flex;align-items:center;justify-content:center;gap:11px;width:100%;padding:13px;border-radius:13px;border:1px solid var(--border);background:var(--stat-bg);color:var(--text);font-family:'Rajdhani';font-size:15px;font-weight:600;cursor:pointer;transition:all 0.25s;margin-bottom:11px;}
+.social-login-btn:hover{border-color:var(--nb);background:rgba(0,200,255,0.08);}
+.social-login-btn.fb{border-color:rgba(24,119,242,0.3);}
+.social-login-btn.fb:hover{background:rgba(24,119,242,0.1);border-color:#1877F2;}
+.social-login-btn.google{border-color:rgba(234,67,53,0.3);}
+.social-login-btn.google:hover{background:rgba(234,67,53,0.1);border-color:#EA4335;}
+.divider{display:flex;align-items:center;gap:11px;margin:12px 0;color:var(--text3);font-size:12px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.logged-in{display:none;}
+.user-profile{background:var(--card);border-radius:22px;border:1px solid var(--border);padding:22px;margin-bottom:14px;text-align:center;}
+.user-avatar{width:68px;height:68px;border-radius:50%;margin:0 auto 11px;display:flex;align-items:center;justify-content:center;font-size:28px;background:linear-gradient(135deg,rgba(0,255,136,0.2),rgba(0,200,255,0.2));border:2px solid var(--nb);}
+.user-name{font-family:'Syncopate';font-size:13px;margin-bottom:4px;}
+.user-badge{display:inline-block;font-size:10px;padding:3px 11px;border-radius:20px;font-family:'Syncopate';}
+.badge-free{background:rgba(255,255,255,0.07);color:var(--text3);}
+.badge-premium{background:linear-gradient(90deg,rgba(255,204,0,0.2),rgba(255,153,0,0.2));color:var(--gold);border:1px solid rgba(255,204,0,0.3);}
+.btn-logout{width:100%;margin-top:14px;padding:11px;border-radius:11px;border:1px solid var(--border);background:var(--stat-bg);color:var(--text2);font-family:'Syncopate';font-size:10px;cursor:pointer;}
+
+/* ═══ PREMIUM PAGE ═══ */
+.premium-hero{margin:0 16px 18px;padding:30px 20px;border-radius:24px;text-align:center;background:linear-gradient(135deg,rgba(255,204,0,0.12),rgba(255,153,0,0.06),rgba(191,95,255,0.08));border:1px solid rgba(255,204,0,0.25);}
+.crown{font-size:46px;margin-bottom:11px;display:block;animation:crown-float 3s ease-in-out infinite;}
+@keyframes crown-float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
+.premium-title{font-family:'Syncopate';font-size:19px;margin-bottom:7px;background:linear-gradient(90deg,var(--gold),#ff9900);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.premium-sub{color:var(--text2);font-size:13px;line-height:1.5;}
+.plan-card{background:var(--card);margin:0 16px 11px;padding:20px;border-radius:20px;border:1px solid var(--border);transition:transform 0.2s,border-color 0.2s;}
+.plan-card:hover{transform:translateY(-2px);}
+.plan-card.popular{border-color:rgba(255,204,0,0.4);background:linear-gradient(135deg,var(--card),rgba(255,204,0,0.04));}
+.plan-badge{display:inline-block;background:linear-gradient(90deg,var(--gold),#ff9900);color:#000;font-family:'Syncopate';font-size:8px;padding:3px 10px;border-radius:20px;margin-bottom:9px;}
+.plan-name{font-family:'Syncopate';font-size:13px;margin-bottom:4px;}
+.plan-price{font-family:'Syncopate';font-size:26px;font-weight:700;margin-bottom:4px;}
+.plan-price span{font-size:13px;color:var(--text3);}
+.plan-features{margin:12px 0;list-style:none;}
+.plan-features li{display:flex;align-items:flex-start;gap:7px;font-size:13px;color:var(--text2);margin-bottom:7px;}
+.plan-features li::before{content:'✓';color:var(--ng);font-weight:700;flex-shrink:0;}
+.plan-features li.locked::before{content:'🔒';}
+.btn-plan{width:100%;padding:13px;border-radius:13px;border:none;font-family:'Syncopate';font-size:10px;cursor:pointer;transition:all 0.2s;}
+.btn-plan-free{background:var(--stat-bg);color:var(--text2);border:1px solid var(--border);}
+.btn-plan-premium{background:linear-gradient(90deg,var(--gold),#ff9900);color:#000;font-weight:900;box-shadow:0 4px 20px rgba(255,204,0,0.25);}
+.btn-plan-premium:hover{box-shadow:0 6px 28px rgba(255,204,0,0.4);transform:scale(1.02);}
+.feature-row{display:flex;align-items:center;gap:13px;background:var(--stat-bg);border-radius:13px;padding:13px 15px;margin:0 16px 9px;border:1px solid var(--border);}
+.feat-icon{font-size:22px;flex-shrink:0;}
+.feat-name{font-weight:700;font-size:14px;}
+.feat-desc{font-size:11px;color:var(--text3);}
+.feat-lock{margin-left:auto;font-size:17px;}
+
+/* ═══ NAV ═══ */
+.nav-bar{
+  position:fixed;bottom:0;width:100%;height:76px;
+  background:var(--card);display:flex;border-top:1px solid var(--border);
+  z-index:100;backdrop-filter:blur(20px);
+}
+.nav-link{color:var(--text3);text-align:center;flex:1;padding-top:11px;font-size:7px;font-family:'Syncopate';cursor:pointer;transition:color 0.2s;letter-spacing:0.5px;}
+.nav-link i{display:block;font-size:17px;margin-bottom:4px;}
+.nav-link.active{color:var(--nb);}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ BIOMETRIC SCREEN ═══════════ -->
+<div id="bio-screen">
+  <div class="bio-title">rGdbet</div>
+  <div class="bio-sub">ELITE PRO ACCESS</div>
+  <div class="fingerprint-wrap">
+    <div class="fp-ring"></div>
+    <div class="fp-ring fp-ring2"></div>
+    <div class="fp-ring fp-ring3"></div>
+    <div class="fp-scan-line"></div>
+    <div class="bio-granted-ring"></div>
+    <svg class="fingerprint-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 10 C28 10 10 28 10 50 C10 72 28 90 50 90 C72 90 90 72 90 50" stroke="#00c8ff" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M50 18 C32 18 18 32 18 50 C18 68 32 82 50 82 C68 82 82 68 82 50" stroke="#00c8ff" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M50 26 C36 26 26 36 26 50 C26 64 36 74 50 74 C64 74 74 64 74 50" stroke="#00c8ff" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M50 34 C40 34 34 40 34 50 C34 60 40 66 50 66 C60 66 66 60 66 50" stroke="#00c8ff" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M50 42 C45 42 42 45 42 50 C42 55 45 58 50 58 C55 58 58 55 58 50" stroke="#00c8ff" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="50" cy="50" r="3" fill="#00c8ff" opacity="0.5"/>
+      <path d="M30 22 C22 30 18 40 18 50" stroke="#00ff88" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+      <path d="M70 22 C78 30 82 40 82 50" stroke="#00ff88" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+    </svg>
+  </div>
+  <div class="bio-status scanning" id="bio-status">SCANNING...</div>
+</div>
+
+<!-- ═══════════ MAIN APP ═══════════ -->
+<div id="app" style="display:none;">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div style="font-family:'Syncopate';font-size:9px;color:var(--text3);letter-spacing:2px;">rGdbet</div>
+    <div class="top-bar-right">
+      <div class="lang-wrapper">
+        <button class="icon-btn" onclick="toggleLang()"><i class="fa-solid fa-globe"></i></button>
+        <div class="lang-dropdown" id="langDrop">
+          <div class="lang-opt active" onclick="setLang('en',this)">🇬🇧 English</div>
+          <div class="lang-opt" onclick="setLang('ro',this)">🇷🇴 Română</div>
+          <div class="lang-opt" onclick="setLang('es',this)">🇪🇸 Español</div>
+          <div class="lang-opt" onclick="setLang('fr',this)">🇫🇷 Français</div>
+          <div class="lang-opt" onclick="setLang('de',this)">🇩🇪 Deutsch</div>
+          <div class="lang-opt" onclick="setLang('it',this)">🇮🇹 Italiano</div>
+          <div class="lang-opt" onclick="setLang('pt',this)">🇧🇷 Português</div>
+          <div class="lang-opt" onclick="setLang('tr',this)">🇹🇷 Türkçe</div>
+          <div class="lang-opt" onclick="setLang('ru',this)">🇷🇺 Русский</div>
+          <div class="lang-opt" onclick="setLang('ar',this)">🇸🇦 العربية</div>
+          <div class="lang-opt" onclick="setLang('zh',this)">🇨🇳 中文</div>
+        </div>
+      </div>
+      <button class="icon-btn" onclick="toggleTheme()"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
+      <button class="icon-btn" onclick="goTab('login')" id="avatarBtn"><i id="avatarIcon" class="fa-solid fa-user"></i></button>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="logo-main"><span class="r">r</span><span class="G">G</span><span class="d">d</span><span class="bet">bet</span></div>
+    <div class="logo-line"></div>
+    <div class="social-row">
+      <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
+      <a href="#" class="social-icon"><i class="fa-brands fa-facebook"></i></a>
+      <a href="#" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
+    </div>
+    <a href="https://revolut.me/rgdbet" class="btn-donate" data-t="donate">⚡ REVOLUT DONATE</a>
+  </header>
+
+  <!-- STREAK FLAMES -->
+  <div class="streak-bar" id="streakBar"></div>
+
+  <!-- PAGES -->
+  <!-- ── CONSOLE ── -->
+  <div id="page-console" class="page active" style="padding-bottom:88px;">
+    <div class="stats-grid">
+      <div class="stat-card"><span id="total-p" class="stat-val">0</span><span class="stat-label" data-t="netProfit">Net Profit</span></div>
+      <div class="stat-card">
+        <input type="number" id="budget-input" class="editable-input" value="1000" oninput="handleDeposit(this.value)">
+        <span class="stat-label" data-t="balance">Balance</span>
+      </div>
+      <div class="stat-card"><span id="total-wr" class="stat-val">0%</span><span class="stat-label" data-t="winRate">Win Rate</span></div>
+      <div class="stat-card"><div id="form-circles"></div><span class="stat-label" data-t="recentForm">Recent Form</span></div>
+    </div>
+
+    <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)" data-t="all">ALL</button>
+      <button class="filter-btn f-win" data-filter="win" onclick="setFilter('win',this)">✅ WIN</button>
+      <button class="filter-btn f-loss" data-filter="loss" onclick="setFilter('loss',this)">❌ LOSS</button>
+      <button class="filter-btn f-pending" data-filter="pending" onclick="setFilter('pending',this)">⏳ PENDING</button>
+    </div>
+    <div class="filter-bar" id="sportFilterBar">
+      <button class="filter-btn active" data-sport="all" onclick="setSportFilter('all',this)" data-t="allSports">🏆 ALL</button>
+      <button class="filter-btn" data-sport="football" onclick="setSportFilter('football',this)">⚽ Football</button>
+      <button class="filter-btn" data-sport="tennis" onclick="setSportFilter('tennis',this)">🎾 Tennis</button>
+      <button class="filter-btn" data-sport="basketball" onclick="setSportFilter('basketball',this)">🏀 Basketball</button>
+      <button class="filter-btn" data-sport="other" onclick="setSportFilter('other',this)">🎯 Other</button>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-card">
+      <div class="sec-title" data-t="placeBet">📋 PLACE NEW BET</div>
+
+      <!-- SPORT -->
+      <div class="sport-pills">
+        <div class="sport-pill sel" data-sport="football" onclick="selectSport(this)">⚽ Football</div>
+        <div class="sport-pill" data-sport="tennis" onclick="selectSport(this)">🎾 Tennis</div>
+        <div class="sport-pill" data-sport="basketball" onclick="selectSport(this)">🏀 Basketball</div>
+        <div class="sport-pill" data-sport="other" onclick="selectSport(this)">🎯 Other</div>
+      </div>
+
+      <!-- MULTI-EVENT BUILDER -->
+      <div class="events-builder">
+        <span class="confidence-label" data-t="eventsLabel">EVENTS ON THIS TICKET</span>
+        <div class="events-list" id="eventsList"></div>
+        <div class="add-event-row">
+          <input type="text" id="ev-name" placeholder="Event name" style="margin-bottom:0;">
+          <input type="number" id="ev-odds" step="0.01" placeholder="Odds" style="margin-bottom:0;width:90px;">
+          <button class="btn-add-event" onclick="addEvent()">+ ADD</button>
+        </div>
+        <div class="total-odds-bar" id="totalOddsBar" style="display:none;">
+          <span class="total-odds-label" data-t="totalOdds">Total Odds</span>
+          <span class="total-odds-val" id="totalOddsVal">1.00</span>
+        </div>
+      </div>
+
+      <!-- CONFIDENCE -->
+      <div class="confidence-wrap">
+        <span class="confidence-label" data-t="confidenceLabel">CONFIDENCE METER</span>
+        <div class="stars-row" id="starsRow">
+          <button class="star-btn" data-star="1" onclick="setConfidence(1)">⭐</button>
+          <button class="star-btn" data-star="2" onclick="setConfidence(2)">⭐</button>
+          <button class="star-btn" data-star="3" onclick="setConfidence(3)">⭐</button>
+          <button class="star-btn" data-star="4" onclick="setConfidence(4)">⭐</button>
+          <button class="star-btn" data-star="5" onclick="setConfidence(5)">⭐</button>
+        </div>
+      </div>
+
+      <input type="text" id="match" data-t-ph="matchPh" placeholder="Ticket name (optional)">
+      <div class="row">
+        <input type="number" id="stake" data-t-ph="stakePh" placeholder="Stake (RON)" oninput="render()">
+      </div>
+
+      <div class="risk-section">
+        <div class="risk-labels"><span data-t="riskMeter">LIVE RISK METER</span><span id="risk-label">0%</span></div>
+        <div class="risk-bar"><div id="risk-fill" class="risk-fill"></div></div>
+      </div>
+
+      <input type="date" id="bet-date">
+      <label for="img-input" class="btn-upload" id="img-label"><i class="fa-solid fa-camera"></i> <span data-t="addScreenshot">ADD SCREENSHOT</span></label>
+      <input type="file" id="img-input" accept="image/*" style="display:none;" onchange="handleImgPreview(this)">
+      <img id="form-img-preview" style="display:none;width:100%;border-radius:11px;margin-bottom:11px;border:1px solid var(--gold);">
+      <select id="status">
+        <option value="pending">⏳ PENDING</option>
+        <option value="win">✅ WIN</option>
+        <option value="loss">❌ LOSS</option>
+      </select>
+      <button class="btn-primary" onclick="addBet()"><span data-t="placeBetBtn">🎯 PLACE BET</span></button>
+    </div>
+
+    <div id="history-container"></div>
+  </div>
+
+  <!-- ── INFO ── -->
+  <div id="page-info" class="page" style="padding-bottom:88px;">
+    <div class="info-hero"><h2 data-t="infoTitle">🧠 Smart Betting Hub</h2><p data-t="infoSub">Evidence-based tips to bet smarter, not harder.</p></div>
+    <div class="section-header" data-t="bettingTips">📚 BETTING TIPS</div>
+    <div class="tip-card"><div class="tip-icon">📊</div><div class="tip-title" data-t="tip1title">BANKROLL MANAGEMENT</div><div class="tip-body" data-t="tip1body">Never stake more than 1–5% of your total bankroll on a single bet. This protects you from losing streaks and allows long-term sustainability.</div></div>
+    <div class="tip-card blue"><div class="tip-icon">🔍</div><div class="tip-title" data-t="tip2title">RESEARCH BEFORE YOU BET</div><div class="tip-body" data-t="tip2body">Study team form, head-to-head records, injuries, and conditions. Informed bettors consistently outperform impulsive ones.</div></div>
+    <div class="tip-card purple"><div class="tip-icon">🧮</div><div class="tip-title" data-t="tip3title">VALUE BETTING</div><div class="tip-body" data-t="tip3body">A bet has value when the real probability is higher than what the odds imply. Always compare odds across bookmakers.</div></div>
+    <div class="tip-card gold"><div class="tip-icon">📉</div><div class="tip-title" data-t="tip4title">TRACK EVERY BET</div><div class="tip-body" data-t="tip4body">Keep records of every wager. Over time, patterns show which markets are genuinely profitable.</div></div>
+    <div class="tip-card"><div class="tip-icon">🎯</div><div class="tip-title" data-t="tip5title">SPECIALIZE</div><div class="tip-body" data-t="tip5body">Focus on 1–2 leagues you truly know. A specialist consistently beats a casual bettor across many sports.</div></div>
+    <div class="tip-card blue"><div class="tip-icon">⚖️</div><div class="tip-title" data-t="tip6title">AVOID ACCA TRAPS</div><div class="tip-body" data-t="tip6body">House edge compounds with each selection. Singles and doubles offer far better long-term ROI than accumulators.</div></div>
+    <div class="section-header" data-t="preventionTitle">🛡️ ADDICTION PREVENTION</div>
+    <div class="addiction-box"><div class="tip-icon">🚨</div><div class="tip-title" data-t="warnTitle">WARNING SIGNS</div><div class="tip-body" data-t="warnBody">Betting more than you can afford, chasing losses, lying about gambling, neglecting responsibilities — these are serious warning signs. Act now.</div><div class="hotline"><a href="tel:+40800000000">📞 <span data-t="hotlineText">Gambling Helpline: 0800 000 000</span></a></div></div>
+    <div class="addiction-box"><div class="tip-icon">🔒</div><div class="tip-title" data-t="limitsTitle">SET HARD LIMITS</div><div class="tip-body" data-t="limitsBody">Decide a max loss before each session. Never borrow money to gamble. Never chase losses. Stop when you hit your limit.</div></div>
+    <div class="addiction-box" style="margin-bottom:16px;"><div class="tip-icon">💆</div><div class="tip-title" data-t="selfcareTitle">GAMBLING IS ENTERTAINMENT</div><div class="tip-body" data-t="selfcareBody">Treat it as a hobby with a cost, not income. Protect your mental health and finances by maintaining this perspective.</div></div>
+  </div>
+
+  <!-- ── PREMIUM ── -->
+  <div id="page-premium" class="page" style="padding-bottom:88px;">
+    <div class="premium-hero"><span class="crown">👑</span><div class="premium-title" data-t="premiumTitle">ELITE ACCESS</div><div class="premium-sub" data-t="premiumSub">Advanced analytics, AI picks, and expert tools.</div></div>
+    <div class="plan-card"><div class="plan-name" data-t="freePlan">FREE PLAN</div><div class="plan-price">€0 <span>/ month</span></div><ul class="plan-features"><li data-t="f1">Bet tracker (50 bets)</li><li data-t="f2">Basic chart</li><li data-t="f3">Win rate stats</li><li data-t="f4">Sport filters</li><li class="locked" data-t="f5">AI Predictions</li><li class="locked" data-t="f6">Advanced ROI</li><li class="locked" data-t="f7">CSV/PDF Export</li><li class="locked" data-t="f8">Value Calculator</li></ul><button class="btn-plan btn-plan-free" data-t="currentPlan">CURRENT PLAN</button></div>
+    <div class="plan-card popular"><div class="plan-badge" data-t="mostPopular">⭐ MOST POPULAR</div><div class="plan-name" data-t="premiumPlan">ELITE PRO</div><div class="plan-price">€9.99 <span>/ month</span></div><ul class="plan-features"><li data-t="p1">Unlimited tracking</li><li data-t="p2">🤖 Daily AI predictions</li><li data-t="p3">📊 Advanced ROI & Yield</li><li data-t="p4">📤 CSV & PDF export</li><li data-t="p5">💰 Value Calculator</li><li data-t="p6">🎯 Tipster leaderboards</li><li data-t="p7">🔔 Smart alerts</li><li data-t="p8">⚡ Priority support</li></ul><button class="btn-plan btn-plan-premium" onclick="handlePremiumClick()" data-t="upgradePremium">👑 UPGRADE TO ELITE</button></div>
+    <div class="section-header" data-t="premiumFeatures">✨ PREMIUM FEATURES</div>
+    <div class="feature-row"><div class="feat-icon">🤖</div><div><div class="feat-name" data-t="aiPicksName">AI Predictions</div><div class="feat-desc" data-t="aiPicksDesc">Daily picks with confidence scores</div></div><div class="feat-lock">🔒</div></div>
+    <div class="feature-row"><div class="feat-icon">📊</div><div><div class="feat-name" data-t="roiName">Advanced Analytics</div><div class="feat-desc" data-t="roiDesc">ROI, yield, streak by sport</div></div><div class="feat-lock">🔒</div></div>
+    <div class="feature-row"><div class="feat-icon">📤</div><div><div class="feat-name" data-t="exportName">Data Export</div><div class="feat-desc" data-t="exportDesc">CSV or PDF download</div></div><div class="feat-lock">🔒</div></div>
+    <div class="feature-row" style="margin-bottom:20px;"><div class="feat-icon">💰</div><div><div class="feat-name" data-t="valueName">Value Calculator</div><div class="feat-desc" data-t="valueDesc">Find value bets & true probabilities</div></div><div class="feat-lock">🔒</div></div>
+  </div>
+
+  <!-- ── LOGIN ── -->
+  <div id="page-login" class="page" style="padding-bottom:88px;">
+    <div id="not-logged-in">
+      <div class="login-wrap">
+        <div class="login-avatar">👤</div>
+        <div class="login-title" data-t="welcomeBack">Welcome!</div>
+        <div class="login-sub" data-t="loginSub">Sign in to sync bets and access Premium.</div>
+        <div class="login-card">
+          <button class="social-login-btn fb" onclick="loginWith('facebook')"><i class="fa-brands fa-facebook" style="color:#1877F2;font-size:19px;"></i><span data-t="loginFacebook">Continue with Facebook</span></button>
+          <button class="social-login-btn google" onclick="loginWith('google')"><svg width="19" height="19" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg><span data-t="loginGoogle">Continue with Google</span></button>
+          <div class="divider" data-t="orContinue">or as guest</div>
+          <button class="btn-plan btn-plan-free" onclick="loginWith('guest')" data-t="guestLogin">👤 Guest Mode</button>
+        </div>
+        <p style="font-size:11px;color:var(--text3);text-align:center;line-height:1.6;" data-t="privacyNote">Signing in means you agree to Terms. Data is encrypted.</p>
+      </div>
+    </div>
+    <div id="logged-in" class="logged-in" style="padding:18px 0 0;">
+      <div class="user-profile" style="margin:0 16px 13px;">
+        <div class="user-avatar" id="userAvatar">👤</div>
+        <div class="user-name" id="userName">User</div>
+        <div id="userBadge" class="user-badge badge-free">FREE PLAN</div>
+        <button class="btn-logout" onclick="logout()" data-t="logout">🚪 Sign Out</button>
+      </div>
+      <div class="form-card" style="margin:0 16px 13px;">
+        <div class="sec-title" data-t="accountStats">📈 MY STATS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;">
+          <div style="text-align:center;padding:11px;background:var(--stat-bg);border-radius:13px;border:1px solid var(--border);">
+            <div id="acc-bets" style="font-family:'Syncopate';font-size:19px;font-weight:700;">0</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:3px;letter-spacing:1px;" data-t="totalBets">TOTAL BETS</div>
+          </div>
+          <div style="text-align:center;padding:11px;background:var(--stat-bg);border-radius:13px;border:1px solid var(--border);">
+            <div id="acc-roi" style="font-family:'Syncopate';font-size:19px;font-weight:700;">0%</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:3px;letter-spacing:1px;" data-t="roi">ROI</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:0 16px;">
+        <button class="btn-plan btn-plan-premium" onclick="goTab('premium')" style="margin-bottom:11px;" data-t="upgradePremiumBtn">👑 Upgrade to Elite Pro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav-bar">
+    <div class="nav-link active" id="nav-console" onclick="goTab('console')"><i class="fa-solid fa-terminal"></i><span data-t="tabConsole">CONSOLE</span></div>
+    <div class="nav-link" id="nav-info" onclick="goTab('info')"><i class="fa-solid fa-lightbulb"></i><span data-t="tabInfo">TIPS</span></div>
+    <div class="nav-link" id="nav-premium" onclick="goTab('premium')"><i class="fa-solid fa-crown"></i><span data-t="tabPremium">PREMIUM</span></div>
+    <div class="nav-link" id="nav-login" onclick="goTab('login')"><i class="fa-solid fa-user"></i><span data-t="tabAccount">ACCOUNT</span></div>
+  </nav>
+
+</div><!-- /app -->
+
+<script>
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let bets = JSON.parse(localStorage.getItem('rgdbet_v4')) || [];
+let baseDeposit = parseFloat(localStorage.getItem('rgdbet_deposit')) || 1000;
+let offsetBalance = parseFloat(localStorage.getItem('rgdbet_offset')) || 0;
+let currentImg = '', myChart = null;
+let activeFilter = 'all', activeSport = 'all', selectedSport = 'football';
+let confidence = 3;
+let currentEvents = []; // multi-event list
+let lang = localStorage.getItem('rgdbet_lang') || 'en';
+let theme = localStorage.getItem('rgdbet_theme') || 'dark';
+let loggedIn = JSON.parse(localStorage.getItem('rgdbet_user')) || null;
+let isPremium = localStorage.getItem('rgdbet_premium') === 'true';
+
+// ══════════════════════════════════════
+// BIOMETRIC BOOT
+// ══════════════════════════════════════
+function runBiometric() {
+  const screen = document.getElementById('bio-screen');
+  const status = document.getElementById('bio-status');
+  const fp = document.querySelector('.fingerprint-svg');
+  // Phase 1: scanning
+  setTimeout(() => {
+    status.textContent = 'ANALYZING...';
+    fp.style.opacity = '0.5';
+  }, 800);
+  // Phase 2: grant
+  setTimeout(() => {
+    screen.classList.add('granted');
+    status.className = 'bio-status granted';
+    const userName = loggedIn ? loggedIn.name.toUpperCase() : 'AGENT';
+    status.textContent = `ACCESS GRANTED · ${userName}`;
+    fp.style.opacity = '1';
+    fp.style.filter = 'drop-shadow(0 0 20px #00ff88)';
+    // Change lines to green
+    screen.querySelectorAll('path,circle').forEach(el => {
+      el.setAttribute('stroke', '#00ff88');
+      el.setAttribute('fill', el.getAttribute('fill') ? '#00ff88' : null);
+    });
+  }, 2000);
+  // Phase 3: show app
+  setTimeout(() => {
+    screen.style.transition = 'opacity 0.6s';
+    screen.style.opacity = '0';
+    setTimeout(() => {
+      screen.style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      applyTranslations();
+      updateLoginUI();
+      render();
+    }, 600);
+  }, 3200);
+}
+
+// ══════════════════════════════════════
+// THEME
+// ══════════════════════════════════════
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeIcon').className = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+  localStorage.setItem('rgdbet_theme', theme);
+}
+function toggleTheme() { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(); }
+
+// ══════════════════════════════════════
+// LANGUAGE
+// ══════════════════════════════════════
+const T = {
+  en:{donate:'⚡ REVOLUT DONATE',tabConsole:'CONSOLE',tabInfo:'TIPS',tabPremium:'PREMIUM',tabAccount:'ACCOUNT',netProfit:'Net Profit',balance:'Balance',winRate:'Win Rate',recentForm:'Recent Form',all:'ALL',allSports:'🏆 ALL',placeBet:'📋 PLACE NEW BET',matchPh:'Ticket name (optional)',stakePh:'Stake (RON)',riskMeter:'LIVE RISK METER',addScreenshot:'ADD SCREENSHOT',placeBetBtn:'🎯 PLACE BET',confidenceLabel:'CONFIDENCE METER',eventsLabel:'EVENTS ON TICKET',totalOdds:'Total Odds',infoTitle:'🧠 Smart Betting Hub',infoSub:'Evidence-based tips for smarter betting.',bettingTips:'📚 BETTING TIPS',tip1title:'BANKROLL MANAGEMENT',tip1body:'Never stake more than 1–5% of your bankroll on a single bet.',tip2title:'RESEARCH BEFORE YOU BET',tip2body:'Study form, head-to-head, injuries. Informed bettors win more.',tip3title:'VALUE BETTING',tip3body:'A bet has value when real probability exceeds the odds implied.',tip4title:'TRACK EVERY BET',tip4body:'Records reveal which markets are genuinely profitable over time.',tip5title:'SPECIALIZE IN 1–2 MARKETS',tip5body:'Depth beats breadth. Focus on leagues you truly know.',tip6title:'AVOID ACCA TRAPS',tip6body:'House edge compounds each selection. Singles offer better ROI.',preventionTitle:'🛡️ ADDICTION PREVENTION',warnTitle:'WARNING SIGNS',warnBody:'Chasing losses, hiding gambling habits, betting beyond your means — seek help immediately.',hotlineText:'Helpline: 0800 000 000',limitsTitle:'SET HARD LIMITS',limitsBody:"Decide max loss before betting. Never borrow. Stop at your limit.",selfcareTitle:'GAMBLING IS ENTERTAINMENT',selfcareBody:'Treat it as a hobby cost. Protect your mental health.',premiumTitle:'ELITE ACCESS',premiumSub:'Advanced analytics, AI picks and expert tools.',freePlan:'FREE PLAN',f1:'Bet tracker (50 bets)',f2:'Basic chart',f3:'Win rate stats',f4:'Sport filters',f5:'AI Predictions',f6:'Advanced ROI',f7:'CSV/PDF Export',f8:'Value Calculator',currentPlan:'CURRENT PLAN',mostPopular:'⭐ MOST POPULAR',premiumPlan:'ELITE PRO',p1:'Unlimited tracking',p2:'🤖 Daily AI predictions',p3:'📊 Advanced ROI & Yield',p4:'📤 CSV & PDF export',p5:'💰 Value Calculator',p6:'🎯 Tipster leaderboards',p7:'🔔 Smart alerts',p8:'⚡ Priority support',upgradePremium:'👑 UPGRADE TO ELITE',premiumFeatures:'✨ PREMIUM FEATURES',aiPicksName:'AI Predictions',aiPicksDesc:'Daily picks with confidence scores',roiName:'Advanced Analytics',roiDesc:'ROI, yield, streak by sport',exportName:'Data Export',exportDesc:'Download as CSV or PDF',valueName:'Value Calculator',valueDesc:'Find value bets & true probabilities',welcomeBack:'Welcome!',loginSub:'Sign in to sync bets and access Premium.',loginFacebook:'Continue with Facebook',loginGoogle:'Continue with Google',orContinue:'or as guest',guestLogin:'👤 Guest Mode',privacyNote:'Signing in means you agree to our Terms.',logout:'🚪 Sign Out',accountStats:'📈 MY STATS',totalBets:'TOTAL BETS',roi:'ROI',upgradePremiumBtn:'👑 Upgrade to Elite Pro'},
+  ro:{donate:'⚡ DONEAZĂ PE REVOLUT',tabConsole:'CONSOLĂ',tabInfo:'SFATURI',tabPremium:'PREMIUM',tabAccount:'CONT',netProfit:'Profit Net',balance:'Sold',winRate:'Rată Câștig',recentForm:'Formă Recentă',all:'TOATE',allSports:'🏆 TOATE',placeBet:'📋 BILET NOU',matchPh:'Nume bilet (opțional)',stakePh:'Miză (RON)',riskMeter:'METRU RISC LIVE',addScreenshot:'ADAUGĂ SCREENSHOT',placeBetBtn:'🎯 PLASEAZĂ BILET',confidenceLabel:'NIVEL DE SIGURANȚĂ',eventsLabel:'EVENIMENTE PE BILET',totalOdds:'Cotă Totală',infoTitle:'🧠 Hub Pariere Inteligentă',infoSub:'Sfaturi bazate pe date pentru a paria mai inteligent.',bettingTips:'📚 SFATURI PARIERE',tip1title:'MANAGEMENTUL BANKROLL-ULUI',tip1body:'Nu risca mai mult de 1–5% din bankroll pe un singur bilet.',tip2title:'CERCETEAZĂ ÎNAINTE SĂ PARIEZI',tip2body:'Studiază forma, meciurile directe, accidentările.',tip3title:'PARIERE CU VALOARE',tip3body:'Un pariu are valoare când probabilitatea reală depășește cota.',tip4title:'ÎNREGISTREAZĂ FIECARE PARIU',tip4body:'Înregistrările arată ce piețe sunt cu adevărat profitabile.',tip5title:'SPECIALIZEAZĂ-TE',tip5body:'Concentrează-te pe 1–2 ligi pe care le cunoști bine.',tip6title:'EVITĂ ACUMULATOARELE',tip6body:'Avantajul casei crește cu fiecare selecție. Pariurile simple sunt mai rentabile.',preventionTitle:'🛡️ PREVENIREA DEPENDENȚEI',warnTitle:'SEMNE DE AVERTIZARE',warnBody:'Urmărești pierderi, ascunzi parierile, pariezi peste posibilități — cere ajutor imediat.',hotlineText:'Linie asistență: 0800 000 000',limitsTitle:'SETEAZĂ LIMITE FERME',limitsBody:'Decide pierderea maximă înainte de a juca. Nu împrumuta bani.',selfcareTitle:'PARIATUL E DIVERTISMENT',selfcareBody:'Tratează-l ca un cost de divertisment. Protejează-ți sănătatea mentală.',premiumTitle:'ACCES ELITE',premiumSub:'Analize avansate, predicții AI și instrumente expert.',freePlan:'PLAN GRATUIT',f1:'Tracker (max 50 bilete)',f2:'Grafic de bază',f3:'Statistici rată câștig',f4:'Filtre sport',f5:'Predicții AI',f6:'ROI Avansat',f7:'Export CSV/PDF',f8:'Calculator Valoare',currentPlan:'PLAN CURENT',mostPopular:'⭐ CEL MAI POPULAR',premiumPlan:'ELITE PRO',p1:'Urmărire nelimitată',p2:'🤖 Predicții AI zilnice',p3:'📊 ROI & Yield avansat',p4:'📤 Export CSV & PDF',p5:'💰 Calculator valoare',p6:'🎯 Clasament tipsteri',p7:'🔔 Alerte inteligente',p8:'⚡ Suport prioritar',upgradePremium:'👑 UPGRADE LA ELITE',premiumFeatures:'✨ FUNCȚII PREMIUM',aiPicksName:'Predicții AI',aiPicksDesc:'Selecții zilnice cu scoruri de încredere',roiName:'Analize Avansate',roiDesc:'ROI, yield, analiză streak pe sport',exportName:'Export Date',exportDesc:'Descarcă ca CSV sau PDF',valueName:'Calculator Valoare',valueDesc:'Detectează pariuri cu valoare',welcomeBack:'Bun venit!',loginSub:'Autentifică-te pentru a sincroniza și accesa Premium.',loginFacebook:'Continuă cu Facebook',loginGoogle:'Continuă cu Google',orContinue:'sau ca vizitator',guestLogin:'👤 Mod Vizitator',privacyNote:'Prin autentificare accepți Termenii.',logout:'🚪 Deconectare',accountStats:'📈 STATISTICILE MELE',totalBets:'TOTAL PARIURI',roi:'ROI',upgradePremiumBtn:'👑 Upgrade la Elite Pro'},
+  es:{donate:'⚡ DONAR EN REVOLUT',tabConsole:'CONSOLA',tabInfo:'CONSEJOS',tabPremium:'PREMIUM',tabAccount:'CUENTA',netProfit:'Ganancia Neta',balance:'Saldo',winRate:'Tasa Éxito',recentForm:'Forma Reciente',all:'TODOS',allSports:'🏆 TODOS',placeBet:'📋 NUEVA APUESTA',matchPh:'Nombre del ticket',stakePh:'Apuesta (RON)',riskMeter:'MEDIDOR DE RIESGO',addScreenshot:'AÑADIR CAPTURA',placeBetBtn:'🎯 APOSTAR',confidenceLabel:'MEDIDOR DE CONFIANZA',eventsLabel:'EVENTOS EN TICKET',totalOdds:'Cuota Total',infoTitle:'🧠 Centro de Apuestas',infoSub:'Consejos basados en datos.',bettingTips:'📚 CONSEJOS',tip1title:'GESTIÓN DEL BANKROLL',tip1body:'Nunca apuestes más del 1–5% en una sola apuesta.',tip2title:'INVESTIGA ANTES DE APOSTAR',tip2body:'Estudia forma, historial, lesiones.',tip3title:'VALUE BETTING',tip3body:'Una apuesta tiene valor cuando la probabilidad real supera la cuota.',tip4title:'REGISTRA CADA APUESTA',tip4body:'Los registros muestran qué mercados son rentables.',tip5title:'ESPECIALÍZATE',tip5body:'Profundidad supera amplitud. Concéntrate en ligas que conoces.',tip6title:'EVITA LOS ACUMULADORES',tip6body:'La ventaja de la casa se multiplica. Los simples ofrecen mejor ROI.',preventionTitle:'🛡️ PREVENCIÓN',warnTitle:'SEÑALES DE ALERTA',warnBody:'Perseguir pérdidas, ocultar el juego, apostar más de lo que puedes — busca ayuda.',hotlineText:'Línea de ayuda: 0800 000 000',limitsTitle:'ESTABLECE LÍMITES FIRMES',limitsBody:'Decide la pérdida máxima antes de jugar. Nunca pidas prestado.',selfcareTitle:'APOSTAR ES ENTRETENIMIENTO',selfcareBody:'Trátalo como un coste de ocio. Protege tu salud mental.',premiumTitle:'ACCESO ELITE',premiumSub:'Análisis avanzados y herramientas experto.',freePlan:'PLAN GRATIS',f1:'Tracker (50 apuestas)',f2:'Gráfico básico',f3:'Estadísticas',f4:'Filtros deporte',f5:'Predicciones IA',f6:'ROI avanzado',f7:'Export CSV/PDF',f8:'Calculadora valor',currentPlan:'PLAN ACTUAL',mostPopular:'⭐ MÁS POPULAR',premiumPlan:'ELITE PRO',p1:'Seguimiento ilimitado',p2:'🤖 Predicciones IA',p3:'📊 ROI avanzado',p4:'📤 Export CSV/PDF',p5:'💰 Calculadora',p6:'🎯 Rankings tipsters',p7:'🔔 Alertas',p8:'⚡ Soporte',upgradePremium:'👑 MEJORAR A ELITE',premiumFeatures:'✨ FUNCIONES',aiPicksName:'Predicciones IA',aiPicksDesc:'Selecciones diarias con confianza',roiName:'Análisis Avanzado',roiDesc:'ROI por deporte',exportName:'Exportar',exportDesc:'CSV o PDF',valueName:'Calculadora',valueDesc:'Encuentra value bets',welcomeBack:'¡Bienvenido!',loginSub:'Inicia sesión para acceder.',loginFacebook:'Facebook',loginGoogle:'Google',orContinue:'o invitado',guestLogin:'👤 Invitado',privacyNote:'Aceptas los Términos.',logout:'🚪 Salir',accountStats:'📈 MIS ESTADÍSTICAS',totalBets:'APUESTAS',roi:'ROI',upgradePremiumBtn:'👑 Elite Pro'},
+};
+// Add placeholders for other langs (fr,de,it,pt,tr,ru,ar,zh) - same as 'en' fallback
+['fr','de','it','pt','tr','ru','ar','zh'].forEach(l => { if(!T[l]) T[l] = {...T.en}; });
+
+function toggleLang() { document.getElementById('langDrop').classList.toggle('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('.lang-wrapper')) document.getElementById('langDrop').classList.remove('open'); });
+function setLang(code, el) {
+  lang = code; localStorage.setItem('rgdbet_lang', lang);
+  document.querySelectorAll('.lang-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('langDrop').classList.remove('open');
+  applyTranslations();
+}
+function applyTranslations() {
+  const t = T[lang] || T.en;
+  document.querySelectorAll('[data-t]').forEach(el => { const k=el.getAttribute('data-t'); if(t[k]) el.textContent=t[k]; });
+  document.querySelectorAll('[data-t-ph]').forEach(el => { const k=el.getAttribute('data-t-ph'); if(t[k]) el.placeholder=t[k]; });
+  document.documentElement.setAttribute('dir', lang==='ar'?'rtl':'ltr');
+}
+
+// ══════════════════════════════════════
+// TABS
+// ══════════════════════════════════════
+function goTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  const nl = document.getElementById('nav-'+tab);
+  if(nl) nl.classList.add('active');
+}
+
+// ══════════════════════════════════════
+// FILTERS
+// ══════════════════════════════════════
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); renderHistory();
+}
+function setSportFilter(s, btn) {
+  activeSport = s;
+  document.querySelectorAll('#sportFilterBar [data-sport]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); renderHistory();
+}
+function selectSport(el) {
+  document.querySelectorAll('.sport-pill').forEach(p => p.classList.remove('sel'));
+  el.classList.add('sel'); selectedSport = el.dataset.sport;
+}
+
+// ══════════════════════════════════════
+// CONFIDENCE STARS
+// ══════════════════════════════════════
+function setConfidence(n) {
+  confidence = n;
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i < n);
+    btn.style.filter = i < n ? 'none' : 'grayscale(1) opacity(0.3)';
+    btn.style.transform = i < n ? 'scale(1.15)' : 'scale(1)';
+  });
+}
+
+// ══════════════════════════════════════
+// MULTI-EVENT
+// ══════════════════════════════════════
+function addEvent() {
+  const name = document.getElementById('ev-name').value.trim();
+  const odds = parseFloat(document.getElementById('ev-odds').value);
+  if(!name || isNaN(odds) || odds < 1) return;
+  currentEvents.push({name, odds});
+  document.getElementById('ev-name').value = '';
+  document.getElementById('ev-odds').value = '';
+  renderEventsList();
+}
+function removeEvent(i) {
+  currentEvents.splice(i, 1);
+  renderEventsList();
+}
+function renderEventsList() {
+  const list = document.getElementById('eventsList');
+  const bar = document.getElementById('totalOddsBar');
+  list.innerHTML = '';
+  if(!currentEvents.length) { bar.style.display='none'; return; }
+  currentEvents.forEach((ev, i) => {
+    list.innerHTML += `<div class="event-item">
+      <div class="event-item-name">${ev.name}</div>
+      <span class="event-item-odds">@${ev.odds.toFixed(2)}</span>
+      <button class="event-del" onclick="removeEvent(${i})">✕</button>
+    </div>`;
+  });
+  const total = currentEvents.reduce((acc, ev) => acc * ev.odds, 1);
+  document.getElementById('totalOddsVal').textContent = total.toFixed(2);
+  bar.style.display = 'flex';
+}
+function getTotalOdds() {
+  if(!currentEvents.length) return 1;
+  return currentEvents.reduce((acc, ev) => acc * ev.odds, 1);
+}
+
+// ══════════════════════════════════════
+// IMAGE
+// ══════════════════════════════════════
+function handleImgPreview(input) {
+  if(input.files && input.files[0]) {
+    const r = new FileReader();
+    r.onload = e => {
+      currentImg = e.target.result;
+      document.getElementById('form-img-preview').src = currentImg;
+      document.getElementById('form-img-preview').style.display = 'block';
+      document.getElementById('img-label').innerHTML = '<i class="fa-solid fa-check"></i> IMAGE LOADED';
+    };
+    r.readAsDataURL(input.files[0]);
+  }
+}
+
+// ══════════════════════════════════════
+// DEPOSIT
+// ══════════════════════════════════════
+function handleDeposit(val) {
+  let v = parseFloat(val); if(isNaN(v)) return;
+  let flow = 0; bets.forEach(b => { flow -= b.s; if(b.st==='win') flow += b.s * b.o; });
+  baseDeposit = v; offsetBalance = -flow;
+  localStorage.setItem('rgdbet_deposit', baseDeposit);
+  localStorage.setItem('rgdbet_offset', offsetBalance);
+  render();
+}
+
+// ══════════════════════════════════════
+// CONFETTI
+// ══════════════════════════════════════
+function boom() { confetti({particleCount:180,spread:80,origin:{y:0.6},colors:['#00ff88','#00c8ff','#fff','#ffcc00']}); }
+function legendBoom() {
+  confetti({particleCount:300,spread:120,origin:{y:0.5},colors:['#ffcc00','#ff9900','#fff','#ff6600'],gravity:0.8});
+}
+
+// ══════════════════════════════════════
+// ADD BET
+// ══════════════════════════════════════
+function addBet() {
+  if(!currentEvents.length) { alert('Add at least one event to the ticket!'); return; }
+  const s = parseFloat(document.getElementById('stake').value);
+  if(isNaN(s) || s<=0) { alert('Enter a valid stake!'); return; }
+  const m = document.getElementById('match').value || currentEvents[0].name;
+  const totalOdds = getTotalOdds();
+  const st = document.getElementById('status').value;
+  const d = document.getElementById('bet-date').value;
+
+  bets.push({ id:Date.now(), m, o:parseFloat(totalOdds.toFixed(2)), s, st, d, img:currentImg,
+    sport:selectedSport, confidence, events:currentEvents.map(e=>({...e})) });
+  if(st==='win') boom();
+  localStorage.setItem('rgdbet_v4', JSON.stringify(bets));
+
+  // Reset form
+  document.getElementById('match').value='';
+  document.getElementById('stake').value='';
+  document.getElementById('form-img-preview').style.display='none';
+  currentImg=''; currentEvents=[]; renderEventsList();
+  setConfidence(3);
+  document.getElementById('img-label').innerHTML='<i class="fa-solid fa-camera"></i> <span data-t="addScreenshot">ADD SCREENSHOT</span>';
+  render();
+}
+
+// ══════════════════════════════════════
+// TOGGLE STATUS
+// ══════════════════════════════════════
+function toggleStatus(id) {
+  const i = bets.findIndex(b=>b.id===id);
+  bets[i].st = bets[i].st==='pending'?'win':bets[i].st==='win'?'loss':'pending';
+  if(bets[i].st==='win') { boom(); render(); setTimeout(()=>{ const el=document.querySelector(`[data-id="${id}"]`); if(el) el.classList.add('win-anim'); },50); }
+  else render();
+  localStorage.setItem('rgdbet_v4', JSON.stringify(bets));
+}
+function deleteBet(id) { bets=bets.filter(b=>b.id!==id); localStorage.setItem('rgdbet_v4',JSON.stringify(bets)); render(); }
+
+// ══════════════════════════════════════
+// STREAK & LEGEND MODE
+// ══════════════════════════════════════
+function getCurrentStreak() {
+  const settled = [...bets].filter(b=>b.st!=='pending').sort((a,b)=>new Date(b.d)-new Date(a.d));
+  let streak = 0;
+  for(let b of settled) { if(b.st==='win') streak++; else break; }
+  return streak;
+}
+function renderStreak() {
+  const streak = getCurrentStreak();
+  const bar = document.getElementById('streakBar');
+  const maxFlames = 7;
+  let html = '';
+  for(let i=1; i<=maxFlames; i++) {
+    let cls = 'flame';
+    if(i <= streak) {
+      if(streak >= 5) cls = 'flame mega';
+      else if(streak >= 3) cls = 'flame hot';
+      else cls = 'flame lit';
+    }
+    html += `<div class="flame-wrap"><span class="${cls}">🔥</span></div>`;
+  }
+  const label = streak > 0 ? `🔥 ${streak} WIN STREAK` : 'START YOUR STREAK';
+  html += `<span class="streak-count" style="width:100%;text-align:center;margin-top:2px;">${label}</span>`;
+  bar.innerHTML = html;
+
+  // LEGEND MODE
+  if(streak >= 5) {
+    document.body.classList.add('legend-mode');
+    if(!document.body.dataset.legendShown) {
+      document.body.dataset.legendShown = '1';
+      legendBoom();
+    }
+  } else {
+    document.body.classList.remove('legend-mode');
+    delete document.body.dataset.legendShown;
+  }
+}
+
+// ══════════════════════════════════════
+// RENDER HISTORY
+// ══════════════════════════════════════
+const sportEmoji={football:'⚽',tennis:'🎾',basketball:'🏀',other:'🎯'};
+const starStr = n => '⭐'.repeat(n);
+
+function renderHistory() {
+  const c = document.getElementById('history-container');
+  c.innerHTML = '';
+  let filtered = [...bets].sort((a,b)=>new Date(b.d)-new Date(a.d));
+  if(activeFilter!=='all') filtered=filtered.filter(b=>b.st===activeFilter);
+  if(activeSport!=='all') filtered=filtered.filter(b=>(b.sport||'football')===activeSport);
+  if(!filtered.length){c.innerHTML=`<div class="no-bets">NO BETS FOUND</div>`;return;}
+
+  filtered.forEach(b=>{
+    const col=b.st==='win'?'var(--ng)':b.st==='loss'?'var(--danger)':'rgba(255,204,0,0.6)';
+    const emoji=sportEmoji[b.sport||'football']||'🎯';
+    let sumH=b.st==='win'?`<span class="bet-sum s-win">+${(b.s*b.o-b.s).toFixed(2)} RON</span>`:b.st==='loss'?`<span class="bet-sum s-loss">-${b.s.toFixed(2)} RON</span>`:'';
+    const label=b.st==='win'?'✅ WIN':b.st==='loss'?'❌ LOSS':'⏳ PENDING';
+    const btnCol=b.st==='win'?'var(--ng)':b.st==='loss'?'var(--danger)':'var(--gold)';
+    const stars=starStr(b.confidence||3);
+    const multiCount=b.events&&b.events.length>1?`<span style="font-size:10px;color:var(--nb);margin-left:6px;">📋 ${b.events.length} events</span>`:'';
+
+    let eventsHtml='';
+    if(b.events && b.events.length>0){
+      eventsHtml=`<div class="event-sub-list">`;
+      b.events.forEach(ev=>{eventsHtml+=`<div class="event-sub-item"><span>${ev.name}</span><span class="event-sub-odds">@${ev.odds.toFixed(2)}</span></div>`;});
+      eventsHtml+=`</div>`;
+    }
+
+    c.innerHTML+=`
+    <div class="bet-item" data-id="${b.id}" style="border-left-color:${col}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:9px;">
+        <div style="flex:1;min-width:0;">
+          <div class="bet-match">${b.m}${multiCount}</div>
+          <div class="bet-meta">@${b.o} · ${b.s} RON · ${b.d||''}</div>
+          <span class="sport-tag">${emoji} ${(b.sport||'football').charAt(0).toUpperCase()+(b.sport||'football').slice(1)}</span>
+          <span class="confidence-badge" title="Confidence">${stars}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+          <button class="status-btn" onclick="toggleStatus(${b.id})" style="background:${btnCol};">${label}</button>
+          <button class="del-btn" onclick="deleteBet(${b.id})">🗑</button>
+          ${sumH}
+        </div>
+      </div>
+      ${eventsHtml}
+      ${b.img?`<img src="${b.img}" style="width:100%;border-radius:10px;margin-top:10px;border:1px solid var(--border);">`:''}
+    </div>`;
+  });
+}
+
+// ══════════════════════════════════════
+// MAIN RENDER
+// ══════════════════════════════════════
+function render() {
+  const stakeInput = parseFloat(document.getElementById('stake').value)||0;
+  let profit=0, balance=baseDeposit+offsetBalance, wins=0, settled=0;
+  bets.forEach(b=>{ balance-=b.s; if(b.st==='win') balance+=b.s*b.o; if(b.st!=='pending'){profit+=b.st==='win'?(b.s*b.o-b.s):-b.s;settled++;if(b.st==='win')wins++;} });
+
+  // Form circles
+  const fc=document.getElementById('form-circles'); fc.innerHTML='';
+  [...bets].filter(b=>b.st!=='pending').sort((a,b)=>new Date(b.d)-new Date(a.d)).slice(0,5).reverse().forEach(b=>{
+    fc.innerHTML+=`<div style="width:26px;height:26px;border-radius:50%;background:${b.st==='win'?'var(--ng)':'var(--danger)'};display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:11px;box-shadow:0 0 10px ${b.st==='win'?'rgba(0,255,136,.7)':'rgba(255,51,102,.7)'};">${b.st==='win'?'W':'L'}</div>`;
+  });
+
+  // Risk
+  const rp=balance>0?(stakeInput/balance)*100:0;
+  const fill=document.getElementById('risk-fill');
+  fill.style.width=Math.min(100,rp)+'%';
+  fill.style.background=rp>10?'linear-gradient(90deg,var(--gold),var(--danger))':'linear-gradient(90deg,var(--ng),var(--nb))';
+  document.getElementById('risk-label').innerText=rp.toFixed(1)+'%';
+
+  // Stats
+  const pe=document.getElementById('total-p');
+  pe.innerText=(profit>=0?'+':'')+profit.toFixed(0);
+  pe.className='stat-val '+(profit>=0?'pos':'neg');
+  document.getElementById('total-wr').innerText=(settled>0?(wins/settled)*100:0).toFixed(0)+'%';
+  document.getElementById('budget-input').value=balance.toFixed(0);
+
+  // Account
+  if(document.getElementById('acc-bets')){
+    document.getElementById('acc-bets').innerText=bets.length;
+    const ts=bets.filter(b=>b.st!=='pending').reduce((s,b)=>s+b.s,0);
+    const roi=ts>0?((profit/ts)*100).toFixed(1):0;
+    const re=document.getElementById('acc-roi');
+    re.innerText=roi+'%'; re.className=parseFloat(roi)>=0?'pos':'neg';
+  }
+
+  renderHistory();
+  updateChart();
+  renderStreak();
+}
+
+// ══════════════════════════════════════
+// CHART
+// ══════════════════════════════════════
+function updateChart(){
+  const ctx=document.getElementById('mainChart').getContext('2d');
+  let cum=0;
+  const data=bets.filter(b=>b.st!=='pending').map(b=>{cum+=b.st==='win'?(b.s*b.o-b.s):-b.s;return cum;});
+  if(myChart) myChart.destroy();
+  const pos=data.length===0||data[data.length-1]>=0;
+  const lc=pos?'#00ff88':'#ff3366';
+  const g=ctx.createLinearGradient(0,0,0,150);
+  g.addColorStop(0,pos?'rgba(0,255,136,0.22)':'rgba(255,51,102,0.22)');
+  g.addColorStop(1,'transparent');
+  myChart=new Chart(ctx,{
+    type:'line',
+    data:{labels:data.map((_,i)=>i+1),datasets:[{data:data.length?data:[0],borderColor:lc,fill:true,backgroundColor:g,tension:0.4,pointRadius:data.length<=10?3:0,pointBackgroundColor:lc,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#555',font:{size:10,family:'Rajdhani'}}}},animation:{duration:500}}
+  });
+}
+
+// ══════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════
+function loginWith(provider){
+  const names={facebook:'Facebook User',google:'Google User',guest:'Guest'};
+  loggedIn={name:names[provider],avatar:'👤',provider};
+  localStorage.setItem('rgdbet_user',JSON.stringify(loggedIn));
+  updateLoginUI();
+}
+function logout(){
+  loggedIn=null; localStorage.removeItem('rgdbet_user');
+  updateLoginUI();
+}
+function updateLoginUI(){
+  const ni=document.getElementById('not-logged-in'), li=document.getElementById('logged-in');
+  if(loggedIn){
+    ni.style.display='none'; li.style.display='block';
+    document.getElementById('userName').textContent=loggedIn.name;
+    document.getElementById('userAvatar').textContent=loggedIn.avatar;
+    document.getElementById('avatarIcon').className='fa-solid fa-circle-check';
+    const badge=document.getElementById('userBadge');
+    badge.textContent=isPremium?'👑 ELITE PRO':'FREE PLAN';
+    badge.className='user-badge '+(isPremium?'badge-premium':'badge-free');
+  } else {
+    ni.style.display='block'; li.style.display='none';
+    document.getElementById('avatarIcon').className='fa-solid fa-user';
+  }
+  render();
+}
+
+// ══════════════════════════════════════
+// PREMIUM
+// ══════════════════════════════════════
+function handlePremiumClick(){
+  if(!loggedIn){alert('Please sign in first!');goTab('login');return;}
+  if(confirm('Upgrade to Elite Pro for €9.99/month?\n(Would connect to payment in production)')){
+    isPremium=true; localStorage.setItem('rgdbet_premium','true');
+    updateLoginUI(); legendBoom(); alert('🎉 Welcome to Elite Pro!');
+  }
+}
+
+function resetApp(){if(confirm('Reset all data?')){localStorage.clear();location.reload();}}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+window.onload=()=>{
+  applyTheme();
+  document.getElementById('bet-date').valueAsDate=new Date();
+  setConfidence(3);
+  // Set lang option
+  document.querySelectorAll('.lang-opt').forEach(o=>{
+    const onclick=o.getAttribute('onclick')||'';
+    if(onclick.includes(`'${lang}'`)) o.classList.add('active');
+    else o.classList.remove('active');
+  });
+  runBiometric();
+};
+</script>
+</body>
+</html>

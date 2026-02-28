@@ -1,5 +1,5 @@
 {
-  "name": "rGdbet Elite PRO",
+  "name": "rGdbet",
   "short_name": "rGdbet",
   "description": "Professional Betting Tracker & Analytics",
   "start_url": "index.html",
@@ -21,4 +21,5 @@
       "purpose": "any"
     }
   ]
+
 }

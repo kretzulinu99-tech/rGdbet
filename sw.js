@@ -1,8 +1,8 @@
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open('rgdbet-v1').then((cache) => cache.addAll([
-      '/',
-      'index.html'
+    caches.open('rgdbet-store').then((cache) => cache.addAll([
+      '/rGdbet/',
+      '/rGdbet/index.html'
     ]))
   );
 });

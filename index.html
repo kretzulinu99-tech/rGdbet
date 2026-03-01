@@ -371,7 +371,7 @@ select option{background:var(--bg2);color:var(--text);}
 <!-- ═══════════ BIOMETRIC SCREEN ═══════════ -->
 <div id="bio-screen">
   <div class="bio-title">rGdbet</div>
-  <div class="bio-sub">ELITE PRO ACCESS</div>
+  <div class="bio-sub">Invata sa pariezi responsabil!</div>
   <div class="fingerprint-wrap">
     <div class="fp-ring"></div>
     <div class="fp-ring fp-ring2"></div>
@@ -389,7 +389,7 @@ select option{background:var(--bg2);color:var(--text);}
       <path d="M70 22 C78 30 82 40 82 50" stroke="#00ff88" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
     </svg>
   </div>
-  <div class="bio-status scanning" id="bio-status">SCANNING...</div>
+  <div class="bio-status scanning" id="bio-status">Analizeaza...</div>
 </div>
 
 <!-- ═══════════ MAIN APP ═══════════ -->
@@ -633,15 +633,15 @@ function runBiometric() {
   const fp = document.querySelector('.fingerprint-svg');
   // Phase 1: scanning
   setTimeout(() => {
-    status.textContent = 'ANALYZING...';
+    status.textContent = 'Analizeaza...';
     fp.style.opacity = '0.5';
   }, 800);
   // Phase 2: grant
   setTimeout(() => {
     screen.classList.add('granted');
     status.className = 'bio-status granted';
-    const userName = loggedIn ? loggedIn.name.toUpperCase() : 'AGENT';
-    status.textContent = `ACCESS GRANTED · ${userName}`;
+    const userName = loggedIn ? loggedIn.name.toUpperCase() : '';
+    status.textContent = `Pariaza profitabil · ${userName}`;
     fp.style.opacity = '1';
     fp.style.filter = 'drop-shadow(0 0 20px #00ff88)';
     // Change lines to green

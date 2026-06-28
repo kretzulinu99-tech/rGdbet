@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>rGdbet — Social Betting Network</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body class="theme-neon mode-standard" data-page="home">
+<img src="rGdbet_bg.png" class="bg-fix bg-home" alt="">
+<img src="simulator_bg.png" class="bg-fix bg-sim" alt="">
+<img src="addbet_bg.png" class="bg-fix bg-addbet" alt="">
+<img src="social_bg.png" class="bg-fix bg-social" alt="">
+<div class="bg-overlay"></div>
+<style>#auth-screen { display: none !important; }</style>
+
+<!-- ═══ AGE GATE ═══ -->
+<div id="age-gate" class="age-gate-overlay" role="dialog" aria-modal="true">
+  <div class="age-gate-box">
+    <div class="age-gate-icon">🔞</div>
+    <div class="age-gate-title">VERIFICARE VÂRSTĂ</div>
+    <div class="age-gate-sub">Această aplicație este destinată exclusiv<br>persoanelor cu vârsta de <strong>peste 18 ani</strong>.</div>
+    <div class="age-gate-q">Ai împlinit 18 ani?</div>
+    <div class="age-gate-btns">
+      <button class="age-gate-yes" onclick="ageGateConfirm(true)"><i class="fa-solid fa-check"></i> DA, am peste 18 ani</button>
+      <button class="age-gate-no"  onclick="ageGateConfirm(false)"><i class="fa-solid fa-xmark"></i> NU, am sub 18 ani</button>
+    </div>
+    <p class="age-gate-disclaimer">Pariurile pot crea dependență. Joacă responsabil.<br>
+      <a href="https://jocresponsabil.ro" target="_blank">jocresponsabil.ro</a></p>
+  </div>
+</div>
+
+<!-- ═══ AUTH SCREEN ═══ -->
+<div id="auth-screen" class="auth-screen" style="display:none;">
+  <div class="auth-bg-glow"></div>
+  <div class="auth-logo">
+    <div class="auth-logo-crown"><i class="fa-solid fa-crown"></i></div>
+    <div class="auth-logo-text">rGdbet</div>
+    <div class="auth-logo-sub">SOCIAL BETTING NETWORK</div>
+  </div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login"    onclick="authSwitchTab('login')">INTRĂ</button>
+      <button class="auth-tab"        id="tab-register" onclick="authSwitchTab('register')">CONT NOU</button>
+    </div>
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-social-row">
+      <button class="auth-oauth-btn google" onclick="authGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.615 24 12.255 24z"/><path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 0 0 0 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.64 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
+        Continuă cu Google
+      </button>
+    </div>
+    <div class="auth-divider"><span>SAU</span></div>
+    <!-- LOGIN -->
+    <div class="auth-panel active" id="panel-login">
+      <div class="auth-field">
+        <label>UTILIZATOR SAU EMAIL</label>
+        <div class="auth-input-wrap">
+          <i class="fa-solid fa-user auth-field-icon"></i>
+          <input class="auth-input" id="login-user" type="text" placeholder="username / email" autocomplete="username"/>
+        </div>
+      </div>
+      <div class="auth-field">
+        <label>PAROLĂ</label>
+        <div class="auth-input-wrap">
+          <i class="fa-solid fa-lock auth-field-icon"></i>
+          <input class="auth-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+        </div>
+      </div>
+      <div class="auth-tc-row">
+        <label class="auth-tc-label">
+          <input type="checkbox" id="login-tc" class="auth-tc-check" onchange="authUpdateBtn('login')"/>
+          <span class="auth-tc-box"></span>
+          <span class="auth-tc-text">Accept <button class="auth-tc-link" onclick="showTerms()">Termenii</button> și <button class="auth-tc-link" onclick="showPrivacy()">Conf.</button></span>
+        </label>
+      </div>
+      <button class="auth-btn" id="btn-login" onclick="authLogin()" disabled><i class="fa-solid fa-right-to-bracket"></i> INTRĂ ÎN CONT</button>
+      <button class="auth-skip-btn" onclick="authSkip()">Continuă fără cont</button>
+    </div>
+    <!-- REGISTER -->
+    <div class="auth-panel" id="panel-register">
+      <div class="auth-field">
+        <label>USERNAME</label>
+        <div class="auth-input-wrap">
+          <i class="fa-solid fa-at auth-field-icon"></i>
+          <input class="auth-input" id="reg-username" type="text" placeholder="min. 3 caractere" autocomplete="off"/>
+        </div>
+      </div>
+      <div class="auth-field">
+        <label>EMAIL</label>
+        <div class="auth-input-wrap">
+          <i class="fa-solid fa-envelope auth-field-icon"></i>
+          <input class="auth-input" id="reg-email" type="email" placeholder="adresa@email.com" autocomplete="email"/>
+        </div>
+      </div>
+      <div class="auth-field">
+        <label>PAROLĂ</label>
+        <div class="auth-input-wrap">
+          <i class="fa-solid fa-lock auth-field-icon"></i>
+          <input class="auth-input" id="reg-pass" type="password" placeholder="min. 6 caractere" oninput="authPwStrength(this.value)" autocomplete="new-password"/>
+        </div>
+        <div class="pw-strength"><div class="pw-strength-fill" id="pw-strength-fill"></div></div>
+      </div>
+      <div class="auth-tc-row">
+        <label class="auth-tc-label">
+          <input type="checkbox" id="reg-tc" class="auth-tc-check" onchange="authUpdateBtn('register')"/>
+          <span class="auth-tc-box"></span>
+          <span class="auth-tc-text">Accept <button class="auth-tc-link" onclick="showTerms()">Termenii</button> și <button class="auth-tc-link" onclick="showPrivacy()">Conf.</button></span>
+        </label>
+      </div>
+      <button class="auth-btn register" id="btn-register" onclick="authRegister()" disabled><i class="fa-solid fa-user-plus"></i> CREEAZĂ CONT</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div class="app-wrapper">
+
+  <!-- TOP BAR (GLOBAL) -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <button class="top-user-btn" id="topUserBtn" onclick="navigateTo('profile', null)" style="display:none;">
+        <div class="top-avatar" id="topAvatar">?</div>
+        <span class="top-username" id="topUsername">USER</span>
+      </button>
+    </div>
+    <div class="top-bar-right">
+      <button class="top-notif-btn" id="topNotifBtn" onclick="openMessagesPanel()" style="display:none;" title="Mesaje">
+        <i class="fa-solid fa-comment-dots"></i>
+        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+      </button>
+      <div class="lang-selector">
+        <i class="fa-solid fa-globe"></i>
+        <select id="langSelect" onchange="changeLanguage(this.value)">
+          <option value="en">English</option><option value="ro">Română</option>
+          <option value="it">Italiano</option><option value="es">Español</option>
+          <option value="de">Deutsch</option><option value="pt">Português</option>
+          <option value="ru">Русский</option><option value="zh">中文</option>
+          <option value="fr">Français</option><option value="tr">Türkçe</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div id="page-home" class="spa-page active">
+    <div class="app-header">
+      <div class="logo-main">
+        <div class="logo-crown"><i class="fa-solid fa-crown"></i></div>
+        <span class="logo-text">rGdbet</span>
+      </div>
+      <div class="logo-line"></div>
+    </div>
+    <div class="social-row">
+      <a href="https://instagram.com" target="_blank" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://facebook.com"  target="_blank" class="social-icon"><i class="fa-brands fa-facebook"></i></a>
+      <a href="https://tiktok.com"    target="_blank" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
+    </div>
+    <a href="https://revolut.me" target="_blank" class="btn-donate" id="donateBtn">⚡ <span data-i18n="donate">REVOLUT DONATE</span></a>
+    <div class="stats-grid">
+      <div class="stat-card"><span class="stat-val pos" id="total-p">+0.00</span><span class="stat-label" data-i18n="net_profit">Net Profit</span></div>
+      <div class="stat-card">
+        <select id="portfolioSelect" onchange="handlePortfolioChange(this.value)" class="portfolio-select"></select>
+        <input type="number" class="editable-input" id="budget-input" value="1000" oninput="handleDeposit(this.value)"/>
+        <span class="stat-label" data-i18n="start_bal">Starting Balance</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" id="total-wr">0%</span>
+        <span class="stat-label" data-i18n="win_rate">Win Rate</span>
+        <div class="sub-stat-container"><span class="sub-stat-val" id="total-tickets">0</span><span class="sub-stat-label" data-i18n="total_tickets">Total Tickets</span></div>
+      </div>
+      <div class="stat-card"><div id="form-circles">-</div><span class="stat-label" data-i18n="recent_form">Recent Form</span></div>
+    </div>
+    <div class="bankroll-health-card">
+      <div class="bh-header"><i class="fa-solid fa-shield-halved"></i> <span data-i18n="bh_title">BANKROLL HEALTH &amp; ANALYTICS</span></div>
+      <div class="bh-grid">
+        <div class="bh-cell">
+          <div class="bh-cell-label" data-i18n="bh_roi">ROI (RETURN ON INV.)</div>
+          <div class="bh-cell-val pos" id="bh-roi">0%</div>
+        </div>
+        <div class="bh-cell">
+          <div class="bh-cell-label" data-i18n="bh_yield">YIELD (RANDAMENT)</div>
+          <div class="bh-cell-val pos" id="bh-yield">0%</div>
+        </div>
+        <div class="bh-cell">
+          <div class="bh-cell-label" data-i18n="bh_staked">TOTAL MIZAT</div>
+          <div class="bh-cell-val blue" id="bh-staked">0 <span class="bh-unit">RON</span></div>
+        </div>
+        <div class="bh-cell">
+          <div class="bh-cell-label" data-i18n="bh_drawdown">MAX DRAWDOWN</div>
+          <div class="bh-cell-val neg" id="bh-drawdown">0 <span class="bh-unit">RON</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="target-card">
+      <div class="stat-label" style="font-size:10px;margin-bottom:8px;" data-i18n="target_goal">Target Goal (RON)</div>
+      <input type="number" class="target-input" id="target-input" value="1000" oninput="updateTargetMeter()"/>
+      <div class="progress-bg"><div class="progress-fill" id="targetFill"></div></div>
+      <div class="stat-label" style="margin-top:8px" id="targetText">0% realized</div>
+    </div>
+    <div style="margin:0 16px 12px;"><button class="btn-cashout-glitch" onclick="globalCashoutReset()">💸 <span data-i18n="cashout_reset">CASHOUT (RESET)</span></button></div>
+    <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+    <div class="form-card" id="income-calculator">
+      <div class="sec-title">📅 <span data-i18n="income_calc">INCOME CALCULATOR</span></div>
+      <div class="row"><input type="date" id="calc-start"/><input type="date" id="calc-end"/></div>
+      <button class="btn-plasma-blast" onclick="calculatePeriodIncome()">📊 <span data-i18n="calc_btn">CALCULATE</span></button>
+      <div class="odds-bar" id="calcResultBar" style="display:none;justify-content:center;">
+        <span style="color:var(--text2)" data-i18n="calc_result_label">Period Profit:</span>&nbsp;<strong id="calcResultVal" style="font-size:16px;">0.00</strong>
+      </div>
+    </div>
+    <div class="form-card" id="sport-distribution-section">
+      <div class="sec-title">📊 <span data-i18n="sport_stats_title">SPORT DISTRIBUTION</span></div>
+      <div class="chart-wrap" style="height:220px;margin:0;background:none;border:none;box-shadow:none;backdrop-filter:none;"><canvas id="sportChart"></canvas></div>
+    </div>
+    <div class="form-card" id="profit-calendar-section">
+      <div class="sec-title">🗓️ <span data-i18n="calendar_title">PROFIT CALENDAR</span></div>
+      <div class="cal-header">
+        <button class="cal-nav-btn" onclick="changeCalMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <span id="cal-month-year" style="color:var(--gold);font-weight:700;letter-spacing:1px;">-</span>
+        <button class="cal-nav-btn" onclick="changeCalMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="cal-weekdays"><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div></div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div class="rg-banner">
+      <div class="rg-banner-top"><span class="rg-badge">🔞 18+</span><span class="rg-title">PARIAZĂ RESPONSABIL</span><span class="rg-badge">🔞 18+</span></div>
+      <p class="rg-text">Această aplicație este destinată exclusiv persoanelor cu vârsta de peste 18 ani.</p>
+      <div class="rg-links">
+        <button class="rg-link" onclick="showTerms()">📄 Termeni</button><span class="rg-sep">•</span>
+        <button class="rg-link" onclick="showPrivacy()">🔒 Confidențialitate</button><span class="rg-sep">•</span>
+        <a class="rg-link" href="https://jocresponsabil.ro" target="_blank">🆘 Ajutor</a>
+      </div>
+      <div class="rg-logos"><div class="rg-logo-pill">ONJN</div><div class="rg-logo-pill">GamCare</div><div class="rg-logo-pill">BeGambleAware</div></div>
+    </div>
+  </div><!-- /home -->
+
+  <!-- BILETE -->
+  <div id="page-addbet" class="spa-page">
+    <div class="page-top-title"><i class="fa-solid fa-ticket" style="color:var(--nb);"></i><span>BILETELE MELE</span></div>
+    <div class="form-card">
+      <div class="sec-title">📋 ADAUGĂ BILET NOU</div>
+      <div class="sport-pills">
+        <div class="sport-pill sel" data-sport-pill="football" onclick="setSport('football',this)">⚽ Football</div>
+        <div class="sport-pill" data-sport-pill="tennis" onclick="setSport('tennis',this)">🎾 Tennis</div>
+        <div class="sport-pill" data-sport-pill="basketball" onclick="setSport('basketball',this)">🏀 Basketball</div>
+        <div class="sport-pill" data-sport-pill="other" onclick="setSport('other',this)">🎮 Other</div>
+      </div>
+      <div class="row">
+        <input type="text"   id="event-name" placeholder="Meci / Selecție"/>
+        <input type="number" id="event-odds" step="0.01" placeholder="Cotă" style="width:110px;"/>
+        <button class="icon-btn" onclick="addEventToTicket()" style="height:39px;border-color:var(--nb);color:var(--nb);"><i class="fa-solid fa-plus"></i></button>
+      </div>
+      <div class="sec-title" style="margin-top:12px;">EVENIMENTE PE BILET</div>
+      <div class="events-list" id="ticketEventsList"></div>
+      <select id="bet-type" class="portfolio-select">
+        <option value="solist">Solist (1X2)</option><option value="cornere">Cornere</option>
+        <option value="cartonase">Cartonașe</option><option value="goluri">Goluri</option>
+        <option value="goluri-1p">Goluri Prima Repriză</option><option value="handicap">Handicap</option>
+        <option value="asiatic">Handicap Asiatic</option><option value="altele">Altele</option>
+      </select>
+      <div class="odds-bar" id="totalOddsBar"><span style="color:var(--text2)">Total Cotă:</span><strong id="totalOddsVal">1.00</strong></div>
+      <div class="sec-title">NIVEL ÎNCREDERE</div>
+      <div class="stars-row">
+        <button class="star-btn active" onclick="setConfidence(1)">⭐</button><button class="star-btn" onclick="setConfidence(2)">⭐</button>
+        <button class="star-btn" onclick="setConfidence(3)">⭐</button><button class="star-btn" onclick="setConfidence(4)">⭐</button>
+        <button class="star-btn" onclick="setConfidence(5)">⭐</button>
+      </div>
+      <input type="date" id="ticket-date"/>
+      <input type="text"   id="match"  placeholder="Nume bilet (opțional)"/>
+      <input type="number" id="stake"  placeholder="Miză (RON)" oninput="updateRiskMeter()"/>
+      <div class="kelly-box" id="kellyBox" style="display:none;">
+        <div class="kelly-prob-row">
+          <span class="kelly-prob-label"><i class="fa-solid fa-percent"></i> Probabilitate estimată de succes</span>
+          <span class="kelly-prob-val" id="kellyProbVal">55%</span>
+        </div>
+        <input type="range" id="kellyProbSlider" class="kelly-slider" min="1" max="99" value="55" step="1" oninput="onKellyProbChange(this.value)"/>
+        <div class="kelly-reco" id="kellyReco">
+          <i class="fa-solid fa-sparkles"></i>
+          <span id="kellyRecoText">rGdbet recomandă o miză de <strong id="kellyRecoPct">0%</strong> din Banca Curentă</span>
+        </div>
+      </div>
+      <div class="photo-upload-zone">
+        <button class="icon-btn" onclick="document.getElementById('ticket-photo').click()" style="width:auto;padding:0 12px;gap:6px;">
+          <i class="fa-solid fa-camera"></i><span style="font-size:13px;font-weight:600;">ADAUGĂ FOTO</span>
+        </button>
+        <input type="file" id="ticket-photo" accept="image/*" style="display:none;" onchange="handlePhotoSelect(this)"/>
+        <span id="photo-status" style="font-size:12px;color:var(--text2);">Niciun fișier</span>
+      </div>
+      <div class="risk-container">
+        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;">
+          <span>RISC BILET</span><span id="riskValue" style="color:var(--text2);">RISC SCĂZUT</span>
+        </div>
+        <div class="risk-bar-bg"><div class="risk-bar-fill" id="riskFill"></div></div>
+      </div>
+      <button class="main-btn" onclick="requestPlaceTicket()">📥 ADAUGĂ BILET</button>
+    </div>
+    <div class="streak-bar" id="streakBar" style="margin-bottom:10px;"></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all"     onclick="setFilter('all',this)">TOATE</button>
+      <button class="filter-btn f-pending" data-filter="pending" onclick="setFilter('pending',this)">ÎN AȘTEPTARE</button>
+      <button class="filter-btn f-win"    data-filter="win"   onclick="setFilter('win',this)">WIN</button>
+      <button class="filter-btn f-loss"   data-filter="loss"  onclick="setFilter('loss',this)">LOSS</button>
+    </div>
+    <div class="filter-bar" style="margin-top:-4px;">
+      <button class="filter-btn active" data-sport="all"        onclick="setSportFilter('all',this)">🏆 TOATE</button>
+      <button class="filter-btn" data-sport="football"  onclick="setSportFilter('football',this)">⚽</button>
+      <button class="filter-btn" data-sport="tennis"    onclick="setSportFilter('tennis',this)">🎾</button>
+      <button class="filter-btn" data-sport="basketball" onclick="setSportFilter('basketball',this)">🏀</button>
+      <button class="filter-btn" data-sport="other"     onclick="setSportFilter('other',this)">🎮</button>
+    </div>
+    <div class="sec-title" style="margin-left:16px;">ACTIV &amp; ISTORIC</div>
+    <div id="betsContainer"></div>
+    <div id="paginationContainer" class="pagination-container"></div>
+  </div><!-- /bilete -->
+
+  <!-- LAB -->
+  <div id="page-lab" class="spa-page"><!-- buildLabUI() --></div>
+
+  <!-- SIM -->
+  <div id="page-match" class="spa-page"><!-- buildMatchUI() --></div>
+
+  <!-- SOCIAL -->
+  <div id="page-social" class="spa-page"><!-- buildSocialPage() --></div>
+
+  <!-- MESAJE -->
+  <div id="page-messages" class="spa-page"><!-- buildMessagesPage() --></div>
+
+  <!-- PROFIL -->
+  <div id="page-profile" class="spa-page"><!-- buildProfilePage() --></div>
+
+  <!-- NAV — 5 butoane + central -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-btn active" data-page="home" onclick="navigateTo('home',this)">
+      <div class="nav-icon-wrap"><i class="fa-solid fa-house"></i><div class="nav-active-dot"></div></div>
+      <span class="nav-label">ACASĂ</span>
+    </button>
+    <button class="nav-btn" data-page="lab" onclick="navigateTo('lab',this)">
+      <div class="nav-icon-wrap"><i class="fa-solid fa-chart-line"></i><div class="nav-active-dot"></div></div>
+      <span class="nav-label">LAB</span>
+    </button>
+    <button class="nav-btn-center" onclick="navigateTo('addbet',null)" aria-label="Bilete">
+      <div class="nav-center-inner">
+        <span class="ticket-line"></span>
+        <span class="ticket-line"></span>
+        <i class="fa-solid fa-receipt nav-center-ico"></i>
+        <span class="nav-center-lbl">BILETE</span>
+        <span class="ticket-line"></span>
+      </div>
+    </button>
+    <button class="nav-btn" data-page="match" onclick="navigateTo('match',this)">
+      <div class="nav-icon-wrap"><i class="fa-solid fa-futbol"></i><div class="nav-active-dot"></div></div>
+      <span class="nav-label">SIM</span>
+    </button>
+    <button class="nav-btn" data-page="social" onclick="navigateTo('social',this)">
+      <div class="nav-icon-wrap"><i class="fa-solid fa-users"></i><div class="nav-active-dot"></div></div>
+      <span class="nav-label">SOCIAL</span>
+    </button>
+  </nav>
+</div><!-- /app-wrapper -->
+
+<!-- ═══ MODALS GLOBALE ═══ -->
+<div id="streak-toast" class="streak-toast" aria-live="assertive"></div>
+
+<!-- Terms -->
+<div id="terms-modal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-header"><span class="modal-title">📄 TERMENI ȘI CONDIȚII</span><button class="modal-close" onclick="closeModal('terms-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <p><strong>1. Acceptarea Termenilor</strong><br>Prin utilizarea rGdbet, confirmi că ai peste 18 ani și ești de acord cu acești termeni.</p>
+      <p><strong>2. Scop</strong><br>rGdbet este o aplicație de analiză sportivă, tracker de pariuri și rețea socială pentru pasionații de sport. Nu este o platformă de pariuri online.</p>
+      <p><strong>3. Mesagerie</strong><br>Sistemul de mesagerie este local. Utilizatorii sunt responsabili pentru conținutul trimis.</p>
+      <p><strong>4. Joc Responsabil</strong><br>Dacă ai probleme, contactează <a href="https://jocresponsabil.ro" target="_blank" style="color:var(--nb)">jocresponsabil.ro</a>.</p>
+      <p><strong>5. Vârsta Minimă</strong><br>Aplicația este destinată exclusiv persoanelor de minimum 18 ani.</p>
+    </div>
+    <button class="modal-confirm-btn" onclick="closeModal('terms-modal')">AM ÎNȚELES</button>
+  </div>
+</div>
+
+<!-- Privacy -->
+<div id="privacy-modal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-header"><span class="modal-title">🔒 CONFIDENȚIALITATE</span><button class="modal-close" onclick="closeModal('privacy-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <p><strong>Stocarea Datelor</strong><br>Toate datele (bilete, mesaje, prietenii, profil) sunt stocate LOCAL pe dispozitivul tău. Nu transmitem nimic extern.</p>
+      <p><strong>Mesaje</strong><br>Mesajele sunt stocate local și vizibile doar utilizatorilor implicați în conversație (pe același dispozitiv/browser).</p>
+      <p><strong>Drepturi</strong><br>Poți șterge toate datele prin CASHOUT RESET sau prin ștergerea datelor din browser.</p>
+    </div>
+    <button class="modal-confirm-btn" onclick="closeModal('privacy-modal')">AM ÎNȚELES</button>
+  </div>
+</div>
+
+<!-- Despre -->
+<div id="about-modal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-header"><span class="modal-title">ℹ️ DESPRE rGdbet</span><button class="modal-close" onclick="closeModal('about-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <p>Bine ai venit în rGdbet – asistentul tău digital conceput pentru o organizare inteligentă și o analiză avansată a activității de pariere.</p>
+      <p><strong>📊 Rolul și Scopul Aplicației</strong><br>
+      Această aplicație este exclusiv un instrument de monitorizare, gestionare și analiză statistică a bugetului (bankroll) alocat pariurilor sportive. rGdbet nu este o agenție de pariuri, nu colectează mize reale și nu intermediază plasarea biletelor către operatori.</p>
+      <p>⚠️ <strong>NOTĂ IMPORTANTĂ:</strong> Toate sumele, balanțele, cotele, profiturile sau pierderile afișate în cadrul acestei aplicații sunt strict fictive (virtuale). Aplicația are un rol pur demonstrativ, simulator și educațional, oferindu-ți un spațiu sigur în care să îți testezi strategiile fără niciun risc financiar real.</p>
+      <p><strong>🎯 Cui i se adresează rGdbet?</strong><br>
+      Indiferent de dinamica și stilul tău de joc, aplicația este proiectată să ofere claritate matematică și control total asupra cifrelor:</p>
+      <p><strong>Pariorilor axați pe profit pe termen lung:</strong> Dacă ești un jucător disciplinat, care folosește modele statistice, calculează valoarea (value betting) și își dorește o monitorizare riguroasă a randamentului și a managementului de bani (Money Management).</p>
+      <p><strong>Pasionaților de bilete multiple (20-30 de evenimente):</strong> Dacă vânezi adrenalina biletelor spectaculoase cu zeci de selecții combinate. Aplicația îți permite să îți înregistrezi și să îți evaluezi istoricul biletelor de tip „tren", oferindu-ți o imagine clară asupra performanței acestor scenarii complexe.</p>
+      <p><strong>🔒 Confidențialitate și Siguranță</strong><br>
+      Pentru că respectăm intimitatea datelor tale, rGdbet funcționează pe un principiu local-first. Toate informațiile pe care le introduci, biletele salvate și statisticile generate sunt stocate exclusiv pe dispozitivul tău, oferindu-ți control absolut și confidențialitate deplină.</p>
+      <p style="text-align:center;opacity:.8;margin-top:8px;"><em>Joacă responsabil. Analizează inteligent. Controlează-ți cifrele.</em></p>
+    </div>
+    <button class="modal-confirm-btn" onclick="closeModal('about-modal')">AM ÎNȚELES</button>
+  </div>
+</div>
+
+<!-- Confirmare Plasare Bilet -->
+<div id="confirm-ticket-modal" class="modal-overlay confirm-ticket-overlay" style="display:none;">
+  <div class="confirm-ticket-box">
+    <div class="confirm-ticket-icon"><i class="fa-solid fa-ticket"></i></div>
+    <div class="confirm-ticket-title">CONFIRMI PLASAREA BILETULUI?</div>
+    <div class="confirm-ticket-summary">
+      <div class="cts-row"><span class="cts-label">Nume</span><span class="cts-val" id="ctsName">—</span></div>
+      <div class="cts-row"><span class="cts-label">Evenimente</span><span class="cts-val" id="ctsEvents">—</span></div>
+      <div class="cts-row"><span class="cts-label">Cotă Totală</span><span class="cts-val gold" id="ctsOdds">—</span></div>
+      <div class="cts-row"><span class="cts-label">Miză</span><span class="cts-val blue" id="ctsStake">—</span></div>
+      <div class="cts-row"><span class="cts-label">Câștig Potențial</span><span class="cts-val green" id="ctsPayout">—</span></div>
+    </div>
+    <div class="confirm-ticket-actions">
+      <button class="cts-btn cts-btn-cancel" onclick="cancelPlaceTicket()"><i class="fa-solid fa-xmark"></i> ANULEAZĂ</button>
+      <button class="cts-btn cts-btn-confirm" onclick="confirmPlaceTicket()"><i class="fa-solid fa-check"></i> CONFIRMĂ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Share Modal -->
+<div id="share-modal" class="modal-overlay" style="display:none;">
+  <div class="modal-box share-modal-box">
+    <div class="modal-header"><span class="modal-title">🔗 SHARE BILET</span><button class="modal-close" onclick="closeModal('share-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div id="share-modal-body"></div>
+  </div>
+</div>
+
+<!-- Gambling Test Modal -->
+<div id="gamb-test-modal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-header"><span class="modal-title">🧠 TEST JOC RESPONSABIL</span><button class="modal-close" onclick="closeModal('gamb-test-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div id="gamb-test-body"></div>
+  </div>
+</div>
+
+<script>
+/* ══ SPA NAVIGATION ══ */
+let currentPage = 'home';
+let _navLock    = false;
+const NAV_ORDER = ['home','lab','addbet','match','social','profile'];
+
+function navigateTo(pageId, btnEl, fromPopState) {
+  if (_navLock) return;
+  if (pageId === currentPage && pageId !== 'addbet') return;
+  _navLock = true;
+  const prev = document.getElementById('page-' + currentPage);
+  const next = document.getElementById('page-' + pageId);
+  if (!next) { _navLock = false; return; }
+  const dir = (NAV_ORDER.indexOf(pageId) >= NAV_ORDER.indexOf(currentPage)) ? 1 : -1;
+  if (prev && prev !== next) {
+    prev.style.cssText = `transition:opacity .20s ease,transform .22s cubic-bezier(.4,0,.2,1);opacity:0;transform:translateX(${dir*-32}px);`;
+    setTimeout(() => { prev.classList.remove('active'); prev.style.cssText=''; }, 230);
+  }
+  next.style.cssText = `display:block;opacity:0;transform:translateX(${dir*32}px);`;
+  void next.offsetHeight;
+  next.style.cssText = `display:block;opacity:0;transform:translateX(${dir*32}px);transition:opacity .24s ease .02s,transform .26s cubic-bezier(.2,.8,.4,1) .02s;`;
+  requestAnimationFrame(() => { next.style.opacity='1'; next.style.transform='translateX(0)'; });
+  next.classList.add('active');
+  setTimeout(() => { next.style.cssText=''; _navLock=false; }, 300);
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  else { const m = document.querySelector(`.nav-btn[data-page="${pageId}"]`); if(m) m.classList.add('active'); }
+
+  /* ══ History API — pagina de Profil capteaza tasta fizica Inapoi ══
+     La intrarea in Profil, adaugam o stare in istoricul browserului.
+     Daca userul apasa Inapoi (popstate) cat timp e in Profil, il
+     redirectionam la Acasa in loc sa lasam browserul sa iasa din pagina/app. */
+  if (pageId === 'profile' && !fromPopState) {
+    history.pushState({ rgbPage: 'profile' }, '', '');
+  } else if (currentPage === 'profile' && pageId !== 'profile' && !fromPopState) {
+    /* Iesim din profil printr-o navigare normala (nu prin back) — curatam starea din istoric */
+    if (history.state && history.state.rgbPage === 'profile') {
+      history.back();
+    }
+  }
+
+  currentPage = pageId;
+  document.body.setAttribute('data-page', pageId);
+  document.body.classList.toggle('page-profile-active', pageId === 'profile');
+
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (pageId==='lab'      && typeof buildLabUI      ==='function') buildLabUI();
+  if (pageId==='match'    && typeof buildMatchUI    ==='function') buildMatchUI();
+  if (pageId==='profile'  && typeof buildProfilePage==='function') buildProfilePage();
+  if (pageId==='social'   && typeof buildSocialPage ==='function') buildSocialPage();
+  if (pageId==='messages' && typeof buildMessagesPage==='function') buildMessagesPage();
+}
+
+/* Tasta fizica Inapoi (Android/Chrome) — daca suntem in Profil, navigam la Acasa
+   in loc sa lasam browserul sa iasa din aplicatie. */
+window.addEventListener('popstate', (e) => {
+  if (currentPage === 'profile') {
+    navigateTo('home', null, true);
+  }
+});
+
+function showTerms()   { document.getElementById('terms-modal').style.display='flex'; }
+function showPrivacy() { document.getElementById('privacy-modal').style.display='flex'; }
+function showAbout()   { document.getElementById('about-modal').style.display='flex'; }
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+
+/* ══════════════════════════════════════════════
+   EXPORT / IMPORT DATE CONT
+   Acoperă datele PERSONALE ale contului curent: bilete, portofolii,
+   utilizator, preferințe, urmăriri. NU include baza de date globală
+   de utilizatori (rgb_users_db) sau feed-ul social public
+   (rgb_social_feed), care nu aparțin exclusiv acestui cont.
+══════════════════════════════════════════════ */
+const RGB_EXPORTABLE_KEYS = [
+  'rgb_bets',
+  'rgb_portfolios',
+  'rgb_current_portfolio',
+  'rgb_initial_budget',
+  'rgb_profit_offset',
+  'rgb_target',
+  'rgb_follows',
+  'rgb_friends',
+  'rgb_friend_reqs',
+  'rgb_theme',
+  'rgb_wallpaper_mode',
+  'rgb_lang',
+  'rgb_user'
+];
+
+function exportAccountData() {
+  const exportPayload = {
+    app: 'rGdbet',
+    exportVersion: 1,
+    exportedAt: new Date().toISOString(),
+    data: {}
+  };
+
+  RGB_EXPORTABLE_KEYS.forEach(key => {
+    const raw = localStorage.getItem(key);
+    if (raw !== null) {
+      try {
+        exportPayload.data[key] = JSON.parse(raw);
+      } catch {
+        exportPayload.data[key] = raw; // valoare simplă (string), nu JSON
+      }
+    }
+  });
+
+  const jsonStr = JSON.stringify(exportPayload, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const dateStamp = new Date().toISOString().split('T')[0];
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `rgdbet_backup_${dateStamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importAccountData(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let parsed;
+    try {
+      parsed = JSON.parse(e.target.result);
+    } catch {
+      alert('Fișierul selectat nu este un export valid rGdbet (JSON invalid).');
+      event.target.value = '';
+      return;
+    }
+
+    if (!parsed || parsed.app !== 'rGdbet' || !parsed.data) {
+      alert('Fișierul selectat nu pare să fie un export valid rGdbet.');
+      event.target.value = '';
+      return;
+    }
+
+    const ticketCount = Array.isArray(parsed.data.rgb_bets) ? parsed.data.rgb_bets.length : 0;
+    const exportDate = parsed.exportedAt ? new Date(parsed.exportedAt).toLocaleDateString('ro-RO') : 'necunoscută';
+    const confirmMsg =
+      `Acest fișier conține ${ticketCount} bilete, exportate la data de ${exportDate}.\n\n` +
+      `Importul va ÎNLOCUI toate datele curente din acest cont (bilete, portofolii, preferințe). ` +
+      `Această acțiune nu poate fi anulată.\n\nContinui?`;
+
+    if (!confirm(confirmMsg)) {
+      event.target.value = '';
+      return;
+    }
+
+    RGB_EXPORTABLE_KEYS.forEach(key => {
+      if (Object.prototype.hasOwnProperty.call(parsed.data, key)) {
+        const value = parsed.data[key];
+        const toStore = typeof value === 'string' ? value : JSON.stringify(value);
+        localStorage.setItem(key, toStore);
+      }
+    });
+
+    alert('Datele au fost importate cu succes! Aplicația se va reîncărca.');
+    location.reload();
+  };
+  reader.onerror = function() {
+    alert('Eroare la citirea fișierului. Te rog încearcă din nou.');
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+document.addEventListener('click', e => {
+  ['terms-modal','privacy-modal','about-modal','share-modal','gamb-test-modal'].forEach(id => {
+    const m=document.getElementById(id);
+    if(m && m.style.display==='flex' && e.target===m) m.style.display='none';
+  });
+});
+</script>
+
+<!-- ═══ PANEL MESAJE (slide-in din dreapta) ═══ -->
+<div id="messages-panel" class="side-panel" style="display:none;">
+  <div class="side-panel-inner">
+    <div id="messages-panel-content"><!-- buildMessagesPage() --></div>
+  </div>
+</div>
+<div id="messages-panel-overlay" class="side-panel-overlay" onclick="closeMessagesPanel()" style="display:none;"></div>
+
+<!-- ═══ PANEL PROFIL — eliminat: profilul e acum pagina completa page-profile (navigateTo) ═══ -->
+
+<script>
+/* ══ PANOURI LATERALE ══ */
+function openMessagesPanel() {
+  const panel   = document.getElementById('messages-panel');
+  const overlay = document.getElementById('messages-panel-overlay');
+  if (!panel) return;
+  overlay.style.display = 'block';
+  panel.style.display   = 'flex';
+  requestAnimationFrame(() => {
+    panel.classList.add('open');
+    /* Construim continutul dupa ce panoul e vizibil */
+    if (typeof buildMessagesPage === 'function') buildMessagesPage(true);
+  });
+}
+function closeMessagesPanel() {
+  const panel   = document.getElementById('messages-panel');
+  const overlay = document.getElementById('messages-panel-overlay');
+  if (!panel) return;
+  panel.classList.remove('open');
+  setTimeout(() => {
+    panel.style.display   = 'none';
+    overlay.style.display = 'none';
+  }, 320);
+}
+/* openProfilePanel/closeProfilePanel eliminate — profilul foloseste acum navigateTo('profile') ca pagina completa */
+</script>
+<script src="age-gate.js"></script>
+<script src="script.js"></script>
+<script src="simulator.js"></script>
+<script src="themes.js"></script>
+<script src="streak-mode.js"></script>
+<script src="social.js"></script>
+<script src="messages.js"></script>
+<script src="profile-viewer.js"></script>
+</body>
+</html>

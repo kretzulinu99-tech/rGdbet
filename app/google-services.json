@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "679777601888",
+    "project_id": "rgdbet-rgd1495",
+    "storage_bucket": "rgdbet-rgd1495.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:679777601888:android:e24dd003116b52681ef605",
+        "android_client_info": {
+          "package_name": "rGdbet.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxhvk4QcFsdP9yZdJzjvQ6uAUo1Qv7rXc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

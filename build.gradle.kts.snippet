@@ -1,0 +1,59 @@
+// ══════════════════════════════════════════════════════════
+// FIȘIER 1: build.gradle.kts  (NIVEL PROIECT — rădăcina)
+// ══════════════════════════════════════════════════════════
+plugins {
+    id("com.android.application") version "8.3.0" apply false
+    id("com.google.gms.google-services") version "4.4.2" apply false
+}
+
+
+// ══════════════════════════════════════════════════════════
+// FIȘIER 2: app/build.gradle.kts  (NIVEL MODUL — folder app/)
+// ══════════════════════════════════════════════════════════
+plugins {
+    id("com.android.application")
+    id("com.google.gms.google-services")   // citește app/google-services.json
+}
+
+android {
+    namespace  = "rGdbet.com"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "rGdbet.com"
+        minSdk        = 24
+        targetSdk     = 35
+        versionCode   = 1
+        versionName   = "1.0"
+    }
+
+    buildFeatures {
+        viewBinding = true    // obligatoriu — activează ActivityXxxBinding
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+dependencies {
+    // UI
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    // Firebase — BoM gestionează automat versiunile tuturor bibliotecilor Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+
+    // Coroutines + suport pentru Firebase Tasks
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
+
+    // Lifecycle (StateFlow colectat din Activity cu lifecycleScope)
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
+}

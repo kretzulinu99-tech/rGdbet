@@ -1,0 +1,48 @@
+# Android Generic
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+
+# User-specific stuff
+/local.properties
+.idea/shelf
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/modules.xml
+.idea/navEditor.xml
+.idea/caches
+
+# Built variants
+*.apk
+*.aar
+*.ap_
+*.dex
+
+# Logs
+*.log
+
+# Android Studio
+*.keystore
+!debug.keystore
+
+# Gradle
+.gradle/
+build/
+app/build/
+
+# Kotlin
+.kotlin/

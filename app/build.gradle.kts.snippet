@@ -1,0 +1,13 @@
+// Adaugă în app/build.gradle.kts (sau build.gradle, sintaxă Groovy echivalentă)
+
+dependencies {
+    // Google Play Billing Library v7.0.0
+    implementation("com.android.billingclient:billing-ktx:7.0.0")
+
+    // Coroutines (folosite de BillingManager pentru operații async)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+
+    // Lifecycle (pentru StateFlow colectat din UI)
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.0")
+}

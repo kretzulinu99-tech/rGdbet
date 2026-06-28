@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Rgdbet" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/rgb_gold</item>
+        <item name="colorOnPrimary">@color/rgb_bg</item>
+        <item name="colorSecondary">@color/rgb_blue</item>
+        <item name="colorSurface">@color/rgb_surface</item>
+        <item name="android:windowBackground">@color/rgb_bg</item>
+        <item name="android:statusBarColor">@color/rgb_bg</item>
+        <item name="android:navigationBarColor">@color/rgb_bg</item>
+    </style>
+</resources>

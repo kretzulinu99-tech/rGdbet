@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="400dp"
+    android:height="120dp"
+    android:viewportWidth="400"
+    android:viewportHeight="120">
+
+    <!-- Outer Glow / Background Shadow -->
+    <path
+        android:pathData="M20,30 L40,10 L120,10 L135,2 L265,2 L280,10 L360,10 L380,30 L380,90 L360,110 L280,110 L265,118 L135,118 L120,110 L40,110 L20,90 Z"
+        android:fillColor="#1500E5FF" />
+
+    <!-- Main Background Body -->
+    <path
+        android:pathData="M22,32 L42,12 L122,12 L137,4 L263,4 L278,12 L358,12 L378,32 L378,88 L358,108 L278,108 L263,116 L137,116 L122,108 L42,108 L22,88 Z"
+        android:fillColor="#E60A0E1A"
+        android:strokeColor="#4000E5FF"
+        android:strokeWidth="1" />
+
+    <!-- Thick Beveled Inner Border (The 3D look) -->
+    <path
+        android:pathData="M35,35 L48,22 L120,22 L135,14 L265,14 L280,22 L352,22 L365,35 L365,85 L352,98 L280,98 L265,106 L135,106 L120,98 L48,98 L35,85 Z"
+        android:strokeColor="#254060"
+        android:strokeWidth="6" />
+
+    <!-- Sharp Glowing Cyan Edge -->
+    <path
+        android:pathData="M22,32 L42,12 L122,12 L137,4 L263,4 L278,12 L358,12 L378,32 L378,88 L358,108 L278,108 L263,116 L137,116 L122,108 L42,108 L22,88 Z"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="2" />
+
+    <!-- Corner Accents (Extra Brightness) -->
+    <path
+        android:pathData="M35,12 L55,12 M22,25 L22,45"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M345,12 L365,12 M378,25 L378,45"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+
+</vector>

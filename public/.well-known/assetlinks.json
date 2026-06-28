@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "rGdbet.com",
+      "sha256_cert_fingerprints": [
+        "76:63:E3:05:FA:0D:65:1F:6C:AD:D2:DF:DC:0C:F5:E7:E8:12:00:BD:FF:65:5F:97:62:BA:99:8C:60:A5:BA:3B"
+      ]
+    }
+  }
+]

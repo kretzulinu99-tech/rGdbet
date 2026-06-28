@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="rgb_bg">#0A0E1A</color>
+    <color name="rgb_gold">#FFCC00</color>
+    <color name="rgb_blue">#00C8FF</color>
+    <color name="rgb_green">#00FF88</color>
+    <color name="rgb_danger">#FF3366</color>
+    <color name="rgb_surface">#1A1F2E</color>
+    <color name="rgb_text_secondary">#AAB2C0</color>
+    <color name="field_green">#1B3D2F</color>
+    <color name="field_green_dark">#0D1F16</color>
+    <color name="stadium_overlay">#CC000000</color>
+    <color name="neon_blue">#00E5FF</color>
+    <color name="neon_blue_glow">#4000E5FF</color>
+    <color name="neon_green">#39FF14</color>
+    <color name="cyber_dark">#02050A</color>
+    <color name="cyber_grid">#10FFFFFF</color>
+</resources>

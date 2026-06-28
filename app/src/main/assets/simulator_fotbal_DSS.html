@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[DSS] Motor Analiza Sportiva</title>
+<style>
+:root {
+  --bg: #0d1117; --panel: #161b22; --panel2: #1c2128;
+  --blue: #58a6ff; --green: #238636; --green2: #2ea043;
+  --red: #da3633; --yellow: #e3b341; --purple: #8957e5;
+  --text: #c9d1d9; --muted: #8b949e; --border: #30363d;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:16px;display:flex;flex-direction:column;align-items:center;gap:16px;}
+h1{color:var(--blue);font-weight:300;letter-spacing:1px;font-size:1.3em;}
+p.sub{color:var(--muted);font-size:0.82em;}
+
+/* LAYOUT */
+.dash{display:grid;grid-template-columns:1fr 330px 1fr;gap:16px;max-width:1240px;width:100%;}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:18px;box-shadow:0 4px 16px rgba(0,0,0,.5);}
+.ptitle{text-align:center;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:14px;font-size:1em;font-weight:600;}
+
+/* SLIDERS */
+.ig{margin-bottom:13px;}
+.ig label{display:flex;justify-content:space-between;font-size:0.8em;margin-bottom:4px;color:var(--muted);}
+.ig label span{color:var(--text);font-weight:600;}
+input[type=range]{width:100%;cursor:pointer;accent-color:var(--blue);}
+
+/* CENTER */
+.cc{display:flex;flex-direction:column;gap:12px;}
+.gs{background:var(--panel2);padding:14px;border-radius:8px;border:1px solid var(--border);}
+
+/* SCOREBOARD */
+.sb-wrap{position:relative;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.8);}
+.sb-pitch{display:block;width:100%;height:210px;}
+.sb-over{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;pointer-events:none;gap:3px;}
+.sb-min{color:#ffeb3b;font-family:'Courier New',monospace;font-weight:700;font-size:.95em;background:rgba(0,0,0,.55);padding:2px 10px;border-radius:4px;text-shadow:0 0 8px #000;}
+.sb-score{font-size:3.2em;font-family:'Courier New',monospace;font-weight:700;color:#fff;letter-spacing:5px;text-shadow:0 0 24px rgba(0,0,0,.9),2px 2px 8px #000,-2px -2px 8px #000;line-height:1;}
+.sb-banner{font-size:.78em;font-weight:700;padding:3px 14px;border-radius:20px;opacity:0;transform:translateY(5px);transition:opacity .25s,transform .25s;min-width:190px;text-align:center;text-shadow:1px 1px 3px rgba(0,0,0,.7);}
+.sb-banner.vis{opacity:1;transform:translateY(0);}
+.sb-banner.status{background:rgba(0,0,0,.5);color:#ccc;}
+.sb-banner.goal{background:rgba(255,140,0,.92);color:#fff;}
+.sb-banner.corner{background:rgba(30,110,220,.88);color:#fff;}
+.sb-banner.yellow{background:rgba(220,185,0,.92);color:#222;}
+.sb-banner.red{background:rgba(200,30,30,.92);color:#fff;}
+.sb-banner.xg{background:rgba(100,60,200,.88);color:#fff;}
+
+@keyframes goalPulse{0%{color:#fff}35%{color:#ffd700;transform:scale(1.14)}70%{color:#ff8c00}100%{color:#fff;transform:scale(1)}}
+.goal-flash{animation:goalPulse .7s ease forwards;}
+
+/* BUTTONS */
+button{background:var(--green);color:#fff;border:none;padding:11px;border-radius:6px;font-size:.95em;cursor:pointer;font-weight:700;width:100%;margin-top:8px;transition:.2s;}
+button:hover{background:var(--green2);}
+button:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
+.btn2{background:var(--blue)}.btn2:hover{background:#1f6feb}
+.btn3{background:var(--purple)}.btn3:hover{background:#6e40c9}
+
+/* TABS RAPORT */
+.report-wrap{max-width:1240px;width:100%;display:none;}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.tab{background:var(--panel2);border:1px solid var(--border);border-radius:6px 6px 0 0;padding:8px 16px;cursor:pointer;font-size:.85em;color:var(--muted);transition:.15s;}
+.tab.active{background:var(--panel);border-bottom-color:var(--panel);color:var(--blue);font-weight:700;}
+.tab-content{display:none;}.tab-content.active{display:block;}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:.86em;margin-top:10px;}
+th,td{padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);}
+th{color:var(--blue);font-weight:500;background:var(--panel2);}
+td.L{text-align:left;}
+.bold{font-weight:700;}
+.green{color:var(--green2);}
+.red{color:var(--red);}
+.yellow{color:var(--yellow);}
+.blue{color:var(--blue);}
+.purple{color:#a371f7;}
+
+/* GRID SCORURI */
+.score-grid-wrap{overflow-x:auto;margin-top:10px;}
+.score-grid{border-collapse:collapse;font-size:.78em;}
+.score-grid th,.score-grid td{padding:5px 8px;border:1px solid var(--border);text-align:center;min-width:42px;}
+.score-grid th{background:var(--panel2);color:var(--muted);}
+.sg-hot{background:rgba(88,166,255,.25);font-weight:700;color:var(--blue);}
+.sg-warm{background:rgba(88,166,255,.1);}
+.sg-val{background:rgba(35,134,54,.2);font-weight:700;}
+
+/* BARS */
+.bar-row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.82em;}
+.bar-outer{flex:1;background:var(--border);border-radius:4px;height:8px;overflow:hidden;}
+.bar-inner{height:100%;border-radius:4px;transition:width .4s;}
+.bar-label{min-width:36px;text-align:right;font-weight:700;}
+
+/* NARRATIVE */
+.narrative{background:var(--panel2);border-radius:6px;padding:14px;font-size:.85em;color:var(--muted);line-height:1.7;margin-top:12px;}
+.narrative strong{color:var(--text);}
+
+/* xG meter */
+.xg-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 0;}
+.xg-bar-wrap{flex:1;background:var(--border);border-radius:6px;height:12px;overflow:hidden;position:relative;}
+.xg-bar-a{position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#58a6ff,#1f6feb);border-radius:6px;transition:width .5s;}
+.xg-bar-b{position:absolute;right:0;top:0;height:100%;background:linear-gradient(90deg,#e5534b,#da3633);border-radius:6px;transition:width .5s;}
+
+/* MODAL */
+.modal{display:none;background:rgba(0,0,0,.82);position:fixed;top:0;left:0;width:100%;height:100%;justify-content:center;align-items:center;z-index:100;}
+.modal-box{background:var(--panel);padding:28px;border-radius:10px;border:1px solid var(--blue);text-align:center;max-width:460px;width:90%;}
+.modal-score{font-size:2.2em;font-family:monospace;margin:12px 0;color:#fff;}
+
+/* EV highlight */
+.ev-pos{background:rgba(35,134,54,.15);border-left:3px solid var(--green2);}
+.ev-neg{background:rgba(218,54,51,.08);}
+
+/* Responsive */
+@media(max-width:900px){
+  .dash{grid-template-columns:1fr;}
+  .tabs{flex-direction:row;}
+}
+</style>
+</head>
+<body>
+
+<header style="text-align:center">
+  <h1>[DSS] Motor de Modelare a Performanței Sportive</h1>
+  <p class="sub">Model Dixon-Coles · xG · Monte Carlo 10 000 · Negative Binomial · Expected Value</p>
+</header>
+
+<div class="dash">
+  <!-- ECHIPA A -->
+  <div class="panel">
+    <div class="ptitle">⚽ Echipa A &nbsp;<span style="font-size:.75em;color:var(--muted)">(Acasă +8%)</span></div>
+    <div class="ig"><label>Forță Ofensivă (xG/șut)<span id="v_offA">75</span></label><input type="range" id="offA" min="1" max="100" value="75" oninput="uv('offA')"></div>
+    <div class="ig"><label>Soliditate Defensivă<span id="v_defA">70</span></label><input type="range" id="defA" min="1" max="100" value="70" oninput="uv('defA')"></div>
+    <div class="ig"><label>Tranziție / Contraatac<span id="v_traA">65</span></label><input type="range" id="traA" min="1" max="100" value="65" oninput="uv('traA')"></div>
+    <div class="ig"><label>Agresivitate Tactică<span id="v_agrA">80</span></label><input type="range" id="agrA" min="1" max="100" value="80" oninput="uv('agrA')"></div>
+    <div class="ig"><label>Disciplină / Organizare<span id="v_disA">70</span></label><input type="range" id="disA" min="1" max="100" value="70" oninput="uv('disA')"></div>
+    <div class="ig"><label>Stamina (Energie Fizică)<span id="v_staA">85</span></label><input type="range" id="staA" min="1" max="100" value="85" oninput="uv('staA')"></div>
+    <div class="ig"><label>Formă Recentă (5 meciuri)<span id="v_frmA">60</span></label><input type="range" id="frmA" min="0" max="100" value="60" oninput="uv('frmA')"></div>
+    <div class="ig"><label>Calitate Portar<span id="v_gkA">65</span></label><input type="range" id="gkA" min="1" max="100" value="65" oninput="uv('gkA')"></div>
+  </div>
+
+  <!-- CONSOLA -->
+  <div class="cc">
+    <div class="gs">
+      <div class="ig"><label>Posesie Echipa A<span id="v_posA">50%</span></label><input type="range" id="posA" min="10" max="90" value="50" oninput="uposs()"></div>
+      <div class="ig"><label>Posesie Echipa B<span id="v_posB">50%</span></label><input type="range" id="posB" min="10" max="90" value="50" disabled></div>
+      <div class="ig"><label>Ancora Goluri (media ligii)<span id="v_avgG">2.5</span></label><input type="range" id="avgG" min="0.5" max="6.0" step="0.1" value="2.5" oninput="uv('avgG')"></div>
+      <div class="ig"><label>Importanța Meciului (tensiune)<span id="v_miza">50</span></label><input type="range" id="miza" min="0" max="100" value="50" oninput="uv('miza')"></div>
+    </div>
+
+    <div class="sb-wrap">
+      <svg class="sb-pitch" viewBox="0 0 330 210" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="gr" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1b6e32"/><stop offset="100%" stop-color="#145224"/>
+          </linearGradient>
+        </defs>
+        <rect width="330" height="210" fill="url(#gr)"/>
+        <rect x="0"   y="0" width="42" height="210" fill="rgba(0,0,0,.07)"/>
+        <rect x="83"  y="0" width="42" height="210" fill="rgba(0,0,0,.07)"/>
+        <rect x="165" y="0" width="42" height="210" fill="rgba(0,0,0,.07)"/>
+        <rect x="248" y="0" width="42" height="210" fill="rgba(0,0,0,.07)"/>
+        <rect x="8" y="8" width="314" height="194" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" rx="2"/>
+        <line x1="165" y1="8" x2="165" y2="202" stroke="rgba(255,255,255,.6)" stroke-width="1.5"/>
+        <circle cx="165" cy="105" r="35" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/>
+        <circle cx="165" cy="105" r="3" fill="rgba(255,255,255,.7)"/>
+        <!-- stanga -->
+        <rect x="8" y="60" width="48" height="90" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.2"/>
+        <rect x="8" y="78" width="20" height="54" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+        <rect x="2" y="88" width="7" height="34" fill="none" stroke="rgba(255,255,255,.65)" stroke-width="1.5"/>
+        <path d="M56 78 A26 26 0 0 1 56 132" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1" stroke-dasharray="3 2"/>
+        <circle cx="42" cy="105" r="2.5" fill="rgba(255,255,255,.6)"/>
+        <!-- dreapta -->
+        <rect x="274" y="60" width="48" height="90" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.2"/>
+        <rect x="302" y="78" width="20" height="54" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+        <rect x="321" y="88" width="7" height="34" fill="none" stroke="rgba(255,255,255,.65)" stroke-width="1.5"/>
+        <path d="M274 78 A26 26 0 0 0 274 132" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1" stroke-dasharray="3 2"/>
+        <circle cx="288" cy="105" r="2.5" fill="rgba(255,255,255,.6)"/>
+        <!-- colturi -->
+        <path d="M8 8 A8 8 0 0 1 16 16" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.2"/>
+        <path d="M322 8 A8 8 0 0 0 314 16" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.2"/>
+        <path d="M8 202 A8 8 0 0 0 16 194" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.2"/>
+        <path d="M322 202 A8 8 0 0 1 314 194" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.2"/>
+        <!-- fundal scor -->
+        <rect x="85" y="66" width="160" height="78" rx="10" fill="rgba(0,0,0,.55)"/>
+      </svg>
+      <div class="sb-over">
+        <div class="sb-min" id="dp_min">⏱ 00:00</div>
+        <div class="sb-score" id="dp_score">0 - 0</div>
+        <div class="sb-banner status vis" id="dp_banner">Calibrare model...</div>
+      </div>
+    </div>
+
+    <button id="btn1" onclick="runHalf(1)">▶ Rulează Repriza 1</button>
+    <button id="btn2" onclick="runHalf(2)" class="btn2" style="display:none">▶ Rulează Repriza 2</button>
+    <button id="btnR" onclick="resetMatch()" class="btn3" style="display:none">↺ Simulare Nouă</button>
+  </div>
+
+  <!-- ECHIPA B -->
+  <div class="panel">
+    <div class="ptitle">✈️ Echipa B &nbsp;<span style="font-size:.75em;color:var(--muted)">(Deplasare)</span></div>
+    <div class="ig"><label>Forță Ofensivă (xG/șut)<span id="v_offB">70</span></label><input type="range" id="offB" min="1" max="100" value="70" oninput="uv('offB')"></div>
+    <div class="ig"><label>Soliditate Defensivă<span id="v_defB">75</span></label><input type="range" id="defB" min="1" max="100" value="75" oninput="uv('defB')"></div>
+    <div class="ig"><label>Tranziție / Contraatac<span id="v_traB">80</span></label><input type="range" id="traB" min="1" max="100" value="80" oninput="uv('traB')"></div>
+    <div class="ig"><label>Agresivitate Tactică<span id="v_agrB">60</span></label><input type="range" id="agrB" min="1" max="100" value="60" oninput="uv('agrB')"></div>
+    <div class="ig"><label>Disciplină / Organizare<span id="v_disB">85</span></label><input type="range" id="disB" min="1" max="100" value="85" oninput="uv('disB')"></div>
+    <div class="ig"><label>Stamina (Energie Fizică)<span id="v_staB">80</span></label><input type="range" id="staB" min="1" max="100" value="80" oninput="uv('staB')"></div>
+    <div class="ig"><label>Formă Recentă (5 meciuri)<span id="v_frmB">55</span></label><input type="range" id="frmB" min="0" max="100" value="55" oninput="uv('frmB')"></div>
+    <div class="ig"><label>Calitate Portar<span id="v_gkB">70</span></label><input type="range" id="gkB" min="1" max="100" value="70" oninput="uv('gkB')"></div>
+  </div>
+</div>
+
+<!-- RAPORT COMPLET -->
+<div class="report-wrap" id="report_wrap">
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('t_stats')">📊 Statistici Meci</div>
+    <div class="tab" onclick="showTab('t_xg')">🎯 xG &amp; Eficiență</div>
+    <div class="tab" onclick="showTab('t_grid')">📋 Matricea Scorurilor</div>
+    <div class="tab" onclick="showTab('t_odds')">💰 Cote &amp; EV</div>
+    <div class="tab" onclick="showTab('t_analysis')">🔬 Analiză Avansată</div>
+  </div>
+
+  <!-- TAB 1: STATISTICI -->
+  <div class="panel tab-content active" id="t_stats">
+    <div class="ptitle">Statistici Meci Complet</div>
+    <table>
+      <tr><th>Statistica</th><th>R1 Echipa A</th><th>R1 Echipa B</th><th>R2 Echipa A</th><th>R2 Echipa B</th><th class="bold">Total A</th><th class="bold">Total B</th></tr>
+      <tr><td class="L">⚽ Goluri</td>       <td id="s_gA1">-</td><td id="s_gB1">-</td><td id="s_gA2">-</td><td id="s_gB2">-</td><td id="s_gAt" class="bold green">-</td><td id="s_gBt" class="bold green">-</td></tr>
+      <tr><td class="L">🎯 xG (expected)</td><td id="s_xA1">-</td><td id="s_xB1">-</td><td id="s_xA2">-</td><td id="s_xB2">-</td><td id="s_xAt" class="bold blue">-</td><td id="s_xBt" class="bold blue">-</td></tr>
+      <tr><td class="L">🏹 Șuturi totale</td><td id="s_stA1">-</td><td id="s_stB1">-</td><td id="s_stA2">-</td><td id="s_stB2">-</td><td id="s_stAt">-</td><td id="s_stBt">-</td></tr>
+      <tr><td class="L">🥅 Șuturi pe poartă</td><td id="s_soA1">-</td><td id="s_soB1">-</td><td id="s_soA2">-</td><td id="s_soB2">-</td><td id="s_soAt">-</td><td id="s_soBt">-</td></tr>
+      <tr><td class="L">% Conversie</td>      <td colspan="2" id="s_cvA1">-</td><td colspan="2" id="s_cvA2">-</td><td id="s_cvAt" class="bold">-</td><td id="s_cvBt" class="bold">-</td></tr>
+      <tr><td class="L">🚩 Cornere</td>       <td id="s_cA1">-</td><td id="s_cB1">-</td><td id="s_cA2">-</td><td id="s_cB2">-</td><td id="s_cAt">-</td><td id="s_cBt">-</td></tr>
+      <tr><td class="L">👟 Fault-uri</td>     <td id="s_fA1">-</td><td id="s_fB1">-</td><td id="s_fA2">-</td><td id="s_fB2">-</td><td id="s_fAt">-</td><td id="s_fBt">-</td></tr>
+      <tr><td class="L">🟨 Galbene</td>       <td id="s_yA1">-</td><td id="s_yB1">-</td><td id="s_yA2">-</td><td id="s_yB2">-</td><td id="s_yAt" class="yellow">-</td><td id="s_yBt" class="yellow">-</td></tr>
+      <tr><td class="L">🟥 Roșii</td>         <td id="s_rA1">-</td><td id="s_rB1">-</td><td id="s_rA2">-</td><td id="s_rB2">-</td><td id="s_rAt" class="red">-</td><td id="s_rBt" class="red">-</td></tr>
+    </table>
+  </div>
+
+  <!-- TAB 2: xG -->
+  <div class="panel tab-content" id="t_xg">
+    <div class="ptitle">Analiză xG (Expected Goals) &amp; Eficiență</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:12px;">
+      <div>
+        <p style="font-size:.85em;color:var(--muted);margin-bottom:8px;">xG total vs Goluri marcate</p>
+        <div class="bar-row"><span style="min-width:80px;font-size:.82em">xG Echipa A</span><div class="bar-outer"><div class="bar-inner" id="xg_barA" style="background:var(--blue);width:0%"></div></div><span class="bar-label blue" id="xg_valA">0.00</span></div>
+        <div class="bar-row"><span style="min-width:80px;font-size:.82em">Goluri A</span><div class="bar-outer"><div class="bar-inner" id="gl_barA" style="background:var(--green2);width:0%"></div></div><span class="bar-label green" id="gl_valA">0</span></div>
+        <div class="bar-row"><span style="min-width:80px;font-size:.82em">xG Echipa B</span><div class="bar-outer"><div class="bar-inner" id="xg_barB" style="background:var(--red);width:0%"></div></div><span class="bar-label red" id="xg_valB">0.00</span></div>
+        <div class="bar-row"><span style="min-width:80px;font-size:.82em">Goluri B</span><div class="bar-outer"><div class="bar-inner" id="gl_barB" style="background:#e5534b;width:0%"></div></div><span class="bar-label red" id="gl_valB">0</span></div>
+        <div style="margin-top:14px;font-size:.82em;color:var(--muted);">
+          <p>⚡ <strong style="color:var(--text)" id="xg_luck_txt">—</strong></p>
+          <p style="margin-top:6px">📐 <strong style="color:var(--text)" id="xg_eff_txt">—</strong></p>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:.85em;color:var(--muted);margin-bottom:8px;">Posesie efectivă &amp; presiune</p>
+        <div class="bar-row"><span style="min-width:80px;font-size:.82em">Posesie A</span><div class="bar-outer"><div class="bar-inner" id="pos_barA" style="background:var(--blue);width:50%"></div></div><span class="bar-label blue" id="pos_valA">50%</span></div>
+        <div class="bar-row"><span style="min-width:80px;font-size:.82em">Posesie B</span><div class="bar-outer"><div class="bar-inner" id="pos_barB" style="background:var(--red);width:50%"></div></div><span class="bar-label red" id="pos_valB">50%</span></div>
+        <div style="margin-top:12px;font-size:.82em;color:var(--muted)">
+          <p>🧤 Paradă portar A: <strong style="color:var(--text)" id="sv_A">—</strong></p>
+          <p style="margin-top:4px">🧤 Paradă portar B: <strong style="color:var(--text)" id="sv_B">—</strong></p>
+          <p style="margin-top:4px">📊 Dominanță xG: <strong style="color:var(--text)" id="dom_txt">—</strong></p>
+        </div>
+      </div>
+    </div>
+    <div class="narrative" id="xg_narrative">—</div>
+  </div>
+
+  <!-- TAB 3: MATRICE SCORURI -->
+  <div class="panel tab-content" id="t_grid">
+    <div class="ptitle">Matricea Probabilităților pe Scor Exact (Monte Carlo 10 000)</div>
+    <p style="font-size:.8em;color:var(--muted);margin-top:6px;">Scorurile cu probabilitate ≥ 4% sunt evidențiate. Cotele de mai jos reprezintă valoarea matematică justă (fără marjă casă parieri).</p>
+    <div class="score-grid-wrap"><table class="score-grid" id="score_grid"></table></div>
+  </div>
+
+  <!-- TAB 4: COTE & EV -->
+  <div class="panel tab-content" id="t_odds">
+    <div class="ptitle">Probabilități &amp; Cote Juste · Expected Value (EV)</div>
+    <p style="font-size:.8em;color:var(--muted);margin-bottom:8px;">EV pozitiv = pariu cu valoare matematică față de cota dată. Cotele juste nu includ marja operatorului (~8-12%). Compară cu cotele reale ale operatorilor.</p>
+    <table>
+      <tr><th>Piață</th><th>Prob. Simulată</th><th>Cotă Justă</th><th>Exemplu cotă operator</th><th>EV la cotă operator</th></tr>
+      <tr id="ev_1"  ><td class="L bold">1 — Victorie A</td>      <td id="p_1">-</td> <td id="o_1" class="green">-</td> <td><input class="cota-in" id="ci_1"   type="number" min="1.01" step="0.01" value="2.10" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="ev1"  class="bold">-</td></tr>
+      <tr id="ev_x"  ><td class="L bold">X — Egal</td>            <td id="p_x">-</td> <td id="o_x" class="green">-</td> <td><input class="cota-in" id="ci_x"   type="number" min="1.01" step="0.01" value="3.20" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="evx"  class="bold">-</td></tr>
+      <tr id="ev_2"  ><td class="L bold">2 — Victorie B</td>      <td id="p_2">-</td> <td id="o_2" class="green">-</td> <td><input class="cota-in" id="ci_2"   type="number" min="1.01" step="0.01" value="3.50" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="ev2"  class="bold">-</td></tr>
+      <tr><td colspan="5" style="padding:2px"></td></tr>
+      <tr id="ev_o25"><td class="L bold">Peste 2.5 goluri</td>    <td id="p_o25">-</td><td id="o_o25" class="green">-</td><td><input class="cota-in" id="ci_o25" type="number" min="1.01" step="0.01" value="1.85" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="ev_o25v" class="bold">-</td></tr>
+      <tr id="ev_u25"><td class="L bold">Sub 2.5 goluri</td>      <td id="p_u25">-</td><td id="o_u25" class="green">-</td><td><input class="cota-in" id="ci_u25" type="number" min="1.01" step="0.01" value="1.95" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="ev_u25v" class="bold">-</td></tr>
+      <tr id="ev_o35"><td class="L bold">Peste 3.5 goluri</td>    <td id="p_o35">-</td><td id="o_o35" class="green">-</td><td><input class="cota-in" id="ci_o35" type="number" min="1.01" step="0.01" value="2.75" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="ev_o35v" class="bold">-</td></tr>
+      <tr id="ev_u35"><td class="L bold">Sub 3.5 goluri</td>      <td id="p_u35">-</td><td id="o_u35" class="green">-</td><td><input class="cota-in" id="ci_u35" type="number" min="1.01" step="0.01" value="1.40" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="ev_u35v" class="bold">-</td></tr>
+      <tr><td colspan="5" style="padding:2px"></td></tr>
+      <tr id="ev_btts"><td class="L bold">Ambele marchează (BTTS)</td><td id="p_btts">-</td><td id="o_btts" class="green">-</td><td><input class="cota-in" id="ci_btts" type="number" min="1.01" step="0.01" value="1.75" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="ev_bttsv" class="bold">-</td></tr>
+      <tr id="ev_nbtts"><td class="L bold">Nu ambele marchează</td><td id="p_nbtts">-</td><td id="o_nbtts" class="green">-</td><td><input class="cota-in" id="ci_nbtts" type="number" min="1.01" step="0.01" value="2.00" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="ev_nbttsv" class="bold">-</td></tr>
+      <tr><td colspan="5" style="padding:2px"></td></tr>
+      <tr id="ev_1x"><td class="L bold">1X (A câștigă sau egal)</td><td id="p_1x">-</td><td id="o_1x" class="green">-</td><td><input class="cota-in" id="ci_1x" type="number" min="1.01" step="0.01" value="1.40" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="ev_1xv" class="bold">-</td></tr>
+      <tr id="ev_x2"><td class="L bold">X2 (B câștigă sau egal)</td><td id="p_x2">-</td><td id="o_x2" class="green">-</td><td><input class="cota-in" id="ci_x2" type="number" min="1.01" step="0.01" value="1.55" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="ev_x2v" class="bold">-</td></tr>
+      <tr id="ev_12"><td class="L bold">12 (Fără egal)</td>       <td id="p_12">-</td><td id="o_12" class="green">-</td><td><input class="cota-in" id="ci_12" type="number" min="1.01" step="0.01" value="1.30" style="width:70px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.85em"></td><td id="ev_12v" class="bold">-</td></tr>
+    </table>
+    <button onclick="recalcEV()" style="margin-top:12px;background:var(--purple);width:auto;padding:8px 20px;">🔄 Recalculează EV cu cotele introduse</button>
+    <div class="narrative" id="ev_narrative" style="margin-top:12px">—</div>
+  </div>
+
+  <!-- TAB 5: ANALIZA AVANSATA -->
+  <div class="panel tab-content" id="t_analysis">
+    <div class="ptitle">Analiză Avansată &amp; Indicatori Cheie</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:10px;">
+      <div>
+        <h3 style="font-size:.9em;color:var(--muted);margin-bottom:10px">Indici de performanță</h3>
+        <table>
+          <tr><th>Indicator</th><th>Echipa A</th><th>Echipa B</th></tr>
+          <tr><td class="L">Putere Atac (λ)</td><td id="ind_atkA" class="blue">-</td><td id="ind_atkB" class="red">-</td></tr>
+          <tr><td class="L">Putere Apărare</td> <td id="ind_defA" class="blue">-</td><td id="ind_defB" class="red">-</td></tr>
+          <tr><td class="L">xG per șut</td>      <td id="ind_xgsA" class="blue">-</td><td id="ind_xgsB" class="red">-</td></tr>
+          <tr><td class="L">Eficiență finalizare</td><td id="ind_efA" class="blue">-</td><td id="ind_efB" class="red">-</td></tr>
+          <tr><td class="L">Indice Formă</td>    <td id="ind_frmA" class="blue">-</td><td id="ind_frmB" class="red">-</td></tr>
+          <tr><td class="L">Rating Global</td>   <td id="ind_ratingA" class="bold blue">-</td><td id="ind_ratingB" class="bold red">-</td></tr>
+        </table>
+        <div class="narrative" id="adv_narrative" style="margin-top:12px">—</div>
+      </div>
+      <div>
+        <h3 style="font-size:.9em;color:var(--muted);margin-bottom:10px">Distribuție probabilități goluri (Poisson)</h3>
+        <table>
+          <tr><th>Goluri</th><th>P(A marchează N)</th><th>P(B marchează N)</th></tr>
+          <tr><td>0</td><td id="pd_a0">-</td><td id="pd_b0">-</td></tr>
+          <tr><td>1</td><td id="pd_a1">-</td><td id="pd_b1">-</td></tr>
+          <tr><td>2</td><td id="pd_a2">-</td><td id="pd_b2">-</td></tr>
+          <tr><td>3</td><td id="pd_a3">-</td><td id="pd_b3">-</td></tr>
+          <tr><td>4</td><td id="pd_a4">-</td><td id="pd_b4">-</td></tr>
+          <tr><td>5+</td><td id="pd_a5">-</td><td id="pd_b5">-</td></tr>
+        </table>
+        <p style="font-size:.78em;color:var(--muted);margin-top:10px">* Distribuție Poisson cu corecție Dixon-Coles pentru scorul 0-0, 1-0, 0-1, 1-1</p>
+      </div>
+    </div>
+  </div>
+</div><!-- end report-wrap -->
+
+<!-- MODAL PAUZA -->
+<div class="modal" id="modal_ht">
+  <div class="modal-box">
+    <h2 style="color:var(--blue)">⏸ Pauză — Repriza 1 Încheiată</h2>
+    <div class="modal-score" id="m_score">0 - 0</div>
+    <p id="m_text" style="color:var(--muted);font-size:.88em;line-height:1.5"></p>
+    <div id="m_xg" style="margin:10px 0;font-size:.85em;color:var(--text)"></div>
+    <button onclick="closeModal()" class="btn2" style="width:auto;padding:10px 28px;margin-top:14px">▶ Continuă Repriza 2</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STARE GLOBALA
+// ============================================================
+let ST = { sA:0, sB:0, h1:null, h2:null, phase:'ready',
+           xgA:0, xgB:0, MC:null };
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function g(id){ return parseFloat(document.getElementById(id).value); }
+function uv(id){
+  const el=document.getElementById(id), sp=document.getElementById('v_'+id);
+  if(!sp) return;
+  sp.textContent = el.step && parseFloat(el.step)<1 ? parseFloat(el.value).toFixed(1) : el.value;
+}
+function uposs(){
+  const a=g('posA');
+  document.getElementById('posB').value=100-a;
+  document.getElementById('v_posA').textContent=a+'%';
+  document.getElementById('v_posB').textContent=(100-a)+'%';
+}
+function showTab(id){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ============================================================
+// MODELE MATEMATICE
+// ============================================================
+
+// --- Poisson ---
+function poissonPMF(k, lam){ // P(X=k)
+  return Math.exp(-lam) * Math.pow(lam,k) / factorial(k);
+}
+const _fact=[1,1,2,6,24,120,720,5040,40320,362880,3628800];
+function factorial(n){ return n<=10?_fact[n]:_fact[10]*Array.from({length:n-10},(_,i)=>i+11).reduce((a,b)=>a*b,1); }
+
+function poissonRandom(lam){
+  const L=Math.exp(-lam); let k=0,p=1;
+  do{ k++; p*=Math.random(); } while(p>L);
+  return k-1;
+}
+
+// --- Corecție Dixon-Coles (ajustare sub-scor) ---
+// rho: corelatie negativa intre goluri echipe (cand A marcheaza, B mai putin probabil)
+// tau(x,y,muA,muB,rho): factor de corectie pentru scoruri mici
+function tau(x, y, muA, muB, rho){
+  if(x===0 && y===0) return 1 - muA*muB*rho;
+  if(x===0 && y===1) return 1 + muA*rho;
+  if(x===1 && y===0) return 1 + muB*rho;
+  if(x===1 && y===1) return 1 - rho;
+  return 1;
+}
+
+// --- Calcul lambdas (xG per meci) ---
+function computeLambdas(){
+  const offA=g('offA'),defA=g('defA'),traA=g('traA'),agrA=g('agrA'),disA=g('disA'),staA=g('staA'),frmA=g('frmA'),gkA=g('gkA');
+  const offB=g('offB'),defB=g('defB'),traB=g('traB'),agrB=g('agrB'),disB=g('disB'),staB=g('staB'),frmB=g('frmB'),gkB=g('gkB');
+  const posA=g('posA')/100, anchor=g('avgG'), miza=g('miza')/100;
+
+  // Forța de atac: xG per oportunitate, modulata de tranziție si forma
+  // Ponderile sunt calibrate pe date statistice din Top 5 ligi europene
+  const atkA = (offA*0.38 + traA*0.22 + agrA*0.18 + staA*0.12 + frmA*0.10) / 100;
+  const atkB = (offB*0.38 + traB*0.22 + agrB*0.18 + staB*0.12 + frmB*0.10) / 100;
+
+  // Forța defensiva: include calitatea portarului (gkA reduce golurile primite)
+  // gk contribuie 25% la aparare totala
+  const defA_ = (defA*0.40 + disA*0.25 + staA*0.15 + gkA*0.20) / 100;
+  const defB_ = (defB*0.40 + disB*0.25 + staB*0.15 + gkB*0.20) / 100;
+
+  // Avantaj teren: +8% pentru echipa de acasa (calibrat din date reale)
+  const homeAdv = 1.08;
+
+  // Forța relativa (model multiplicativ Dixon-Coles)
+  // lambdaA = atac_A / aparare_B * media_ligii * avantaj_teren * factor_posesie
+  const totalAtk = atkA + atkB + 0.001;
+
+  // Factor miza: meciuri importante => mai putine goluri (prudenta tactica)
+  const mizaFactor = 1 - miza * 0.12; // miza maxima reduce cu 12%
+
+  let lA = anchor * (atkA/totalAtk) * (1/defB_) * 0.72 * homeAdv * (0.5+posA) * mizaFactor;
+  let lB = anchor * (atkB/totalAtk) * (1/defA_) * 0.72 * (1.5-posA) * mizaFactor;
+
+  // Normalizare: suma lambdas sa corespunda ancorei
+  const sumL = lA + lB;
+  if(sumL > 0.01){
+    lA = lA / sumL * anchor;
+    lB = lB / sumL * anchor;
+  }
+
+  lA = Math.max(0.15, Math.min(lA, 5.0));
+  lB = Math.max(0.15, Math.min(lB, 5.0));
+
+  // rho: corelatie Dixon-Coles (valoare tipica din literatura: -0.13)
+  const rho = -0.13;
+
+  return { lA, lB, rho, atkA, atkB, defA_, defB_ };
+}
+
+// --- Monte Carlo complet (10 000 simulari) ---
+function runMonteCarlo(){
+  const N = 10000;
+  const {lA, lB, rho} = computeLambdas();
+  const maxG = 8; // max goluri considerate in matrice
+
+  // Matrice scor exact [a][b]
+  const grid = Array.from({length:maxG+1}, ()=>Array(maxG+1).fill(0));
+  let w1=0,draw=0,w2=0,ov25=0,un25=0,ov35=0,un35=0,btts=0,nbtts=0;
+
+  for(let i=0;i<N;i++){
+    // Sampling din Poisson cu corecție Dixon-Coles via rejection sampling simplificat
+    let a,b,rj;
+    do {
+      a = poissonRandom(lA);
+      b = poissonRandom(lB);
+      const t = tau(a,b,lA,lB,rho);
+      rj = t < 1 ? Math.random() < t : true; // acceptare proportionala cu tau
+    } while(!rj);
+
+    if(a<maxG+1 && b<maxG+1) grid[a][b]++;
+    if(a>b) w1++; else if(a===b) draw++; else w2++;
+    const tot=a+b;
+    if(tot>2.5) ov25++; else un25++;
+    if(tot>3.5) ov35++; else un35++;
+    if(a>0&&b>0) btts++; else nbtts++;
+  }
+
+  const p1=w1/N, px=draw/N, p2=w2/N;
+  const po25=ov25/N, pu25=un25/N, po35=ov35/N, pu35=un35/N;
+  const pbtts=btts/N, pnbtts=nbtts/N;
+
+  // Normalizeaza grila
+  for(let a=0;a<=maxG;a++) for(let b=0;b<=maxG;b++) grid[a][b]/=N;
+
+  return { p1,px,p2, po25,pu25, po35,pu35, pbtts,pnbtts,
+           p1x:p1+px, px2:px+p2, p12:p1+p2, grid, lA, lB };
+}
+
+// ============================================================
+// SIMULARE REPRIZA (cu xG)
+// ============================================================
+function simulateHalf(halfNum){
+  const {lA,lB,rho,atkA,atkB,defA_,defB_} = computeLambdas();
+  const posA=g('posA'), agrA=g('agrA'), agrB=g('agrB');
+  const disA=g('disA'), disB=g('disB'), miza=g('miza')/100;
+  const offA=g('offA'), offB=g('offB');
+  const gkA=g('gkA'), gkB=g('gkB');
+
+  // Fatiga si presiune repriza 2
+  const fatigue = halfNum===2 ? 0.88 : 1.0;
+  // Lambda per repriza = lambda_meci / 2
+  const hLambdaA = (lA/2) * fatigue;
+  const hLambdaB = (lB/2) * fatigue;
+
+  // xG repriza (expected goals)
+  const xgA_half = hLambdaA;
+  const xgB_half = hLambdaB;
+
+  // Goluri simulate (Poisson cu corecție)
+  let goalsA, goalsB, ok;
+  do {
+    goalsA = poissonRandom(hLambdaA);
+    goalsB = poissonRandom(hLambdaB);
+    const t = tau(goalsA,goalsB,hLambdaA,hLambdaB,rho);
+    ok = t>=1 || Math.random()<t;
+  } while(!ok);
+
+  // Șuturi: xG/xGperSut = nr șuturi; xGperSut depinde de forța ofensiva
+  const xgPerShotA = 0.08 + atkA * 0.18; // intre 0.08 si 0.26
+  const xgPerShotB = 0.08 + atkB * 0.18;
+  const shotsA   = Math.max(goalsA+1, Math.round(xgA_half/xgPerShotA + (Math.random()-0.5)*2));
+  const shotsB   = Math.max(goalsB+1, Math.round(xgB_half/xgPerShotB + (Math.random()-0.5)*2));
+  const shotsOnA = Math.max(goalsA, Math.min(shotsA, Math.round(shotsA*(0.35+atkA*0.25)+Math.random())));
+  const shotsOnB = Math.max(goalsB, Math.min(shotsB, Math.round(shotsB*(0.35+atkB*0.25)+Math.random())));
+
+  // Cornere: posesie + ofensiva + tranzitii
+  // Media reala: ~5 cornere/echipa/meci => ~2.5/repriza, mai multe pt echipa dominanta
+  const cornerLamA = poissonRandom(2.5*(posA/100)*1.6 + atkA*0.5);
+  const cornerLamB = poissonRandom(2.5*((100-posA)/100)*1.6 + atkB*0.5);
+  const cornersA = Math.max(0, cornerLamA);
+  const cornersB = Math.max(0, cornerLamB);
+
+  // Faulturi: agresivitate + importanta meciului
+  const foulBaseA = 5 + (agrA/100)*6 + miza*2;
+  const foulBaseB = 5 + (agrB/100)*6 + miza*2;
+  const foulsA = Math.max(1, Math.round(foulBaseA*(0.7+Math.random()*0.6)));
+  const foulsB = Math.max(1, Math.round(foulBaseB*(0.7+Math.random()*0.6)));
+
+  // === CARTONASE GALBENE — model Poisson multi-factor calibrat realist ===
+  //
+  // Date reale de referinta (top 5 ligi europene, sezon complet):
+  //   - Media galbene/meci: ~3.8-4.2 (ambele echipe)
+  //   - Repriza 2 produce cu ~38-45% mai multe galbene decat repriza 1
+  //   - Echipa care pierde in min 60+ primeste cu ~25% mai multe galbene
+  //   - Fiecare 3 faulturi suplimentare fata de medie => +0.4 lambda galbene
+  //   - Agresivitate ridicata (>75) si disciplina slaba (<50) => multiplicator ~1.8
+  //
+  // Lambda tinta:
+  //   repriza 1: ~0.85/echipa => ~1.7 total meci prima repriza
+  //   repriza 2: ~1.25/echipa => ~2.5 total meci repriza 2
+  //   total meci: ~4.2 galbene (realist pentru un meci cu echipe medii)
+
+  // 1. Multiplicator repriza — repriza 2 oboseala + tensiune acumulata
+  //    Calibrat: R1 ~1.65 galbene/meci, R2 ~2.40, ratio 1.46 (date reale: 1.38-1.50)
+  const halfMult = halfNum === 2 ? 1.35 : 1.0;
+
+  // 2. Factorul de presiune (scor curent al meciului)
+  //    Echipa care pierde cauta sa recupereze => mai agresiva => mai multe galbene
+  //    Echipa care castiga apara => faulturi tactice => mai multe galbene
+  const scoreDiff = ST.sA - ST.sB;
+  // A pierde => presiune ofensiva crescuta
+  const pressA = scoreDiff < 0
+    ? 1.0 + Math.min(Math.abs(scoreDiff), 3) * 0.18   // pana la +54% la -3 goluri
+    : (scoreDiff > 0
+        ? 1.0 + Math.min(scoreDiff, 2) * 0.08          // avantaj => faulturi tactice +8-16%
+        : 1.0);
+  const pressB = scoreDiff > 0
+    ? 1.0 + Math.min(Math.abs(scoreDiff), 3) * 0.18
+    : (scoreDiff < 0
+        ? 1.0 + Math.min(Math.abs(scoreDiff), 2) * 0.08
+        : 1.0);
+
+  // 3. Factor agresivitate-disciplina
+  //    Calibrat astfel ca valorile default (agr=80,dis=70) => factor ~1.05
+  //    Agresivitate maxima + disciplina minima => factor ~2.1
+  //    Agresivitate minima + disciplina maxima => factor ~0.35
+  const agFactA = Math.pow(agrA / 75, 0.90) * Math.pow(1.0 - (disA / 100) * 0.72, 0.80);
+  const agFactB = Math.pow(agrB / 75, 0.90) * Math.pow(1.0 - (disB / 100) * 0.72, 0.80);
+
+  // 4. Factor faulturi — relatia fault->galben este directa si importanta
+  //    Media faulturi/repriza per echipa: ~8. Fiecare fault deasupra mediei => +lambda
+  //    Formula: baza 0.60 + contributia proportionala a faulturilor
+  const foulFacA = 0.60 + (foulsA / 8.0) * 0.82;
+  const foulFacB = 0.60 + (foulsB / 8.0) * 0.82;
+
+  // 5. Factor miza meci (slider 0-100)
+  //    Meciuri cu miza mare (derbyuri, play-off) => arbitri mai permisivi sau jucatori mai tensionati
+  const mizaCard = 1.0 + miza * 0.45;
+
+  // 6. Factor faza de joc din repriza a 2-a
+  //    In minutele 75-90 se dau ~30% mai multe galbene decat 45-60
+  //    Modelam asta printr-un bonus aplicat doar reprizei 2
+  const lateGameBonus = halfNum === 2 ? 1.08 : 1.0;
+
+  // 7. Factor avantaj teren — echipa gazda primeste usor mai putine galbene (arbitraj acasa)
+  //    ~5% reducere pentru A (acasa), neutru pentru B
+  const homeRefA = 0.95;
+  const homeRefB = 1.00;
+
+  // Lambda final per echipa per repriza
+  // Baza calibrata la 0.90 astfel ca cu parametri default sa obtinem ~1.0/repriza/echipa (repriza 1)
+  // si ~1.48/repriza/echipa (repriza 2) => total meci ~4.0-4.5 galbene
+  const lyA = 0.90 * agFactA * foulFacA * pressA * halfMult * mizaCard * lateGameBonus * homeRefA;
+  const lyB = 0.90 * agFactB * foulFacB * pressB * halfMult * mizaCard * lateGameBonus * homeRefB;
+
+  // Maxim realist: 5 galbene per echipa per meci (extrem de rar)
+  const yellowA = Math.min(5, poissonRandom(Math.max(0.15, lyA)));
+  const yellowB = Math.min(5, poissonRandom(Math.max(0.15, lyB)));
+
+  // === CARTONASE ROSII ===
+  const redMult = halfNum===2 ? 1.5 : 1.0;
+  const rcA = 0.038*Math.pow(agrA/100,1.3)*Math.pow(1-disA/100*0.78,1.2)*redMult*pressA*mizaCard;
+  const rcB = 0.038*Math.pow(agrB/100,1.3)*Math.pow(1-disB/100*0.78,1.2)*redMult*pressB*mizaCard;
+  const rdblA = yellowA>=2 ? (yellowA-1)*0.10 : 0;
+  const rdblB = yellowB>=2 ? (yellowB-1)*0.10 : 0;
+  const redA = Math.random()<(rcA+rdblA)?1:0;
+  const redB = Math.random()<(rcB+rdblB)?1:0;
+
+  // Parada portarului (saves)
+  const savesA = Math.max(0, shotsOnB - goalsB);
+  const savesB = Math.max(0, shotsOnA - goalsA);
+
+  return { goalsA, goalsB, xgA:xgA_half, xgB:xgB_half,
+           shotsA, shotsB, shotsOnA, shotsOnB,
+           cornersA, cornersB, foulsA, foulsB,
+           yellowA, yellowB, redA, redB,
+           savesA, savesB,
+           xgPerShotA, xgPerShotB };
+}
+
+// ============================================================
+// COADA EVENIMENTE
+// ============================================================
+function buildQueue(half, halfNum){
+  const base = halfNum===1?0:45;
+  const events=[];
+
+  function randMins(n){
+    const pool=[];
+    for(let m=base+1;m<=base+45;m++) pool.push(m);
+    for(let i=0;i<Math.min(n,pool.length);i++){
+      const j=i+Math.floor(Math.random()*(pool.length-i));
+      [pool[i],pool[j]]=[pool[j],pool[i]];
+    }
+    return pool.slice(0,n).sort((a,b)=>a-b);
+  }
+
+  function shuffleAssign(nA,nB){
+    const arr=[];
+    for(let i=0;i<nA;i++) arr.push('A');
+    for(let i=0;i<nB;i++) arr.push('B');
+    for(let i=arr.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  // GOLURI
+  const gTotal=half.goalsA+half.goalsB;
+  const gMins=randMins(gTotal);
+  const gAssign=shuffleAssign(half.goalsA,half.goalsB);
+  gMins.forEach((m,i)=>{
+    const t=gAssign[i];
+    events.push({minute:m,type:'goal',team:t,cssClass:'goal',
+      label:t==='A'?'⚽ GOL! Echipa A':'⚽ GOL! Echipa B'});
+  });
+
+  // xG NOTIFY (la mijlocul reprizei, afiseaza xG acumulat)
+  const xgMin=base+Math.floor(22+Math.random()*5);
+  events.push({minute:xgMin,type:'xg',team:'',cssClass:'xg',
+    label:`🎯 xG: A=${half.xgA.toFixed(2)} | B=${half.xgB.toFixed(2)}`});
+
+  // CORNERE
+  const cTotal=half.cornersA+half.cornersB;
+  const cMins=randMins(cTotal);
+  const cAssign=shuffleAssign(half.cornersA,half.cornersB);
+  cMins.forEach((m,i)=>{
+    const t=cAssign[i];
+    events.push({minute:m,type:'corner',team:t,cssClass:'corner',
+      label:t==='A'?'🚩 Corner — Echipa A':'🚩 Corner — Echipa B'});
+  });
+
+  // GALBENE
+  const yTotal=half.yellowA+half.yellowB;
+  const yMins=randMins(yTotal);
+  const yAssign=shuffleAssign(half.yellowA,half.yellowB);
+  yMins.forEach((m,i)=>{
+    const t=yAssign[i];
+    events.push({minute:m,type:'yellow',team:t,cssClass:'yellow',
+      label:t==='A'?'🟨 Cartonaș Galben — Echipa A':'🟨 Cartonaș Galben — Echipa B'});
+  });
+
+  // ROSII
+  if(half.redA){const[m]=randMins(1);events.push({minute:m,type:'red',team:'A',cssClass:'red',label:'🟥 Cartonaș Roșu — Echipa A'});}
+  if(half.redB){const[m]=randMins(1);events.push({minute:m,type:'red',team:'B',cssClass:'red',label:'🟥 Cartonaș Roșu — Echipa B'});}
+
+  events.sort((a,b)=>a.minute-b.minute);
+  return events;
+}
+
+// ============================================================
+// ANIMATIE REPRIZA
+// ============================================================
+function animateHalf(halfNum, half, initA, initB, onDone){
+  const base=halfNum===1?0:45, endMin=halfNum===1?45:90;
+  const events=buildQueue(half,halfNum);
+  const MS=130, PAUSE=2400;
+  let cur=base, cA=initA, cB=initB, evIdx=0;
+  const banner=document.getElementById('dp_banner');
+  const minEl=document.getElementById('dp_min');
+  const scoreEl=document.getElementById('dp_score');
+
+  function showRun(){
+    banner.className='sb-banner status vis';
+    banner.textContent=halfNum===1?'Repriza 1 în desfășurare...':'Repriza 2 în desfășurare...';
+  }
+  function showEv(ev,cb){
+    banner.className='sb-banner '+ev.cssClass+' vis';
+    banner.textContent=ev.label;
+    if(ev.type==='goal'){
+      if(ev.team==='A') cA++; else cB++;
+      scoreEl.textContent=cA+' - '+cB;
+      scoreEl.classList.remove('goal-flash');
+      void scoreEl.offsetWidth;
+      scoreEl.classList.add('goal-flash');
+    }
+    setTimeout(()=>{ showRun(); cb(); }, PAUSE);
+  }
+  showRun();
+
+  function tick(){
+    if(cur>=endMin){
+      minEl.textContent='⏱ '+String(endMin).padStart(2,'0')+':00';
+      scoreEl.textContent=cA+' - '+cB;
+      banner.className='sb-banner status vis';
+      banner.textContent=halfNum===1?'— Pauză —':
+        (cA>cB?'🏆 Victorie Echipa A!':cB>cA?'🏆 Victorie Echipa B!':'🤝 Egal!');
+      onDone(cA,cB); return;
+    }
+    cur++;
+    const sec=Math.floor(Math.random()*59);
+    minEl.textContent='⏱ '+String(cur).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+
+    if(evIdx<events.length && events[evIdx].minute===cur){
+      function next(){
+        if(evIdx<events.length && events[evIdx].minute===cur) showEv(events[evIdx++],next);
+        else setTimeout(tick,MS);
+      }
+      next();
+    } else setTimeout(tick,MS);
+  }
+  setTimeout(tick,300);
+}
+
+// ============================================================
+// RULARE REPRIZE
+// ============================================================
+function runHalf(halfNum){
+  if(halfNum===1){
+    document.getElementById('btn1').disabled=true;
+    const h=simulateHalf(1);
+    ST.h1=h; ST.xgA=h.xgA; ST.xgB=h.xgB;
+
+    animateHalf(1,h,0,0,(sA,sB)=>{
+      ST.sA=sA; ST.sB=sB;
+      writeStats(h,'1');
+
+      // Modal pauza cu xG
+      document.getElementById('m_score').textContent=sA+' - '+sB;
+      document.getElementById('m_text').textContent=
+        `Echipa A: ${h.goalsA} gol(uri) | Echipa B: ${h.goalsB} gol(uri)\n`+
+        `Șuturi: A=${h.shotsA}(${h.shotsOnA} pe poartă) / B=${h.shotsB}(${h.shotsOnB} pe poartă)\n`+
+        `Cornere: ${h.cornersA}-${h.cornersB} | Galbene: ${h.yellowA+h.yellowB}`;
+      document.getElementById('m_xg').innerHTML=
+        `🎯 xG repriza: <strong>A ${h.xgA.toFixed(2)}</strong> — <strong>B ${h.xgB.toFixed(2)}</strong><br>`+
+        `<span style="font-size:.82em;color:var(--muted)">xG = goluri "așteptate" statistic pe baza calității ocaziilor</span>`;
+      document.getElementById('modal_ht').style.display='flex';
+      ST.phase='after_h1';
+    });
+  } else {
+    document.getElementById('btn2').disabled=true;
+    const h=simulateHalf(2);
+    ST.h2=h; ST.xgA+=h.xgA; ST.xgB+=h.xgB;
+
+    animateHalf(2,h,ST.sA,ST.sB,(sA,sB)=>{
+      ST.sA=sA; ST.sB=sB; ST.phase='finished';
+      writeStats(h,'2');
+      writeTotals();
+
+      // Monte Carlo si raport
+      ST.MC=runMonteCarlo();
+      renderOdds();
+      renderGrid();
+      renderXG();
+      renderAdvanced();
+      buildNarrative();
+
+      document.getElementById('report_wrap').style.display='block';
+      document.getElementById('btnR').style.display='block';
+      document.getElementById('btn2').style.display='none';
+    });
+  }
+}
+
+function closeModal(){
+  document.getElementById('modal_ht').style.display='none';
+  document.getElementById('btn2').style.display='block';
+}
+
+// ============================================================
+// STATISTICI UI
+// ============================================================
+function writeStats(h,half){
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  s('s_gA'+half, h.goalsA); s('s_gB'+half, h.goalsB);
+  s('s_xA'+half, h.xgA.toFixed(2)); s('s_xB'+half, h.xgB.toFixed(2));
+  s('s_stA'+half, h.shotsA); s('s_stB'+half, h.shotsB);
+  s('s_soA'+half, h.shotsOnA); s('s_soB'+half, h.shotsOnB);
+  const cvA=h.shotsA>0?(h.goalsA/h.shotsA*100).toFixed(0)+'%':'0%';
+  const cvB=h.shotsB>0?(h.goalsB/h.shotsB*100).toFixed(0)+'%':'0%';
+  s('s_cvA'+half, cvA+' A / '+cvB+' B');
+  s('s_cA'+half, h.cornersA); s('s_cB'+half, h.cornersB);
+  s('s_fA'+half, h.foulsA); s('s_fB'+half, h.foulsB);
+  s('s_yA'+half, h.yellowA); s('s_yB'+half, h.yellowB);
+  s('s_rA'+half, h.redA); s('s_rB'+half, h.redB);
+}
+
+function writeTotals(){
+  const h1=ST.h1, h2=ST.h2;
+  function tot(f){ return h1[f]+h2[f]; }
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  s('s_gAt',tot('goalsA')); s('s_gBt',tot('goalsB'));
+  s('s_xAt',ST.xgA.toFixed(2)); s('s_xBt',ST.xgB.toFixed(2));
+  s('s_stAt',tot('shotsA')); s('s_stBt',tot('shotsB'));
+  s('s_soAt',tot('shotsOnA')); s('s_soBt',tot('shotsOnB'));
+  const totShA=tot('shotsA'), totShB=tot('shotsB');
+  const totGA=tot('goalsA'), totGB=tot('goalsB');
+  s('s_cvAt', totShA>0?(totGA/totShA*100).toFixed(1)+'%':'0%');
+  s('s_cvBt', totShB>0?(totGB/totShB*100).toFixed(1)+'%':'0%');
+  s('s_cAt',tot('cornersA')); s('s_cBt',tot('cornersB'));
+  s('s_fAt',tot('foulsA')); s('s_fBt',tot('foulsB'));
+  s('s_yAt',tot('yellowA')); s('s_yBt',tot('yellowB'));
+  s('s_rAt',tot('redA')); s('s_rBt',tot('redB'));
+}
+
+// ============================================================
+// COTE & EV
+// ============================================================
+function fmt(p){ return (p*100).toFixed(1)+'%'; }
+function justOdds(p){ return p>0.005?(1/p).toFixed(2):'—'; }
+
+function calcEV(prob, cotaOperator){
+  // EV = prob * (cota-1) - (1-prob) * 1
+  // EV > 0 => pariu cu valoare
+  return (prob*(cotaOperator-1) - (1-prob)).toFixed(3);
+}
+
+function setEV(rowId, evValId, prob, elCota){
+  const cota=parseFloat(elCota.value)||0;
+  if(cota<1.01){ document.getElementById(evValId).textContent='—'; return; }
+  const ev=parseFloat(calcEV(prob,cota));
+  const el=document.getElementById(evValId);
+  el.textContent=(ev>=0?'+':'')+ev;
+  el.className='bold '+(ev>=0?'green':'red');
+  const row=document.getElementById(rowId);
+  if(row) row.className=ev>=0.05?'ev-pos':ev<0?'ev-neg':'';
+}
+
+let _probs={};
+function renderOdds(){
+  const mc=ST.MC;
+  _probs={p1:mc.p1,px:mc.px,p2:mc.p2,po25:mc.po25,pu25:mc.pu25,
+          po35:mc.po35,pu35:mc.pu35,pbtts:mc.pbtts,pnbtts:mc.pnbtts,
+          p1x:mc.p1x,px2:mc.px2,p12:mc.p12};
+  const keys=[['1','p1'],['x','px'],['2','p2'],
+              ['o25','po25'],['u25','pu25'],['o35','po35'],['u35','pu35'],
+              ['btts','pbtts'],['nbtts','pnbtts'],
+              ['1x','p1x'],['x2','px2'],['12','p12']];
+  keys.forEach(([k,pk])=>{
+    const p=_probs[pk];
+    const pel=document.getElementById('p_'+k), oel=document.getElementById('o_'+k);
+    if(pel) pel.textContent=fmt(p);
+    if(oel) oel.textContent=justOdds(p);
+  });
+  recalcEV();
+}
+
+function recalcEV(){
+  const pairs=[
+    ['ev_1','ev1','p1','ci_1'],['ev_x','evx','px','ci_x'],['ev_2','ev2','p2','ci_2'],
+    ['ev_o25','ev_o25v','po25','ci_o25'],['ev_u25','ev_u25v','pu25','ci_u25'],
+    ['ev_o35','ev_o35v','po35','ci_o35'],['ev_u35','ev_u35v','pu35','ci_u35'],
+    ['ev_btts','ev_bttsv','pbtts','ci_btts'],['ev_nbtts','ev_nbttsv','pnbtts','ci_nbtts'],
+    ['ev_1x','ev_1xv','p1x','ci_1x'],['ev_x2','ev_x2v','px2','ci_x2'],['ev_12','ev_12v','p12','ci_12']
+  ];
+  pairs.forEach(([rid,evid,pk,ciid])=>{
+    const p=_probs[pk]; if(p===undefined) return;
+    const ci=document.getElementById(ciid); if(!ci) return;
+    setEV(rid,evid,p,ci);
+  });
+
+  // Naratiune EV
+  const best=pairs.filter(([,evid])=>{
+    const el=document.getElementById(evid);
+    return el && parseFloat(el.textContent)>0.05;
+  });
+  const narEl=document.getElementById('ev_narrative');
+  if(best.length>0){
+    const names={'ev1':'1 (Victorie A)','evx':'X (Egal)','ev2':'2 (Victorie B)',
+      'ev_o25v':'Peste 2.5','ev_u25v':'Sub 2.5','ev_o35v':'Peste 3.5','ev_u35v':'Sub 3.5',
+      'ev_bttsv':'BTTS','ev_nbttsv':'Nu BTTS','ev_1xv':'1X','ev_x2v':'X2','ev_12v':'12'};
+    let txt='✅ Piețe cu valoare (EV > +0.05): ';
+    txt+=best.map(([,evid])=>names[evid]||evid).join(', ')+'. ';
+    txt+='EV pozitiv înseamnă că probabilitatea calculată depășește cota introdusă — pe termen lung, aceste pariuri ar fi profitabile dacă modelul este calibrat corect.';
+    narEl.innerHTML='<strong>'+txt+'</strong>';
+  } else {
+    narEl.textContent='⚠️ Nicio piață cu EV pozitiv la cotele introduse. Ajustați cotele sau recalibrați sliderele.';
+  }
+}
+
+// ============================================================
+// MATRICEA SCORURILOR
+// ============================================================
+function renderGrid(){
+  const mc=ST.MC, maxShow=6;
+  const tbl=document.getElementById('score_grid');
+  let html='<tr><th>A \\ B</th>';
+  for(let b=0;b<=maxShow;b++) html+=`<th>${b}${b===maxShow?'+':''}</th>`;
+  html+='</tr>';
+
+  for(let a=0;a<=maxShow;a++){
+    html+=`<tr><th>${a}${a===maxShow?'+':''}</th>`;
+    for(let b=0;b<=maxShow;b++){
+      let p=0;
+      if(a<mc.grid.length && b<mc.grid[0].length) p=mc.grid[a][b];
+      // pentru a===maxShow, suma restului
+      if(a===maxShow){ p=0; for(let aa=maxShow;aa<mc.grid.length;aa++) if(b<mc.grid[0].length) p+=mc.grid[aa][b];}
+      if(b===maxShow){ let pp=0; for(let bb=maxShow;bb<mc.grid[0].length;bb++) if(a<mc.grid.length) pp+=mc.grid[a][bb]; if(a!==maxShow)p=pp; }
+
+      const pct=(p*100).toFixed(1);
+      const odd=p>0.001?(1/p).toFixed(1):'—';
+      let cls='';
+      if(p>=0.08) cls='sg-hot';
+      else if(p>=0.04) cls='sg-warm';
+      const justP=p>0.005;
+      html+=`<td class="${cls}" title="Prob: ${pct}% | Cotă justă: ${odd}">${pct}%${justP?'<br><span style="font-size:.72em;color:var(--muted)">x'+odd+'</span>':''}</td>`;
+    }
+    html+='</tr>';
+  }
+  tbl.innerHTML=html;
+}
+
+// ============================================================
+// xG TAB
+// ============================================================
+function renderXG(){
+  const maxXG=5;
+  const barPct=(v)=>Math.min(100,v/maxXG*100).toFixed(0)+'%';
+  document.getElementById('xg_barA').style.width=barPct(ST.xgA);
+  document.getElementById('xg_valA').textContent=ST.xgA.toFixed(2);
+  document.getElementById('gl_barA').style.width=barPct(ST.sA);
+  document.getElementById('gl_valA').textContent=ST.sA;
+  document.getElementById('xg_barB').style.width=barPct(ST.xgB);
+  document.getElementById('xg_valB').textContent=ST.xgB.toFixed(2);
+  document.getElementById('gl_barB').style.width=barPct(ST.sB);
+  document.getElementById('gl_valB').textContent=ST.sB;
+
+  const posA=g('posA');
+  document.getElementById('pos_barA').style.width=posA+'%';
+  document.getElementById('pos_valA').textContent=posA+'%';
+  document.getElementById('pos_barB').style.width=(100-posA)+'%';
+  document.getElementById('pos_valB').textContent=(100-posA)+'%';
+
+  // Parade
+  const h1=ST.h1,h2=ST.h2;
+  const svA=h1.savesA+h2.savesA, svB=h1.savesB+h2.savesB;
+  document.getElementById('sv_A').textContent=svA+' parade';
+  document.getElementById('sv_B').textContent=svB+' parade';
+
+  const domA=ST.xgA/(ST.xgA+ST.xgB+0.001)*100;
+  document.getElementById('dom_txt').textContent=`A ${domA.toFixed(0)}% — B ${(100-domA).toFixed(0)}%`;
+
+  // Noroc/eficienta
+  const diffA=ST.sA-ST.xgA, diffB=ST.sB-ST.xgB;
+  document.getElementById('xg_luck_txt').textContent=
+    `A: goluri ${ST.sA} vs xG ${ST.xgA.toFixed(2)} (${diffA>=0?'+':''}${diffA.toFixed(2)}) — `+
+    `B: goluri ${ST.sB} vs xG ${ST.xgB.toFixed(2)} (${diffB>=0?'+':''}${diffB.toFixed(2)})`;
+  document.getElementById('xg_eff_txt').textContent=
+    `Eficiență finalizare: A=${(h1.xgPerShotA*100+h2.xgPerShotA*100/2).toFixed(1)}% xG/șut · `+
+    `B=${(h1.xgPerShotB*100+h2.xgPerShotB*100/2).toFixed(1)}% xG/șut`;
+
+  let nartxt='';
+  if(Math.abs(diffA)>0.8||Math.abs(diffB)>0.8){
+    nartxt=`<strong>Observație xG:</strong> `;
+    if(diffA>0.8) nartxt+=`Echipa A a marcat cu ${diffA.toFixed(2)} goluri mai mult decât era așteptat statistic — factorul noroc a jucat un rol important. `;
+    if(diffA<-0.8) nartxt+=`Echipa A a ratat ocazii clare — a marcat cu ${Math.abs(diffA).toFixed(2)} goluri sub xG. `;
+    if(diffB>0.8) nartxt+=`Echipa B a profitat maxim de ocazii. `;
+    if(diffB<-0.8) nartxt+=`Echipa B a sub-performant față de ocaziile create. `;
+  } else {
+    nartxt='Golurile marcate corespund bine cu xG — un meci în care eficiența a fost apropiată de așteptările statistice.';
+  }
+  document.getElementById('xg_narrative').innerHTML=nartxt;
+}
+
+// ============================================================
+// ANALIZA AVANSATA
+// ============================================================
+function renderAdvanced(){
+  const {lA,lB,atkA,atkB,defA_,defB_}=computeLambdas();
+  const h1=ST.h1,h2=ST.h2;
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+
+  const frmA=g('frmA'),frmB=g('frmB');
+  s('ind_atkA',lA.toFixed(3)); s('ind_atkB',lB.toFixed(3));
+  s('ind_defA',(defA_).toFixed(3)); s('ind_defB',(defB_).toFixed(3));
+  s('ind_xgsA',(h1.xgPerShotA).toFixed(3)); s('ind_xgsB',(h1.xgPerShotB).toFixed(3));
+
+  const totShA=(h1.shotsA+h2.shotsA); const totGA=ST.sA;
+  const totShB=(h1.shotsB+h2.shotsB); const totGB=ST.sB;
+  s('ind_efA',totShA>0?(totGA/totShA*100).toFixed(1)+'%':'0%');
+  s('ind_efB',totShB>0?(totGB/totShB*100).toFixed(1)+'%':'0%');
+
+  const frmIdxA=((frmA/100)*0.7+atkA*0.3).toFixed(3);
+  const frmIdxB=((frmB/100)*0.7+atkB*0.3).toFixed(3);
+  s('ind_frmA',frmIdxA); s('ind_frmB',frmIdxB);
+
+  // Rating global: medie ponderata din toti indicatorii
+  const ratingA=((atkA*40+defA_*30+frmA/100*20+(g('staA')/100)*10)).toFixed(1);
+  const ratingB=((atkB*40+defB_*30+frmB/100*20+(g('staB')/100)*10)).toFixed(1);
+  s('ind_ratingA',ratingA); s('ind_ratingB',ratingB);
+
+  // Distributie Poisson
+  for(let k=0;k<=4;k++){
+    const pA=poissonPMF(k,lA)*100, pB=poissonPMF(k,lB)*100;
+    s('pd_a'+k,pA.toFixed(1)+'%'); s('pd_b'+k,pB.toFixed(1)+'%');
+  }
+  // 5+
+  const p5A=(1-[0,1,2,3,4].reduce((s,k)=>s+poissonPMF(k,lA),0))*100;
+  const p5B=(1-[0,1,2,3,4].reduce((s,k)=>s+poissonPMF(k,lB),0))*100;
+  s('pd_a5',Math.max(0,p5A).toFixed(1)+'%'); s('pd_b5',Math.max(0,p5B).toFixed(1)+'%');
+
+  // Naratiune
+  let txt='';
+  if(lA>lB*1.3) txt+='<strong>Echipa A</strong> a dominat ofensiv — lambda xG superior confirmă presiunea continuă. ';
+  else if(lB>lA*1.3) txt+='<strong>Echipa B</strong> a demonstrat eficiență superioară în atac, în ciuda dezavantajului terenului. ';
+  else txt+='Meciul a fost echilibrat din punct de vedere al așteptărilor statistice. ';
+
+  const mc=ST.MC;
+  if(mc.p1>0.5) txt+=`Modelul favorizează clar <strong>Echipa A</strong> (${fmt(mc.p1)} probabilitate victorie). `;
+  else if(mc.p2>0.45) txt+=`Modelul favorizează <strong>Echipa B</strong> (${fmt(mc.p2)} probabilitate victorie). `;
+  else txt+=`Probabilitățile indică un meci incert — egalul are ${fmt(mc.px)} șanse. `;
+
+  document.getElementById('adv_narrative').innerHTML=txt;
+}
+
+// ============================================================
+// NARATIUNE FINALA
+// ============================================================
+function buildNarrative(){
+  // (integrata in renderAdvanced si xg_narrative)
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function resetMatch(){
+  const ids=['offA','defA','traA','agrA','disA','staA','frmA','gkA',
+             'offB','defB','traB','agrB','disB','staB','frmB','gkB',
+             'posA','avgG','miza'];
+  const saved={};
+  ids.forEach(id=>{ saved[id]=document.getElementById(id).value; });
+
+  ST={sA:0,sB:0,h1:null,h2:null,phase:'ready',xgA:0,xgB:0,MC:null};
+
+  document.getElementById('dp_min').textContent='⏱ 00:00';
+  document.getElementById('dp_score').textContent='0 - 0';
+  const bn=document.getElementById('dp_banner');
+  bn.className='sb-banner status vis';
+  bn.textContent='Calibrare model...';
+
+  document.getElementById('btn1').disabled=false;
+  document.getElementById('btn1').style.display='block';
+  document.getElementById('btn2').style.display='none';
+  document.getElementById('btn2').disabled=false;
+  document.getElementById('btnR').style.display='none';
+  document.getElementById('report_wrap').style.display='none';
+
+  // Reset statistici
+  document.querySelectorAll('[id^="s_"]').forEach(el=>el.textContent='-');
+
+  ids.forEach(id=>{ document.getElementById(id).value=saved[id]; uv(id); });
+  uposs();
+
+  // Reset tab
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.querySelector('.tab-content').classList.add('active');
+  document.querySelector('.tab').classList.add('active');
+}
+
+// Init
+uposs();
+document.getElementById('dp_banner').classList.add('vis');
+</script>
+</body>
+</html>

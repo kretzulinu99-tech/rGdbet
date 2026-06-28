@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Main Background with faint glow -->
+    <item>
+        <shape>
+            <solid android:color="#0DFFFFFF" />
+            <corners android:radius="4dp" />
+            <stroke android:width="1dp" android:color="#1AFFFFFF" />
+        </shape>
+    </item>
+
+    <!-- Top Left Accent -->
+    <item android:width="20dp" android:height="20dp" android:gravity="top|left">
+        <shape>
+            <stroke android:width="2dp" android:color="@color/neon_blue" />
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+
+    <!-- Bottom Right Accent -->
+    <item android:width="20dp" android:height="20dp" android:gravity="bottom|right">
+        <shape>
+            <stroke android:width="2dp" android:color="@color/neon_blue" />
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+</layer-list>

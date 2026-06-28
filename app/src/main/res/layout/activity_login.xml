@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#05080F">
+
+    <!-- Background Image: Macro Grass -->
+    <ImageView
+        android:id="@+id/bgGrass"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_grass_macro"
+        android:contentDescription="Stadium Background" />
+
+    <!-- Light Overlay to improve clarity while keeping HD look -->
+    <View
+        android:id="@+id/bgOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#33000000" />
+
+    <com.rgdbet.app.ui.StadiumFloodlightView
+        android:id="@+id/floodlightView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <!-- Dynamic HUD Data Stream -->
+    <TextView
+        android:id="@+id/hudDataStream"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:fontFamily="monospace"
+        android:text="STADIUM_SYNC: 98% | LATENCY: 14ms | CORE: OPTIMAL"
+        android:textColor="#4000E5FF"
+        android:textSize="8sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="30dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <FrameLayout
+                android:id="@+id/logoWrapper"
+                android:layout_width="wrap_content"
+                android:layout_height="120dp"
+                android:layout_marginTop="20dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent">
+
+                <!-- Container for individual letters to allow independent jumping -->
+                <LinearLayout
+                    android:id="@+id/letterContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:orientation="horizontal"
+                    android:clipChildren="false">
+                    <!-- Letters will be added or handled in code -->
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:text="rGdbet"
+                    android:textColor="#FFFFFF"
+                    android:textSize="56sp"
+                    android:fontFamily="sans-serif-black"
+                    android:letterSpacing="0.05"
+                    android:visibility="invisible" />
+
+                <!-- Juggling Ball (Higher elevation to ensure it's complete) -->
+                <TextView
+                    android:id="@+id/jugglingBall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⚽"
+                    android:textSize="32sp"
+                    android:elevation="25dp"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:includeFontPadding="false"
+                    android:visibility="invisible" />
+            </FrameLayout>
+
+            <View
+                android:id="@+id/titleUnderline"
+                android:layout_width="120dp"
+                android:layout_height="4dp"
+                android:background="@color/neon_green"
+                app:layout_constraintTop_toBottomOf="@+id/logoWrapper"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/glassCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                app:cardBackgroundColor="#0DFFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeWidth="1.5dp"
+                app:strokeColor="#3000E5FF"
+                app:layout_constraintTop_toBottomOf="@+id/titleUnderline">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="25dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="JUCĂTOR"
+                        app:hintTextColor="@color/neon_blue"
+                        app:boxStrokeColor="@color/neon_blue"
+                        app:boxStrokeWidth="2dp"
+                        app:boxBackgroundColor="#2000E5FF"
+                        app:boxCornerRadiusTopStart="30dp"
+                        app:boxCornerRadiusTopEnd="30dp"
+                        app:boxCornerRadiusBottomStart="30dp"
+                        app:boxCornerRadiusBottomEnd="30dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#FFFFFF"
+                            android:fontFamily="monospace"
+                            android:letterSpacing="0.1" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="PAROLĂ"
+                        app:hintTextColor="@color/neon_blue"
+                        app:boxStrokeColor="@color/neon_blue"
+                        app:boxStrokeWidth="2dp"
+                        app:boxBackgroundColor="#2000E5FF"
+                        app:passwordToggleEnabled="true"
+                        app:passwordToggleTint="@color/neon_blue"
+                        app:boxCornerRadiusTopStart="30dp"
+                        app:boxCornerRadiusTopEnd="30dp"
+                        app:boxCornerRadiusBottomStart="30dp"
+                        app:boxCornerRadiusBottomEnd="30dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#FFFFFF"
+                            android:inputType="textPassword"
+                            android:fontFamily="monospace"
+                            android:letterSpacing="0.1" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/btnLogin"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:layout_marginTop="20dp"
+                        android:background="@drawable/bg_futuristic_frame"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:paddingHorizontal="20dp">
+
+                        <ImageView
+                            android:id="@+id/ivIcon1"
+                            android:layout_width="54dp"
+                            android:layout_height="54dp"
+                            android:src="@drawable/ic_pitch_outline"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintLeft_toRightOf="@+id/ivIcon1"
+                            app:layout_constraintRight_toRightOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+
+                            <TextView
+                                android:id="@+id/tvMainText1"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-black"
+                                android:text="INTRA PE TEREN"
+                                android:textColor="#FFFFFF"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <LinearLayout
+                                android:id="@+id/progressContainer1"
+                                android:layout_width="match_parent"
+                                android:layout_height="6dp"
+                                android:layout_marginTop="4dp"
+                                android:orientation="horizontal">
+
+                                <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block" />
+                                <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block" />
+                                <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block" />
+                                <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block" />
+                                <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block" />
+                                <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block" />
+                                <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="#FF8800" />
+                                <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="#FF8800" />
+                                <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block_dim" />
+                                <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block_dim" />
+                            </LinearLayout>
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="monospace"
+                                    android:text="STATUS: ACTIV"
+                                    android:textColor="#00E5FF"
+                                    android:textSize="9sp"
+                                    android:textStyle="bold"
+                                    app:layout_constraintLeft_toLeftOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent" />
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+                        </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/tvGoRegister"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:background="@drawable/bg_futuristic_frame"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:paddingHorizontal="20dp"
+                app:layout_constraintTop_toBottomOf="@+id/glassCard"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent">
+
+                <ImageView
+                    android:id="@+id/ivIcon2"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:src="@drawable/ic_people_group"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@+id/ivIcon2"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/tvMainText2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-black"
+                        android:text="INTRA ÎN ECHIPĂ"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:id="@+id/progressContainer2"
+                        android:layout_width="match_parent"
+                        android:layout_height="6dp"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal">
+
+                        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block" />
+                        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block" />
+                        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block" />
+                        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block" />
+                        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="#FF8800" />
+                        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="#FF8800" />
+                        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block_dim" />
+                        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_margin="0.5dp" android:layout_weight="1" android:background="@drawable/bg_tech_progress_block_dim" />
+                    </LinearLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp">
+
+                        <TextView
+                            android:id="@+id/tvUserCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="monospace"
+                            android:text="LOT: ..."
+                            android:textColor="#00E5FF"
+                            android:textSize="9sp"
+                            android:textStyle="bold"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="20dp"
+                android:visibility="gone"
+                android:indeterminateTint="@color/neon_blue"
+                app:layout_constraintTop_toBottomOf="@+id/tvGoRegister"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+
+            <TextView
+                android:id="@+id/tvError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:textColor="@color/rgb_danger"
+                android:gravity="center"
+                android:fontFamily="monospace"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@+id/progressBar" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

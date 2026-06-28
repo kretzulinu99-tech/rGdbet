@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- Deep Natural Grass Green (Forced) -->
+    <solid android:color="#2E7D32" />
+
+    <!-- White Border (Forced) -->
+    <stroke
+        android:width="2dp"
+        android:color="#FFFFFF" />
+
+    <!-- Rounded Corners -->
+    <corners android:radius="8dp" />
+</shape>

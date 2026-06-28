@@ -212,6 +212,23 @@ function markConversationRead(otherUsername) {
   updateMsgBadge();
 }
 
+/* Polling pentru mesaje noi în conversația activă (Face citirea instantă) */
+setInterval(() => {
+  if (_activeConv) {
+    const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    if (me) {
+      const myKey = me.username.toLowerCase();
+      const cid = convId(myKey, _activeConv.toLowerCase());
+      const unread = getUnread();
+      if (unread[myKey] && unread[myKey][cid]) {
+         markConversationRead(_activeConv);
+         const page = document.getElementById('messages-panel-content') || document.getElementById('page-messages');
+         if (page) renderChatView(page, me, _activeConv);
+      }
+    }
+  }
+}, 1500);
+
 /* Numără necitiți total */
 function getTotalUnread() {
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
@@ -233,12 +250,15 @@ window.updateMsgBadge = function() {
   const badge    = document.getElementById('navMsgBadge');
   const topBadge = document.getElementById('notifBadge');
 
-  // Actualizăm ambele badge-uri (cel din nav bar și cel de sus de lângă iconița de mesaje)
+  // Actualizăm ambele badge-uri
   [badge, topBadge].forEach(b => {
     if (!b) return;
     if (total > 0) {
       b.textContent = total > 99 ? '99+' : total;
       b.style.display = 'flex';
+      // Efect vizual de actualizare
+      b.style.transform = 'scale(1.2)';
+      setTimeout(() => { b.style.transform = 'scale(1)'; }, 200);
     } else {
       b.style.display = 'none';
     }
@@ -537,6 +557,10 @@ window.msgSendCurrent = function() {
   const ok = sendMessage(_activeConv, text);
   if (!ok) return;
   if (inp) inp.value = '';
+
+  /* Update badge imediat după ce trimitem un mesaj (în caz că suntem noi destinatarul în simulare) */
+  updateMsgBadge();
+
   /* Adaugă bubble fără rebuild complet */
   const list = document.getElementById('msgChatList');
   const me   = typeof getCurrentUser === 'function' ? getCurrentUser() : null;

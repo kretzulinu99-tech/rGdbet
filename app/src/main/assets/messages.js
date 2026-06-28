@@ -186,15 +186,29 @@ function markConversationRead(otherUsername) {
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   if (!me) return;
   const myKey = me.username.toLowerCase();
-  const cid   = convId(myKey, otherUsername.toLowerCase());
+  const targetKey = otherUsername.toLowerCase();
+  const cid   = convId(myKey, targetKey);
   const unread = getUnread();
-  if (unread[myKey]) { delete unread[myKey][cid]; saveUnread(unread); }
-  /* Marchează și mesajele ca citite */
+
+  if (unread[myKey] && unread[myKey][cid]) {
+    delete unread[myKey][cid];
+    saveUnread(unread);
+  }
+
+  /* Marchează și mesajele individuale ca citite */
   const msgs = getMessages();
   if (msgs[cid]) {
-    msgs[cid].forEach(m => { if (m.to === myKey) m.read = true; });
-    saveMessages(msgs);
+    let changed = false;
+    msgs[cid].forEach(m => {
+      if (m.to === myKey && !m.read) {
+        m.read = true;
+        changed = true;
+      }
+    });
+    if (changed) saveMessages(msgs);
   }
+
+  /* Update badge-uri imediat */
   updateMsgBadge();
 }
 
@@ -403,6 +417,9 @@ function renderInboxView(page, me) {
 
 /* ── CHAT VIEW ── */
 function renderChatView(page, me, otherUsername) {
+  /* Mark as read immediately when opening chat */
+  markConversationRead(otherUsername);
+
   const users  = typeof getUsers === 'function' ? getUsers() : {};
   const other  = users[otherUsername.toLowerCase()] || { username: otherUsername };
   const av     = renderAvatarContent(other.avatar);

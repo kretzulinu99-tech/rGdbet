@@ -929,6 +929,7 @@ function socRenderPost(p, currentUser, myFollows) {
   const statusLabel = p.status === 'win' ? '✅ WIN' : p.status === 'loss' ? '❌ LOSS' : '⏳ PENDING';
   const users  = getUsers();
   const author = users[p.author?.toLowerCase()];
+  const displayName = author?.displayName || p.author || 'anonim';
 
   // Helper pentru afișare avatar (Emoji sau Imagine)
   const renderAvatarContent = (av) => {
@@ -950,7 +951,10 @@ function socRenderPost(p, currentUser, myFollows) {
       <div class="soc-post-header">
         <div class="soc-post-avatar" data-user="${p.author}">${avDisplay}</div>
         <div class="soc-post-meta">
-          <div class="soc-post-author" onclick="event.stopPropagation(); viewUserProfile('${p.author}')">@${p.author || 'anonim'}</div>
+          <div class="soc-post-author" onclick="event.stopPropagation(); viewUserProfile('${p.author}')">
+            ${displayName}
+            <span style="font-size:10px; color:rgba(255,255,255,0.4); font-weight:normal; margin-left:4px;">@${p.author}</span>
+          </div>
           <div class="soc-post-date">${dateStr}</div>
         </div>
         <div class="soc-post-status" style="color:${statusColor}">${statusLabel}</div>

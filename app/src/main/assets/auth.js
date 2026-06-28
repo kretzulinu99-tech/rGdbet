@@ -22,10 +22,11 @@ function authHash(str) {
 }
 
 function authGetUsers() {
-  try { return JSON.parse(localStorage.getItem('rgd_users') || '{}'); } catch { return {}; }
+  try { return JSON.parse(localStorage.getItem('rgb_users_db') || '{}'); } catch { return {}; }
 }
 function authSaveUsers(users) {
-  localStorage.setItem('rgd_users', JSON.stringify(users));
+  localStorage.setItem('rgb_users_db', JSON.stringify(users));
+  localStorage.setItem('rgd_users', JSON.stringify(users)); // Sync
 }
 
 function authGetSession() {
@@ -144,7 +145,11 @@ window.authLogin = function() {
    6. START SESIUNE → ascunde auth screen
 ───────────────────────────────────────────── */
 function authStartSession(user) {
-  authSaveSession({ username: user.username, email: user.email, loginAt: new Date().toISOString() });
+  const sess = { username: user.username, email: user.email, loginAt: new Date().toISOString() };
+  authSaveSession(sess);
+  localStorage.setItem('rgb_session', JSON.stringify(sess));
+  localStorage.setItem('rgb_user', JSON.stringify(user));
+  localStorage.setItem('rgd_user', JSON.stringify(user));
   authHideError();
 
   const screen = document.getElementById('auth-screen');

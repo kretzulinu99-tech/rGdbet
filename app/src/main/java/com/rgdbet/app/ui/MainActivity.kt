@@ -118,9 +118,10 @@ class MainActivity : AppCompatActivity() {
                     };
                     
                     // Salvăm în toate locațiile posibile folosite de scripturile web
-                    const users = JSON.parse(localStorage.getItem('rgd_users') || '{}');
+                    const users = JSON.parse(localStorage.getItem('rgb_users_db') || '{}');
                     users["${username.lowercase()}"] = user;
-                    localStorage.setItem('rgd_users', JSON.stringify(users));
+                    localStorage.setItem('rgb_users_db', JSON.stringify(users));
+                    localStorage.setItem('rgd_users', JSON.stringify(users)); // Compatibilitate auth.js
                     
                     const session = {
                         username: "$username",
@@ -128,10 +129,11 @@ class MainActivity : AppCompatActivity() {
                         loginAt: new Date().toISOString()
                     };
                     localStorage.setItem('rgd_session', JSON.stringify(session));
+                    localStorage.setItem('rgb_session', JSON.stringify(session));
                     
                     // Marcăm și cheia v3 dacă există
                     localStorage.setItem('rgb_user', JSON.stringify(user));
-                    localStorage.setItem('rgb_session', JSON.stringify(session));
+                    localStorage.setItem('rgd_user', JSON.stringify(user));
 
                     // Actualizăm bara de sus
                     if (typeof authUpdateTopBar === 'function') {

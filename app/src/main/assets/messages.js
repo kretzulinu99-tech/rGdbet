@@ -530,7 +530,10 @@ window.msgSendCurrent = function() {
 window.msgSearchUsers = function(query) {
   const res = document.getElementById('msgSearchResults');
   if (!res) return;
-  if (!query || query.length < 2) { res.innerHTML = ''; return; }
+
+  /* Căutare instantanee de la 1 caracter */
+  if (!query || query.trim().length < 1) { res.innerHTML = ''; return; }
+
   const me      = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   if (!me) return;
   const myKey   = me.username.toLowerCase();
@@ -538,11 +541,12 @@ window.msgSearchUsers = function(query) {
   const friends = getFriends();
   const myFriends = friends[myKey] || [];
   const reqs    = getFriendReqs();
-  const AVATARS = ['👤','⚽','🏆','👑','🔥','💎','🦁','🐉','🌟','🎯','💥','🏅'];
 
+  const q = query.toLowerCase().trim();
   const matches = Object.values(users).filter(u =>
     u.username.toLowerCase() !== myKey &&
-    u.username.toLowerCase().includes(query.toLowerCase())
+    ((u.username && u.username.toLowerCase().includes(q)) ||
+     (u.email && u.email.toLowerCase().includes(q)))
   );
   if (!matches.length) {
     res.innerHTML = `<div style="font-family:Rajdhani,sans-serif;color:rgba(255,255,255,.35);font-size:13px;padding:10px 0;">Niciun utilizator găsit.</div>`;

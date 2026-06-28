@@ -995,12 +995,21 @@ window.socToggleFollow = function(authorUsername, btn) {
 window.socSearch = function(query) {
   const res = document.getElementById('soc-search-results');
   if (!res) return;
-  if (!query || query.length < 2) { res.innerHTML = ''; return; }
+
+  /* Permitem căutarea de la 1 caracter pentru a găsi pe toată lumea imediat */
+  if (!query || query.trim().length < 1) { res.innerHTML = ''; return; }
+
   const users   = getUsers();
   const current = getCurrentUser();
   const follows = getFollows();
   const myFollows = current ? (follows[current.username.toLowerCase()] || []) : [];
-  const matches = Object.values(users).filter(u => u.username.toLowerCase().includes(query.toLowerCase()));
+
+  /* Căutare case-insensitive pe username sau email */
+  const q = query.toLowerCase().trim();
+  const matches = Object.values(users).filter(u =>
+    (u.username && u.username.toLowerCase().includes(q)) ||
+    (u.email && u.email.toLowerCase().includes(q))
+  );
 
   if (!matches.length) {
     res.innerHTML = `<div class="soc-empty" style="padding:20px 16px;"><div style="font-family:Rajdhani,sans-serif;color:rgba(255,255,255,.4);">Niciun utilizator găsit.</div></div>`;
@@ -1354,6 +1363,15 @@ window.socMsgOrAdd = function(username, isFriend) {
    INIT LA PORNIRE
 ═══════════════════════════════════════════════════════════════ */
 (function init() {
+  /* Sincronizăm bazele de date pentru a ne asigura că toți utilizatorii sunt găsiți */
+  try {
+    const db1 = JSON.parse(localStorage.getItem('rgd_users') || '{}');
+    const db2 = JSON.parse(localStorage.getItem('rgb_users_db') || '{}');
+    const merged = { ...db1, ...db2 };
+    localStorage.setItem('rgb_users_db', JSON.stringify(merged));
+    localStorage.setItem('rgd_users', JSON.stringify(merged));
+  } catch(e) { console.error("Sync error:", e); }
+
   const user = getCurrentUser();
   if (user) {
     authUpdateTopBar(user);

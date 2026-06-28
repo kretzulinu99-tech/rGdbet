@@ -296,6 +296,12 @@ window.buildMessagesPage = function(force = false) {
   if (!page) return;
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
 
+  /* Ne asigurăm că pagina este vizibilă */
+  page.style.display = 'block';
+  page.classList.add('active');
+  page.style.opacity = '1';
+
+
   if (!me) {
     page.innerHTML = `
       <div class="msg-login-prompt">

@@ -218,10 +218,16 @@ window.updateMsgBadge = function() {
 
   const badge    = document.getElementById('navMsgBadge');
   const topBadge = document.getElementById('notifBadge');
+
+  // Actualizăm ambele badge-uri (cel din nav bar și cel de sus de lângă iconița de mesaje)
   [badge, topBadge].forEach(b => {
     if (!b) return;
-    if (total > 0) { b.textContent = total > 99 ? '99+' : total; b.style.display = 'flex'; }
-    else           { b.style.display = 'none'; }
+    if (total > 0) {
+      b.textContent = total > 99 ? '99+' : total;
+      b.style.display = 'flex';
+    } else {
+      b.style.display = 'none';
+    }
   });
 };
 

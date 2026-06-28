@@ -631,8 +631,6 @@ window.closeConversation = function() {
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   if (page && me) renderInboxView(page, me);
 };
-  if (page && me) renderInboxView(page, me);
-};
 
 /* ── Trimite mesaj curent ── */
 window.msgSendCurrent = function() {

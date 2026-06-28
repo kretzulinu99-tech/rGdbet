@@ -126,7 +126,12 @@ window.authRegister = function() {
 
   const users = getUsers();
   const key   = username.toLowerCase();
-  if (users[key])                 return authShowError('Username-ul este deja folosit.');
+
+  /* Verificăm unicitatea numelui (Username / Nickname) */
+  if (users[key] || Object.values(users).some(u => (u.displayName||'').toLowerCase() === key)) {
+    return authShowError('Acest nume este deja folosit de altcineva.');
+  }
+
   if (Object.values(users).some(u => u.email === email)) return authShowError('Email-ul este deja înregistrat.');
 
   const newUser = {
@@ -712,6 +717,15 @@ window.profSaveEdit = function() {
   } else if (_currentEditType === 'displayName') {
     const nd = (document.getElementById('edit-displayname-new')?.value || '').trim();
     if (nd.length < 2) return showErr('Nickname-ul trebuie să aibă minim 2 caractere.');
+
+    /* Verificăm unicitatea Nickname-ului față de ceilalți utilizatori */
+    const isTaken = Object.values(users).some(u =>
+      (u.username.toLowerCase() !== key) &&
+      ((u.displayName || '').toLowerCase() === nd.toLowerCase() || u.username.toLowerCase() === nd.toLowerCase())
+    );
+
+    if (isTaken) return showErr('Acest nickname este deja folosit de altcineva.');
+
     user.displayName = nd;
     if (users[key]) users[key].displayName = nd;
   } else if (_currentEditType === 'password') {

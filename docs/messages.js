@@ -336,8 +336,8 @@ function renderInboxView(page, me) {
         const av = renderAvatarContent(senderUser.avatar);
         return `
         <div class="msg-friend-req-card">
-          <div class="msg-av">${av}</div>
-          <div style="flex:1;">
+          <div class="msg-av" onclick="if(typeof viewUserProfile==='function') viewUserProfile('${req.from}')" style="cursor:pointer;">${av}</div>
+          <div style="flex:1; cursor:pointer;" onclick="if(typeof viewUserProfile==='function') viewUserProfile('${req.from}')">
             <div class="msg-username">@${req.from}</div>
             <div class="msg-preview-text">Vrea să fie prieten cu tine 🤝</div>
           </div>
@@ -382,7 +382,8 @@ function renderInboxView(page, me) {
           return `
           <div class="msg-conv-row ${c.unreadCount > 0 ? 'msg-conv-unread' : ''}"
                onclick="openConversation('${c.username}')">
-            <div class="msg-av" style="position:relative;">
+            <div class="msg-av" style="position:relative; cursor:pointer;"
+                 onclick="event.stopPropagation(); if(typeof viewUserProfile==='function') viewUserProfile('${c.username}')">
               ${av}
               ${c.unreadCount > 0 ? `<span class="msg-unread-dot">${c.unreadCount}</span>` : ''}
             </div>
@@ -433,10 +434,13 @@ function renderChatView(page, me, otherUsername) {
       <button class="msg-back-btn" onclick="closeConversation()">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
-      <div class="msg-av" style="width:40px;height:40px;font-size:22px;">${av}</div>
-      <div>
-        <div class="msg-username" style="font-size:15px;">@${other.username || otherUsername}</div>
-        <div class="msg-time">Prieten • Chat privat</div>
+      <div style="display:flex; align-items:center; gap:12px; cursor:pointer; flex:1;"
+           onclick="if(typeof viewUserProfile==='function') viewUserProfile('${otherUsername}')">
+        <div class="msg-av" style="width:40px;height:40px;font-size:22px;">${av}</div>
+        <div>
+          <div class="msg-username" style="font-size:15px;">${other.displayName || other.username || otherUsername}</div>
+          <div style="font-family:Rajdhani,sans-serif; font-size:11px; color:var(--nb); margin-top:-2px;">@${other.username || otherUsername}</div>
+        </div>
       </div>
     </div>
 

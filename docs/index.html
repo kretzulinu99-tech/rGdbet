@@ -487,10 +487,16 @@ function navigateTo(pageId, btnEl, fromPopState) {
 
   next.style.display = 'block';
   void next.offsetHeight;
-  next.style.cssText = `opacity:0;transform:translateX(${dir*32}px);transition:opacity .24s ease .02s,transform .26s cubic-bezier(.2,.8,.4,1) .02s;`;
-  requestAnimationFrame(() => { next.style.opacity='1'; next.style.transform='translateX(0)'; });
+  next.style.cssText = `display:block;opacity:0;transform:translateX(${dir*32}px);transition:opacity .24s ease .02s,transform .26s cubic-bezier(.2,.8,.4,1) .02s;`;
+  requestAnimationFrame(() => {
+    next.style.opacity = '1';
+    next.style.transform = 'translateX(0)';
+  });
   next.classList.add('active');
-  setTimeout(() => { next.style.cssText=''; _navLock=false; }, 300);
+  setTimeout(() => {
+    next.style.cssText = 'display:block;opacity:1;';
+    _navLock = false;
+  }, 300);
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   if (btnEl) btnEl.classList.add('active');
   else { const m = document.querySelector(`.nav-btn[data-page="${pageId}"]`); if(m) m.classList.add('active'); }

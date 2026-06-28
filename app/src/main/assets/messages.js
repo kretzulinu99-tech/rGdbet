@@ -292,15 +292,7 @@ window.updateMsgBadge = function() {
 let _activeConv = null; /* username-ul cu care chatăm acum */
 
 window.buildMessagesPage = function(force = false) {
-  /* Scriem in panoul lateral daca e deschis, altfel in page-messages */
-  let page = null;
-  const panelContent = document.getElementById('messages-panel-content');
-  const panel = document.getElementById('messages-panel');
-  if (panel && panel.classList.contains('open') && panelContent) {
-    page = panelContent;
-  } else {
-    page = document.getElementById('page-messages');
-  }
+  const page = document.getElementById('page-messages');
   if (!page) return;
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
 
@@ -623,29 +615,17 @@ window.clearFullChat = function(otherUsername) {
 /* ── Deschide / Închide conversație ── */
 window.openConversation = function(username) {
   _activeConv = username;
-  let page = null;
-  const panelContent = document.getElementById('messages-panel-content');
-  const panel = document.getElementById('messages-panel');
-  if (panel && panel.classList.contains('open') && panelContent) {
-    page = panelContent;
-  } else {
-    page = document.getElementById('page-messages');
-  }
+  const page = document.getElementById('page-messages');
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   if (page && me) renderChatView(page, me, username);
 };
 
 window.closeConversation = function() {
   _activeConv = null;
-  let page = null;
-  const panelContent = document.getElementById('messages-panel-content');
-  const panel = document.getElementById('messages-panel');
-  if (panel && panel.classList.contains('open') && panelContent) {
-    page = panelContent;
-  } else {
-    page = document.getElementById('page-messages');
-  }
+  const page = document.getElementById('page-messages');
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (page && me) renderInboxView(page, me);
+};
   if (page && me) renderInboxView(page, me);
 };
 

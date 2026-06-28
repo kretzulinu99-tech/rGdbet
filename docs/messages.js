@@ -292,15 +292,7 @@ window.updateMsgBadge = function() {
 let _activeConv = null; /* username-ul cu care chatăm acum */
 
 window.buildMessagesPage = function(force = false) {
-  /* Scriem in panoul lateral daca e deschis, altfel in page-messages */
-  let page = null;
-  const panelContent = document.getElementById('messages-panel-content');
-  const panel = document.getElementById('messages-panel');
-  if (panel && panel.classList.contains('open') && panelContent) {
-    page = panelContent;
-  } else {
-    page = document.getElementById('page-messages');
-  }
+  const page = document.getElementById('page-messages');
   if (!page) return;
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
 
@@ -347,26 +339,31 @@ function renderInboxView(page, me) {
   const myKey   = me.username.toLowerCase();
   const myUnread = unread[myKey] || {};
 
-  /* Identificăm TOATE conversațiile active (nu doar prietenii)
-     pentru a nu avea mesaje "fantomă" de la non-prieteni. */
+  /* Identificăm TOATE conversațiile active */
   const activeCids = new Set();
 
-  // Din mesaje
-  Object.keys(msgs).forEach(cid => {
-    if (cid.includes(myKey)) activeCids.add(cid);
-  });
-
-  // Din necitite (importante pentru badge)
-  Object.keys(myUnread).forEach(cid => activeCids.add(cid));
+  try {
+    Object.keys(msgs).forEach(cid => {
+      if (cid && cid.includes(myKey)) activeCids.add(cid);
+    });
+    Object.keys(myUnread).forEach(cid => {
+      if (cid) activeCids.add(cid);
+    });
+  } catch(e) { console.error("Conv list error:", e); }
 
   const convList = Array.from(activeCids).map(cid => {
-    const parts = cid.split('::');
-    const otherUsername = parts[0] === myKey ? parts[1] : parts[0];
-    const msgs_ = msgs[cid] || [];
-    const last  = msgs_[msgs_.length - 1] || null;
-    const unreadCount = myUnread[cid] || 0;
-    return { username: otherUsername, last, unreadCount, ts: last?.ts || 0 };
-  }).sort((a, b) => b.ts - a.ts);
+    try {
+      const parts = cid.split('::');
+      if (parts.length < 2) return null;
+      const otherUsername = parts[0] === myKey ? parts[1] : parts[0];
+      const msgs_ = msgs[cid] || [];
+      const last  = msgs_[msgs_.length - 1] || null;
+      const unreadCount = myUnread[cid] || 0;
+      return { username: otherUsername, last, unreadCount, ts: last?.ts || 0 };
+    } catch(e) { return null; }
+  }).filter(c => c !== null).sort((a, b) => b.ts - a.ts);
+
+  const myFriends = typeof getMyFriends === 'function' ? getMyFriends() : [];
 
   page.innerHTML = `
     <div class="side-panel-close-btn" style="background:transparent; border-bottom:none;">
@@ -618,29 +615,17 @@ window.clearFullChat = function(otherUsername) {
 /* ── Deschide / Închide conversație ── */
 window.openConversation = function(username) {
   _activeConv = username;
-  let page = null;
-  const panelContent = document.getElementById('messages-panel-content');
-  const panel = document.getElementById('messages-panel');
-  if (panel && panel.classList.contains('open') && panelContent) {
-    page = panelContent;
-  } else {
-    page = document.getElementById('page-messages');
-  }
+  const page = document.getElementById('page-messages');
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   if (page && me) renderChatView(page, me, username);
 };
 
 window.closeConversation = function() {
   _activeConv = null;
-  let page = null;
-  const panelContent = document.getElementById('messages-panel-content');
-  const panel = document.getElementById('messages-panel');
-  if (panel && panel.classList.contains('open') && panelContent) {
-    page = panelContent;
-  } else {
-    page = document.getElementById('page-messages');
-  }
+  const page = document.getElementById('page-messages');
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (page && me) renderInboxView(page, me);
+};
   if (page && me) renderInboxView(page, me);
 };
 

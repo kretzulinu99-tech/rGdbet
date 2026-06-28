@@ -455,23 +455,39 @@
 /* ══ SPA NAVIGATION ══ */
 let currentPage = 'home';
 let _navLock    = false;
-const NAV_ORDER = ['home','lab','addbet','match','social','profile'];
+const NAV_ORDER = ['home','lab','addbet','match','social','messages','profile'];
 
 function navigateTo(pageId, btnEl, fromPopState) {
   if (_navLock) return;
   if (pageId === currentPage && pageId !== 'addbet') return;
   _navLock = true;
+
+  const allPages = document.querySelectorAll('.spa-page');
   const prev = document.getElementById('page-' + currentPage);
   const next = document.getElementById('page-' + pageId);
   if (!next) { _navLock = false; return; }
+
+  /* Ascundem instantaneu orice pagină care nu este prev sau next pentru a preveni suprapunerile */
+  allPages.forEach(p => {
+    if (p !== prev && p !== next) {
+      p.classList.remove('active');
+      p.style.display = 'none';
+    }
+  });
+
   const dir = (NAV_ORDER.indexOf(pageId) >= NAV_ORDER.indexOf(currentPage)) ? 1 : -1;
   if (prev && prev !== next) {
     prev.style.cssText = `transition:opacity .20s ease,transform .22s cubic-bezier(.4,0,.2,1);opacity:0;transform:translateX(${dir*-32}px);`;
-    setTimeout(() => { prev.classList.remove('active'); prev.style.cssText=''; }, 230);
+    setTimeout(() => {
+      prev.classList.remove('active');
+      prev.style.display = 'none'; // Forțăm display none
+      prev.style.cssText = '';
+    }, 230);
   }
-  next.style.cssText = `display:block;opacity:0;transform:translateX(${dir*32}px);`;
+
+  next.style.display = 'block';
   void next.offsetHeight;
-  next.style.cssText = `display:block;opacity:0;transform:translateX(${dir*32}px);transition:opacity .24s ease .02s,transform .26s cubic-bezier(.2,.8,.4,1) .02s;`;
+  next.style.cssText = `opacity:0;transform:translateX(${dir*32}px);transition:opacity .24s ease .02s,transform .26s cubic-bezier(.2,.8,.4,1) .02s;`;
   requestAnimationFrame(() => { next.style.opacity='1'; next.style.transform='translateX(0)'; });
   next.classList.add('active');
   setTimeout(() => { next.style.cssText=''; _navLock=false; }, 300);
@@ -632,41 +648,16 @@ document.addEventListener('click', e => {
 });
 </script>
 
-<!-- ═══ PANEL MESAJE (slide-in din dreapta) ═══ -->
-<div id="messages-panel" class="side-panel" style="display:none;">
-  <div class="side-panel-inner">
-    <div id="messages-panel-content"><!-- buildMessagesPage() --></div>
-  </div>
-</div>
-<div id="messages-panel-overlay" class="side-panel-overlay" onclick="closeMessagesPanel()" style="display:none;"></div>
-
-<!-- ═══ PANEL PROFIL — eliminat: profilul e acum pagina completa page-profile (navigateTo) ═══ -->
+<!-- ═══ PANEL MESAJE — eliminat: mesajele sunt acum pagina completa page-messages (navigateTo) ═══ -->
 
 <script>
 /* ══ PANOURI LATERALE ══ */
 function openMessagesPanel() {
-  const panel   = document.getElementById('messages-panel');
-  const overlay = document.getElementById('messages-panel-overlay');
-  if (!panel) return;
-  overlay.style.display = 'block';
-  panel.style.display   = 'flex';
-  requestAnimationFrame(() => {
-    panel.classList.add('open');
-    /* Construim continutul dupa ce panoul e vizibil */
-    if (typeof buildMessagesPage === 'function') buildMessagesPage(true);
-  });
+  navigateTo('messages', null);
 }
 function closeMessagesPanel() {
-  const panel   = document.getElementById('messages-panel');
-  const overlay = document.getElementById('messages-panel-overlay');
-  if (!panel) return;
-  panel.classList.remove('open');
-  setTimeout(() => {
-    panel.style.display   = 'none';
-    overlay.style.display = 'none';
-  }, 320);
+  navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
 }
-/* openProfilePanel/closeProfilePanel eliminate — profilul foloseste acum navigateTo('profile') ca pagina completa */
 </script>
 <script src="age-gate.js"></script>
 <script src="script.js"></script>

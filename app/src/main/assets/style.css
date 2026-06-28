@@ -1163,15 +1163,18 @@ body[data-page="social"] .soc-action-bar {
 
 .spa-page {
   display: none;
-  opacity: 1;
+  opacity: 0; /* Pornește de la 0 */
   padding-bottom: 90px;
   min-height: 100vh;
+  width: 100%;
   will-change: opacity, transform;
   contain: layout style;
+  background: transparent;
 }
 
 .spa-page.active {
   display: block;
+  opacity: 1;
   position: relative;
   z-index: 200;
 }

@@ -291,6 +291,15 @@ window.updateMsgBadge = function() {
 /* ═══ BUILD PAGINA MESAJE ════════════════════════════════════ */
 let _activeConv = null; /* username-ul cu care chatăm acum */
 
+// Helper pentru afișare avatar (Emoji sau Imagine)
+const renderAvatarContent = (av) => {
+  if (!av || av === 'default' || av === '👤') return '👤';
+  if (av.startsWith('data:') || av.startsWith('http')) {
+    return `<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+  }
+  return av;
+};
+
 window.buildMessagesPage = function(force = false) {
   const page = document.getElementById('page-messages');
   if (!page) return;
@@ -300,7 +309,6 @@ window.buildMessagesPage = function(force = false) {
   page.style.display = 'block';
   page.classList.add('active');
   page.style.opacity = '1';
-
 
   if (!me) {
     page.innerHTML = `
@@ -325,15 +333,6 @@ window.buildMessagesPage = function(force = false) {
 
   /* Inbox principal */
   renderInboxView(page, me);
-};
-
-// Helper pentru afișare avatar (Emoji sau Imagine)
-const renderAvatarContent = (av) => {
-  if (!av || av === 'default' || av === '👤') return '👤';
-  if (av.startsWith('data:') || av.startsWith('http')) {
-    return `<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
-  }
-  return av;
 };
 
 /* ── INBOX ── */

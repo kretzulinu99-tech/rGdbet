@@ -199,8 +199,10 @@
     <div class="target-card">
       <div class="stat-label" style="font-size:10px;margin-bottom:8px;" data-i18n="target_goal">Target Goal (RON)</div>
       <input type="number" class="target-input" id="target-input" value="1000" oninput="updateTargetMeter()"/>
-      <div class="progress-bg"><div class="progress-fill" id="targetFill"></div></div>
-      <div class="stat-label" style="margin-top:8px" id="targetText">0% realized</div>
+      <div class="progress-bg">
+        <div class="progress-fill" id="targetFill"></div>
+        <div class="target-text-overlay" id="targetText">0% realized</div>
+      </div>
     </div>
     <div style="margin:0 16px 12px;"><button class="btn-cashout-glitch" onclick="globalCashoutReset()">💸 <span data-i18n="cashout_reset">CASHOUT (RESET)</span></button></div>
     <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
@@ -356,11 +358,7 @@
       <span class="nav-label">SIM</span>
     </button>
     <button class="nav-btn" data-page="social" onclick="navigateTo('social',this)">
-      <div class="nav-icon-wrap">
-        <i class="fa-solid fa-users"></i>
-        <div class="nav-active-dot"></div>
-        <span class="notif-badge" id="navMsgBadge" style="display:none; position:absolute; top:-5px; right:-5px;">0</span>
-      </div>
+      <div class="nav-icon-wrap"><i class="fa-solid fa-users"></i><div class="nav-active-dot"></div></div>
       <span class="nav-label">SOCIAL</span>
     </button>
   </nav>

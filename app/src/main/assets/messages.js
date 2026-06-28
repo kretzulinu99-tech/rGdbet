@@ -347,26 +347,31 @@ function renderInboxView(page, me) {
   const myKey   = me.username.toLowerCase();
   const myUnread = unread[myKey] || {};
 
-  /* Identificăm TOATE conversațiile active (nu doar prietenii)
-     pentru a nu avea mesaje "fantomă" de la non-prieteni. */
+  /* Identificăm TOATE conversațiile active */
   const activeCids = new Set();
 
-  // Din mesaje
-  Object.keys(msgs).forEach(cid => {
-    if (cid.includes(myKey)) activeCids.add(cid);
-  });
-
-  // Din necitite (importante pentru badge)
-  Object.keys(myUnread).forEach(cid => activeCids.add(cid));
+  try {
+    Object.keys(msgs).forEach(cid => {
+      if (cid && cid.includes(myKey)) activeCids.add(cid);
+    });
+    Object.keys(myUnread).forEach(cid => {
+      if (cid) activeCids.add(cid);
+    });
+  } catch(e) { console.error("Conv list error:", e); }
 
   const convList = Array.from(activeCids).map(cid => {
-    const parts = cid.split('::');
-    const otherUsername = parts[0] === myKey ? parts[1] : parts[0];
-    const msgs_ = msgs[cid] || [];
-    const last  = msgs_[msgs_.length - 1] || null;
-    const unreadCount = myUnread[cid] || 0;
-    return { username: otherUsername, last, unreadCount, ts: last?.ts || 0 };
-  }).sort((a, b) => b.ts - a.ts);
+    try {
+      const parts = cid.split('::');
+      if (parts.length < 2) return null;
+      const otherUsername = parts[0] === myKey ? parts[1] : parts[0];
+      const msgs_ = msgs[cid] || [];
+      const last  = msgs_[msgs_.length - 1] || null;
+      const unreadCount = myUnread[cid] || 0;
+      return { username: otherUsername, last, unreadCount, ts: last?.ts || 0 };
+    } catch(e) { return null; }
+  }).filter(c => c !== null).sort((a, b) => b.ts - a.ts);
+
+  const myFriends = typeof getMyFriends === 'function' ? getMyFriends() : [];
 
   page.innerHTML = `
     <div class="side-panel-close-btn" style="background:transparent; border-bottom:none;">

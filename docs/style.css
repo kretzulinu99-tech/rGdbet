@@ -704,11 +704,30 @@
           font-family: 'Syncopate'; font-size: 18px;
           width: 140px; text-align: center; margin-bottom: 10px; outline: none;
       }
-      .progress-bg { height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;
-        overflow: hidden; margin: 5px 0;
+      .progress-bg {
+        height: 20px; /* Am mărit înălțimea pentru a încăpea textul */
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 5px 0;
+        position: relative; /* Pentru a poziționa textul peste bară */
       }
       .progress-fill { height: 100%; width: 0%;
-        transition: width 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease; border-radius: 5px;
+        transition: width 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease; border-radius: 10px;
+      }
+      .target-text-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        font-family: 'Syncopate', sans-serif;
+        font-size: 9px;
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        pointer-events: none;
+        z-index: 5;
       }
 
       /* ═══ CHART (MODERN GLASS STYLE) ═══ */
@@ -5350,12 +5369,10 @@ body.page-profile-active .top-bar {
 ════════════════════════════════════════════════════════ */
 .msg-chat-header {
   display: flex; align-items: center; gap: 12px;
-  padding: 14px 16px 12px;
-  background: rgba(6,9,16,.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255,255,255,.06);
-  position: sticky; top: 0; z-index: 10;
+  padding: 16px 20px;
+  background: rgba(10,15,26,0.8) !important; /* Mai vizibil */
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  position: sticky; top: 0; z-index: 100;
 }
 .msg-back-btn {
   width: 38px; height: 38px; border-radius: 12px;
@@ -5418,13 +5435,11 @@ body.page-profile-active .top-bar {
   position: fixed;
   bottom: 72px; left: 0; right: 0;
   max-width: 500px; margin: 0 auto;
-  padding: 10px 16px 12px;
-  background: rgba(6,9,16,.97);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,.06);
+  padding: 12px 16px;
+  background: rgba(10,15,26,0.9) !important; /* Aproape solid pentru tastatură */
+  border-top: 1px solid rgba(255,255,255,.1);
   display: flex; gap: 10px; align-items: center;
-  z-index: 50;
+  z-index: 500;
 }
 .msg-input {
   flex: 1;
@@ -5830,8 +5845,9 @@ body.page-profile-active .top-bar {
 .side-panel-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(2px);
+  background: rgba(0,0,0,0.4); /* Subtil mai întunecat pentru contrast */
+  backdrop-filter: none !important; /* Eliminăm blur-ul de pe fundal */
+  -webkit-backdrop-filter: none !important;
   z-index: 1100;
   animation: overlayFadeIn .25s ease;
 }
@@ -5872,13 +5888,13 @@ body.page-profile-active .top-bar {
 .side-panel-close-btn {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 16px 10px;
-  background: var(--bg, #0a0e1a);
-  border-bottom: 1px solid rgba(255,255,255,.06);
+  padding: 16px 20px;
+  background: rgba(10,15,26,0.8) !important; /* Mai vizibil */
+  border-bottom: 1px solid rgba(255,255,255,.1);
   cursor: pointer;
 }
 .side-panel-close-btn button {

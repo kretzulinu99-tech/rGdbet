@@ -131,6 +131,7 @@ window.authRegister = function() {
 
   const newUser = {
     username,
+    displayName:  username, // Nickname inițial identic cu username
     email,
     passwordHash: hashStr(pass),
     avatar:       'default',
@@ -288,7 +289,8 @@ window.buildProfilePage = function(force = false) {
         <div class="prof-avatar" id="profAvatarDisplay">${avatarDisplay}</div>
         <div class="prof-avatar-edit"><i class="fa-solid fa-camera"></i></div>
       </div>
-      <div class="prof-username">${user.username}</div>
+      <div class="prof-username" id="profDisplayNameDisplay">${user.displayName || user.username}</div>
+      <div style="font-family:Rajdhani,sans-serif;font-size:13px;color:var(--nb);margin-top:-4px;">@${user.username}</div>
       <div class="prof-email">${user.email || 'fără email'}</div>
       <div class="prof-joined">Membru din ${joinDate}</div>
       <div class="prof-privacy-badge privacy-${user.privacy || 'public'}">
@@ -334,6 +336,17 @@ window.buildProfilePage = function(force = false) {
     <!-- ══ SECȚIUNE: CONT ══ -->
     <div class="prof-section">
       <div class="prof-section-title">SETĂRI CONT</div>
+
+      <div class="prof-row" onclick="profOpenEdit('displayName')">
+        <div class="prof-row-left">
+          <div class="prof-row-icon blue"><i class="fa-solid fa-id-card"></i></div>
+          <div class="prof-row-text">
+            <span class="prof-row-label">Nickname (Nume afișat)</span>
+            <span class="prof-row-sub">${user.displayName || user.username}</span>
+          </div>
+        </div>
+        <i class="fa-solid fa-pen prof-row-arrow" style="font-size:10px;"></i>
+      </div>
 
       <div class="prof-row" onclick="profOpenEdit('email')">
         <div class="prof-row-left">
@@ -654,6 +667,16 @@ window.profOpenEdit = function(type) {
         <label>EMAIL NOU</label>
         <input id="edit-email-new" type="email" ${inputStyle} placeholder="email@nou.com"/>
       </div>`;
+  } else if (type === 'displayName') {
+    if (title) title.textContent = 'SETEAZĂ NICKNAME';
+    if (body) body.innerHTML = `
+      <div class="auth-field" style="margin-bottom:12px;">
+        <label>NICKNAME NOU (Ex: Popescu Ion)</label>
+        <input id="edit-displayname-new" type="text" ${inputStyle} placeholder="Introdu un nume..." maxlength="30"/>
+        <p style="font-family:Rajdhani,sans-serif;font-size:11px;color:var(--text2);margin-top:6px;">
+          Acest nume va apărea în feed-ul social și la căutări.
+        </p>
+      </div>`;
   } else if (type === 'password') {
     if (title) title.textContent = 'SCHIMBĂ PAROLA';
     if (body) body.innerHTML = `
@@ -686,6 +709,11 @@ window.profSaveEdit = function() {
       return showErr('Email-ul este deja folosit.');
     user.email = ne;
     if (users[key]) users[key].email = ne;
+  } else if (_currentEditType === 'displayName') {
+    const nd = (document.getElementById('edit-displayname-new')?.value || '').trim();
+    if (nd.length < 2) return showErr('Nickname-ul trebuie să aibă minim 2 caractere.');
+    user.displayName = nd;
+    if (users[key]) users[key].displayName = nd;
   } else if (_currentEditType === 'password') {
     const old = document.getElementById('edit-pass-old')?.value || '';
     const nw  = document.getElementById('edit-pass-new')?.value || '';
@@ -1004,11 +1032,12 @@ window.socSearch = function(query) {
   const follows = getFollows();
   const myFollows = current ? (follows[current.username.toLowerCase()] || []) : [];
 
-  /* Căutare case-insensitive pe username sau email */
+  /* Căutare case-insensitive pe username, email sau displayName (Nickname) */
   const q = query.toLowerCase().trim();
   const matches = Object.values(users).filter(u =>
     (u.username && u.username.toLowerCase().includes(q)) ||
-    (u.email && u.email.toLowerCase().includes(q))
+    (u.email && u.email.toLowerCase().includes(q)) ||
+    (u.displayName && u.displayName.toLowerCase().includes(q))
   );
 
   if (!matches.length) {
@@ -1029,10 +1058,11 @@ window.socSearch = function(query) {
     const followed = myFollows.includes(u.username.toLowerCase());
     const userPosts = getPosts().filter(p => p.author?.toLowerCase() === u.username.toLowerCase()).length;
     return `
-      <div class="soc-user-card">
+      <div class="soc-user-card" onclick="if(typeof viewUserProfile==='function') viewUserProfile('${u.username}')">
         <div class="soc-post-avatar">${avD}</div>
         <div style="flex:1;">
-          <div class="soc-post-author" style="font-size:15px;">@${u.username}</div>
+          <div class="soc-post-author" style="font-size:15px; color:#fff;">${u.displayName || u.username}</div>
+          <div style="font-family:Rajdhani,sans-serif;font-size:11px;color:var(--nb);margin-top:-2px;">@${u.username}</div>
           <div class="soc-post-date">${userPosts} bilete postate • ${privacyIcon(u.privacy)} ${privacyLabel(u.privacy)}</div>
         </div>
         ${!isMe && current ? `

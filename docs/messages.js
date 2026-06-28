@@ -408,6 +408,31 @@ function renderInboxView(page, me) {
       }).join('')}
     </div>` : ''}
 
+    <!-- Prieteni -->
+    <div class="msg-section">
+      <div class="msg-section-title">
+        <i class="fa-solid fa-user-group"></i>
+        LISTA DE PRIETENI
+        ${myFriends.length === 0 ? '' : `<span class="msg-badge-pill">${myFriends.length}</span>`}
+      </div>
+      ${myFriends.length === 0 ? `
+        <div class="msg-empty" style="padding:20px 0;">
+          <div style="font-family:Rajdhani,sans-serif;font-size:13px;color:rgba(255,255,255,.3);">Nu ai adăugat niciun prieten încă.</div>
+        </div>` : `
+        <div style="display:flex; gap:10px; overflow-x:auto; padding:10px 4px; scrollbar-width:none;">
+          ${myFriends.map(fKey => {
+            const fUser = users[fKey] || { username: fKey };
+            return `
+            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; flex-shrink:0; cursor:pointer;"
+                 onclick="openConversation('${fKey}')">
+              <div class="msg-av" style="width:50px; height:50px;">${renderAvatarContent(fUser.avatar)}</div>
+              <div class="msg-username" style="font-size:9px; max-width:60px; overflow:hidden; text-overflow:ellipsis;">@${fKey}</div>
+            </div>`;
+          }).join('')}
+        </div>`
+      }
+    </div>
+
     <!-- Conversații -->
     <div class="msg-section">
       <div class="msg-section-title">
@@ -498,6 +523,9 @@ function renderChatView(page, me, otherUsername) {
           <div style="font-family:Rajdhani,sans-serif; font-size:11px; color:var(--nb); margin-top:-2px;">@${other.username || otherUsername}</div>
         </div>
       </div>
+      <button class="msg-back-btn" onclick="clearFullChat('${otherUsername}')" title="Șterge tot chatul" style="border-color:rgba(255,51,102,0.3); color:var(--danger);">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
     </div>
 
     <!-- Mesaje -->
@@ -547,13 +575,44 @@ function renderMsgBubble(msg, myKey) {
   }
 
   return `
-    <div class="msg-bubble-row ${isMe ? 'msg-bubble-row-me' : 'msg-bubble-row-other'}">
-      <div class="msg-bubble ${isMe ? 'msg-bubble-me' : 'msg-bubble-other'}">
+    <div class="msg-bubble-row ${isMe ? 'msg-bubble-row-me' : 'msg-bubble-row-other'}" id="msg_row_${msg.id}">
+      <div class="msg-bubble ${isMe ? 'msg-bubble-me' : 'msg-bubble-other'}" onclick="showMsgActions('${msg.id}', '${msg.from === myKey ? 'me' : 'other'}', '${msg.from === myKey ? msg.to : msg.from}')">
         ${escMsgHtml(msg.text)}
         <div class="msg-bubble-time">${time} ${isMe && msg.read ? '<i class="fa-solid fa-check-double" style="color:var(--ng)"></i>' : ''}</div>
       </div>
     </div>`;
 }
+
+/* -- Acțiuni Mesaj Individual -- */
+window.showMsgActions = function(msgId, owner, otherUser) {
+  if (confirm('Ștergi acest mesaj?')) {
+    const cid = convId(getCurrentUser().username, otherUser);
+    const msgs = getMessages();
+    if (msgs[cid]) {
+      msgs[cid] = msgs[cid].filter(m => m.id !== msgId);
+      saveMessages(msgs);
+      const row = document.getElementById('msg_row_' + msgId);
+      if (row) {
+        row.style.opacity = '0';
+        row.style.transform = 'scale(0.8)';
+        setTimeout(() => row.remove(), 300);
+      }
+    }
+  }
+};
+
+window.clearFullChat = function(otherUsername) {
+  if (confirm(`Ești sigur că vrei să ștergi TOATĂ conversația cu @${otherUsername}?`)) {
+    const me = getCurrentUser();
+    if (!me) return;
+    const cid = convId(me.username, otherUsername);
+    const msgs = getMessages();
+    delete msgs[cid];
+    saveMessages(msgs);
+    closeConversation();
+    showMsgToast('Conversație ștearsă.', 'info');
+  }
+};
 
 /* ── Deschide / Închide conversație ── */
 window.openConversation = function(username) {

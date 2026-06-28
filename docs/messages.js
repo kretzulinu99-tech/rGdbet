@@ -369,7 +369,7 @@ function renderInboxView(page, me) {
   }).sort((a, b) => b.ts - a.ts);
 
   page.innerHTML = `
-    <div class="side-panel-close-btn">
+    <div class="side-panel-close-btn" style="background:transparent; border-bottom:none;">
       <button onclick="closeMessagesPanel ? closeMessagesPanel() : null"><i class="fa-solid fa-xmark"></i></button>
       <span>MESAJE</span>
     </div>
@@ -511,7 +511,7 @@ function renderChatView(page, me, otherUsername) {
 
   page.innerHTML = `
     <!-- Header chat -->
-    <div class="msg-chat-header">
+    <div class="msg-chat-header" style="background:transparent; border-bottom:none;">
       <button class="msg-back-btn" onclick="closeConversation()">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
@@ -542,11 +542,12 @@ function renderChatView(page, me, otherUsername) {
     </div>
 
     <!-- Input mesaj -->
-    <div class="msg-input-bar">
+    <div class="msg-input-bar" style="background:transparent; border-top:none; backdrop-filter:none; -webkit-backdrop-filter:none;">
       <input class="msg-input" id="msgInputField" type="text"
              placeholder="Scrie un mesaj..."
              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();msgSendCurrent();}"
-             autocomplete="off" maxlength="500"/>
+             autocomplete="off" maxlength="500"
+             style="background:rgba(255,255,255,0.1); backdrop-filter:blur(10px);"/>
       <button class="msg-send-btn" onclick="msgSendCurrent()">
         <i class="fa-solid fa-paper-plane"></i>
       </button>

@@ -60,6 +60,11 @@ window.sendFriendRequest = function(toUsername) {
 
   reqs[to].push({ from, status: 'pending', ts: Date.now() });
   saveFriendReqs(reqs);
+
+  /* Trimitem un mesaj de sistem (notificare) destinatarului */
+  const sysMsg = `👋 @${me.username} ți-a trimis o cerere de prietenie!`;
+  sendMessage(toUsername, sysMsg, true); // true = system message
+
   showMsgToast('Cerere de prietenie trimisă lui @' + toUsername + '! 🤝', 'success');
   updateMsgBadge();
 };
@@ -85,13 +90,21 @@ window.respondFriendRequest = function(fromUsername, accept) {
     if (!friends[myKey].includes(fromKey))   friends[myKey].push(fromKey);
     if (!friends[fromKey].includes(myKey))   friends[fromKey].push(myKey);
     saveFriends(friends);
+
+    /* Notificare de acceptare */
+    const sysMsg = `🎊 @${me.username} ți-a acceptat cererea de prietenie! Acum puteți comunica.`;
+    sendMessage(fromUsername, sysMsg, true);
+
     showMsgToast('Ești acum prieten cu @' + fromUsername + '! 🎉', 'success');
   } else {
-    reqs[myKey][idx].status = 'rejected';
+    reqs[myKey].splice(idx, 1); // Eliminăm cererea dacă e refuzată
   }
   saveFriendReqs(reqs);
   buildMessagesPage(true);
   updateMsgBadge();
+
+  /* Refresh social feed dacă e vizibil pentru a actualiza iconițele de add/message */
+  if (typeof socRenderFeed === 'function') socRenderFeed();
 };
 
 /* Obține cererile primite de user curent */
@@ -118,8 +131,17 @@ window.isFriend = function(username) {
 
 /* ═══ MESAGERIE ══════════════════════════════════════════════ */
 
+/* ── Sunete ── */
+const snd_send = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
+const snd_recv = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+
+let _lastTotalUnread = -1;
+
+function playSendSnd() { snd_send.play().catch(()=>{}); }
+function playRecvSnd() { snd_recv.play().catch(()=>{}); }
+
 /* Trimite mesaj */
-window.sendMessage = function(toUsername, text) {
+window.sendMessage = function(toUsername, text, isSystem = false) {
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   if (!me || !text?.trim()) return false;
   const from = me.username.toLowerCase();
@@ -134,6 +156,7 @@ window.sendMessage = function(toUsername, text) {
     text: text.trim(),
     ts:   Date.now(),
     read: false,
+    isSystem: isSystem, // Marcăm dacă e mesaj de sistem
   });
   /* Limitează la 500 mesaje per conversație */
   if (msgs[cid].length > 500) msgs[cid] = msgs[cid].slice(-500);
@@ -145,6 +168,7 @@ window.sendMessage = function(toUsername, text) {
   unread[to][cid] = (unread[to][cid] || 0) + 1;
   saveUnread(unread);
 
+  if (!isSystem) playSendSnd();
   return true;
 };
 
@@ -188,6 +212,10 @@ window.updateMsgBadge = function() {
   const pending  = getMyPendingRequests().length;
   const unreadN  = getTotalUnread();
   const total    = pending + unreadN;
+
+  if (_lastTotalUnread !== -1 && unreadN > _lastTotalUnread) playRecvSnd();
+  _lastTotalUnread = unreadN;
+
   const badge    = document.getElementById('navMsgBadge');
   const topBadge = document.getElementById('notifBadge');
   [badge, topBadge].forEach(b => {
@@ -425,6 +453,16 @@ function renderChatView(page, me, otherUsername) {
 function renderMsgBubble(msg, myKey) {
   const isMe   = msg.from === myKey;
   const time   = formatMsgTime(msg.ts);
+
+  if (msg.isSystem) {
+    return `
+      <div class="msg-bubble-row" style="justify-content:center;margin:10px 0;">
+        <div style="background:rgba(255,255,255,0.05);padding:6px 16px;border-radius:20px;border:1px dashed rgba(0,200,255,0.3);font-size:12px;color:rgba(255,255,255,0.6);font-family:Rajdhani,sans-serif;">
+          ${escMsgHtml(msg.text)}
+        </div>
+      </div>`;
+  }
+
   return `
     <div class="msg-bubble-row ${isMe ? 'msg-bubble-row-me' : 'msg-bubble-row-other'}">
       <div class="msg-bubble ${isMe ? 'msg-bubble-me' : 'msg-bubble-other'}">

@@ -295,7 +295,10 @@ window.pvToggleFollow = function(username) {
 };
 
 window.pvSendRequest = function(username) {
-  if (typeof sendFriendRequest === 'function') sendFriendRequest(username);
+  if (typeof sendFriendRequest === 'function') {
+    sendFriendRequest(username);
+    /* Notificarea este trimisă automat din sendFriendRequest în messages.js */
+  }
   const btn = document.getElementById('pvFriendBtn');
   if (btn) {
     btn.className  = 'pv-action-btn pv-btn-pending';

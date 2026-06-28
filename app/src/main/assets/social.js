@@ -31,13 +31,21 @@ function hashStr(s) {
 }
 
 function getUsers()       { try { return JSON.parse(localStorage.getItem(SK.users) || '{}'); } catch { return {}; } }
+window.getUsers = getUsers;
 function saveUsers(u)     { localStorage.setItem(SK.users, JSON.stringify(u)); }
+window.saveUsers = saveUsers;
 function getCurrentUser() { try { return JSON.parse(localStorage.getItem(SK.user) || 'null'); } catch { return null; } }
+window.getCurrentUser = getCurrentUser;
 function saveCurrentUser(u){ localStorage.setItem(SK.user, JSON.stringify(u)); }
+window.saveCurrentUser = saveCurrentUser;
 function getPosts()       { try { return JSON.parse(localStorage.getItem(SK.posts) || '[]'); } catch { return []; } }
+window.getPosts = getPosts;
 function savePosts(p)     { localStorage.setItem(SK.posts, JSON.stringify(p)); }
+window.savePosts = savePosts;
 function getFollows()     { try { return JSON.parse(localStorage.getItem(SK.follows) || '{}'); } catch { return {}; } }
+window.getFollows = getFollows;
 function saveFollows(f)   { localStorage.setItem(SK.follows, JSON.stringify(f)); }
+window.saveFollows = saveFollows;
 
 /* ═══════════════════════════════════════════════════════════════
    MODUL AUTH
@@ -906,26 +914,27 @@ function socRenderPost(p, currentUser, myFollows) {
   const avDisplay = renderAvatarContent(author?.avatar);
   const isOwn  = currentUser && currentUser.username.toLowerCase() === p.author?.toLowerCase();
   const authorFollowed = myFollows?.includes(p.author?.toLowerCase());
+  const amIFriend = typeof window.isFriend === 'function' ? window.isFriend(p.author) : false;
   const dateStr = new Date(p.postedAt).toLocaleDateString('ro-RO', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
 
   return `
-    <div class="soc-post-card">
+    <div class="soc-post-card" onclick="if(typeof viewUserProfile==='function') viewUserProfile('${p.author}')">
       <div class="soc-post-header">
-        <div class="soc-post-avatar">${avDisplay}</div>
+        <div class="soc-post-avatar" data-user="${p.author}">${avDisplay}</div>
         <div class="soc-post-meta">
-          <div class="soc-post-author">@${p.author || 'anonim'}</div>
+          <div class="soc-post-author" onclick="event.stopPropagation(); viewUserProfile('${p.author}')">@${p.author || 'anonim'}</div>
           <div class="soc-post-date">${dateStr}</div>
         </div>
         <div class="soc-post-status" style="color:${statusColor}">${statusLabel}</div>
         ${!isOwn && currentUser ? `
-          <div class="soc-user-actions" style="gap:5px;">
+          <div class="soc-user-actions" onclick="event.stopPropagation()" style="gap:5px;">
             <button class="soc-follow-btn ${authorFollowed ? 'following' : ''}"
                     onclick="socToggleFollow('${p.author}',this)">
               ${authorFollowed ? '✓' : '+ Follow'}
             </button>
             <button class="soc-msg-btn" style="padding:6px 10px;"
-                    onclick="event.stopPropagation();socMsgOrAdd('${p.author}',${authorFollowed})">
-              <i class="fa-solid fa-${authorFollowed ? 'comment' : 'user-plus'}"></i>
+                    onclick="socMsgOrAdd('${p.author}',${amIFriend})">
+              <i class="fa-solid fa-${amIFriend ? 'comment' : 'user-plus'}"></i>
             </button>
           </div>` : ''}
       </div>
@@ -965,12 +974,19 @@ window.socToggleFollow = function(authorUsername, btn) {
   if (!authKey) return;
   if (!follows[myKey]) follows[myKey] = [];
   const idx = follows[myKey].indexOf(authKey);
+
   if (idx >= 0) {
     follows[myKey].splice(idx, 1);
-    if (btn) { btn.textContent = '+ Urmărește'; btn.classList.remove('following'); }
+    if (btn) { btn.textContent = '+ Follow'; btn.classList.remove('following'); }
   } else {
     follows[myKey].push(authKey);
     if (btn) { btn.textContent = 'Urmărești'; btn.classList.add('following'); }
+
+    /* Notificare în mesagerie pentru cel urmărit */
+    if (typeof sendMessage === 'function') {
+       const msg = `🚀 @${user.username} a început să îți urmărească activitatea!`;
+       sendMessage(authorUsername, msg, true); // true = system notification
+    }
   }
   saveFollows(follows);
 };

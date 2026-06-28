@@ -100,6 +100,10 @@ window.respondFriendRequest = function(fromUsername, accept) {
     reqs[myKey].splice(idx, 1); // Eliminăm cererea dacă e refuzată
   }
   saveFriendReqs(reqs);
+
+  /* Curățăm și notificarea de chat (mesajul de sistem) pentru această persoană */
+  markConversationRead(fromUsername);
+
   buildMessagesPage(true);
   updateMsgBadge();
 
@@ -190,7 +194,8 @@ function markConversationRead(otherUsername) {
   const cid   = convId(myKey, targetKey);
   const unread = getUnread();
 
-  if (unread[myKey] && unread[myKey][cid]) {
+  /* Ștergem intrarea de necitite pentru această conversație */
+  if (unread[myKey]) {
     delete unread[myKey][cid];
     saveUnread(unread);
   }
@@ -212,30 +217,51 @@ function markConversationRead(otherUsername) {
   updateMsgBadge();
 }
 
-/* Polling pentru mesaje noi în conversația activă (Face citirea instantă) */
-setInterval(() => {
-  if (_activeConv) {
-    const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    if (me) {
-      const myKey = me.username.toLowerCase();
-      const cid = convId(myKey, _activeConv.toLowerCase());
-      const unread = getUnread();
-      if (unread[myKey] && unread[myKey][cid]) {
-         markConversationRead(_activeConv);
-         const page = document.getElementById('messages-panel-content') || document.getElementById('page-messages');
-         if (page) renderChatView(page, me, _activeConv);
-      }
-    }
-  }
-}, 1500);
+/* Marchează TOATE conversațiile ca citite */
+window.markAllMsgsRead = function() {
+  const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (!me) return;
+  const myKey = me.username.toLowerCase();
 
-/* Numără necitiți total */
+  /* Ștergem toate notificările de mesaje */
+  const unread = getUnread();
+  if (unread[myKey]) {
+    unread[myKey] = {};
+    saveUnread(unread);
+  }
+
+  /* Opțional: marcare mesaje individuale în DB (poate fi lent pe DB mari, dar e corect) */
+  const msgs = getMessages();
+  let changed = false;
+  Object.keys(msgs).forEach(cid => {
+    if (cid.includes(myKey)) {
+      msgs[cid].forEach(m => {
+        if (m.to === myKey && !m.read) {
+          m.read = true;
+          changed = true;
+        }
+      });
+    }
+  });
+  if (changed) saveMessages(msgs);
+
+  showMsgToast('Toate mesajele au fost marcate ca citite.', 'success');
+  buildMessagesPage(true);
+  updateMsgBadge();
+};
+
+/* Numără necitiți total - robust */
 function getTotalUnread() {
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   if (!me) return 0;
   const unread = getUnread();
   const myUnread = unread[me.username.toLowerCase()] || {};
-  return Object.values(myUnread).reduce((s, v) => s + v, 0);
+  let total = 0;
+  for (const cid in myUnread) {
+    const count = parseInt(myUnread[cid]);
+    if (!isNaN(count) && count > 0) total += count;
+  }
+  return total;
 }
 
 /* Update badge nav */
@@ -250,15 +276,12 @@ window.updateMsgBadge = function() {
   const badge    = document.getElementById('navMsgBadge');
   const topBadge = document.getElementById('notifBadge');
 
-  // Actualizăm ambele badge-uri
+  // Actualizăm ambele badge-uri (cel din nav bar și cel de sus de lângă iconița de mesaje)
   [badge, topBadge].forEach(b => {
     if (!b) return;
     if (total > 0) {
       b.textContent = total > 99 ? '99+' : total;
       b.style.display = 'flex';
-      // Efect vizual de actualizare
-      b.style.transform = 'scale(1.2)';
-      setTimeout(() => { b.style.transform = 'scale(1)'; }, 200);
     } else {
       b.style.display = 'none';
     }
@@ -318,19 +341,31 @@ const renderAvatarContent = (av) => {
 /* ── INBOX ── */
 function renderInboxView(page, me) {
   const pending = getMyPendingRequests();
-  const myFriends = getMyFriends();
   const users   = typeof getUsers === 'function' ? getUsers() : {};
   const msgs    = getMessages();
   const unread  = getUnread();
-  const myUnread = unread[me.username.toLowerCase()] || {};
+  const myKey   = me.username.toLowerCase();
+  const myUnread = unread[myKey] || {};
 
-  /* Construim lista conversații cu ultimul mesaj */
-  const convList = myFriends.map(friendKey => {
-    const cid  = convId(me.username.toLowerCase(), friendKey);
+  /* Identificăm TOATE conversațiile active (nu doar prietenii)
+     pentru a nu avea mesaje "fantomă" de la non-prieteni. */
+  const activeCids = new Set();
+
+  // Din mesaje
+  Object.keys(msgs).forEach(cid => {
+    if (cid.includes(myKey)) activeCids.add(cid);
+  });
+
+  // Din necitite (importante pentru badge)
+  Object.keys(myUnread).forEach(cid => activeCids.add(cid));
+
+  const convList = Array.from(activeCids).map(cid => {
+    const parts = cid.split('::');
+    const otherUsername = parts[0] === myKey ? parts[1] : parts[0];
     const msgs_ = msgs[cid] || [];
     const last  = msgs_[msgs_.length - 1] || null;
     const unreadCount = myUnread[cid] || 0;
-    return { username: friendKey, last, unreadCount, ts: last?.ts || 0 };
+    return { username: otherUsername, last, unreadCount, ts: last?.ts || 0 };
   }).sort((a, b) => b.ts - a.ts);
 
   page.innerHTML = `
@@ -379,6 +414,7 @@ function renderInboxView(page, me) {
         <i class="fa-solid fa-inbox"></i>
         CONVERSAȚII
         ${convList.length === 0 ? '' : `<span class="msg-badge-pill">${convList.length}</span>`}
+        <button onclick="markAllMsgsRead()" style="margin-left:auto; background:none; border:none; color:var(--nb); font-size:10px; font-family:Syncopate; cursor:pointer; padding:4px;">MARCHEAZĂ TOT CITIT</button>
       </div>
       ${convList.length === 0 ? `
         <div class="msg-empty">
@@ -557,10 +593,6 @@ window.msgSendCurrent = function() {
   const ok = sendMessage(_activeConv, text);
   if (!ok) return;
   if (inp) inp.value = '';
-
-  /* Update badge imediat după ce trimitem un mesaj (în caz că suntem noi destinatarul în simulare) */
-  updateMsgBadge();
-
   /* Adaugă bubble fără rebuild complet */
   const list = document.getElementById('msgChatList');
   const me   = typeof getCurrentUser === 'function' ? getCurrentUser() : null;

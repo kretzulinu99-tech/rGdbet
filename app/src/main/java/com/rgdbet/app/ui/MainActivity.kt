@@ -109,6 +109,7 @@ class MainActivity : AppCompatActivity() {
                     const existingUser = JSON.parse(localStorage.getItem('rgb_user') || '{}');
                     const user = {
                         username: "$username",
+                        displayName: existingUser.displayName || "$username",
                         email: "$email",
                         passwordHash: "firebase_auth",
                         createdAt: "${System.currentTimeMillis()}",

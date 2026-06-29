@@ -841,6 +841,9 @@ window.buildSocialPage = function() {
       <button class="soc-tab active" id="soc-tab-feed"   onclick="socSwitchTab('feed')">
         <i class="fa-solid fa-fire"></i> FEED
       </button>
+      <button class="soc-tab" id="soc-tab-rank"   onclick="socSwitchTab('rank')">
+        <i class="fa-solid fa-trophy"></i> RANK
+      </button>
       <button class="soc-tab" id="soc-tab-search" onclick="socSwitchTab('search')">
         <i class="fa-solid fa-magnifying-glass"></i> CAUTĂ
       </button>
@@ -852,6 +855,11 @@ window.buildSocialPage = function() {
     <!-- Panel Feed -->
     <div id="soc-panel-feed" class="soc-panel active">
       <div id="soc-feed-list"></div>
+    </div>
+
+    <!-- Panel Clasament (NEW ELITE FEATURE) -->
+    <div id="soc-panel-rank" class="soc-panel">
+      <div id="soc-rank-list"></div>
     </div>
 
     <!-- Panel Căutare / Follow -->
@@ -898,9 +906,74 @@ function socSwitchTab(tab) {
   document.querySelectorAll('.soc-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.soc-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('soc-tab-' + tab)?.classList.add('active');
+  document.getElementById('panel-' + tab)?.classList.add('active'); // legacy support
   document.getElementById('soc-panel-' + tab)?.classList.add('active');
   if (tab === 'feed')   socRenderFeed();
   if (tab === 'my')     socRenderMyPosts();
+  if (tab === 'rank')   socRenderLeaderboard();
+}
+
+/* ── Render Leaderboard ── */
+function socRenderLeaderboard() {
+  const list = document.getElementById('soc-rank-list');
+  if (!list) return;
+
+  const users = getUsers();
+  const allPosts = getPosts();
+
+  // Calculăm statisticile pentru fiecare utilizator care a postat minim 3 bilete (pentru relevanță)
+  const rankings = Object.values(users).map(u => {
+    const userPosts = allPosts.filter(p => p.author?.toLowerCase() === u.username.toLowerCase());
+    const settled = userPosts.filter(p => p.status === 'win' || p.status === 'loss');
+    const wins = settled.filter(p => p.status === 'win').length;
+    const wr = settled.length >= 3 ? Math.round((wins / settled.length) * 100) : 0;
+
+    return {
+      username: u.username,
+      avatar: u.avatar,
+      total: settled.length,
+      wins: wins,
+      wr: wr,
+      score: wr * settled.length // Algoritm de ranking: Rata de castig x Volumul de meciuri
+    };
+  }).filter(r => r.total >= 3) // Doar cei cu minim 3 bilete
+    .sort((a, b) => b.score - a.score);
+
+  if (!rankings.length) {
+    list.innerHTML = `<div class="soc-empty"><div style="font-family:Rajdhani,sans-serif;color:rgba(255,255,255,.4);">Clasamentul se va genera după ce utilizatorii postează minim 3 bilete.</div></div>`;
+    return;
+  }
+
+  list.innerHTML = `
+    <div style="padding: 10px 16px; font-family: 'Syncopate', sans-serif; font-size: 8px; color: var(--nb); letter-spacing: 2px; text-align: center; margin-bottom: 10px;">
+      ELITE RANKINGS (WIN RATE X VOLUME)
+    </div>
+    ${rankings.map((r, index) => `
+      <div class="soc-user-card" onclick="viewUserProfile('${r.username}')" style="border-left: 3px solid ${index === 0 ? 'var(--gold)' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'transparent'};">
+        <div style="font-family: 'Syncopate', sans-serif; font-size: 14px; font-weight: 700; width: 24px; color: ${index < 3 ? 'var(--gold)' : 'var(--text3)'}; text-align: center;">
+          ${index + 1}
+        </div>
+        <div class="soc-post-avatar">${renderAvatarContent(r.avatar)}</div>
+        <div style="flex:1;">
+          <div class="soc-post-author" style="font-size:15px; color:#fff;">@${r.username}</div>
+          <div class="soc-post-date">${r.total} bilete • <span style="color:var(--ng); font-weight:700;">${r.wr}% Win Rate</span></div>
+        </div>
+        <div style="text-align: right;">
+           <i class="fa-solid fa-bolt" style="color:var(--nb); font-size:10px;"></i>
+           <div style="font-family:Syncopate; font-size:9px; color:var(--text3);">${Math.round(r.score)} pt</div>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+// Helper local pentru leaderboard daca cel global nu e disponibil
+function renderAvatarContent(av) {
+  if (!av || av === 'default' || av === '👤') return '👤';
+  if (av.startsWith('data:') || av.startsWith('http')) {
+    return `<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+  }
+  return av;
 }
 
 /* ── Render feed ── */

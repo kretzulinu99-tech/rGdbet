@@ -77,19 +77,87 @@
         --ng:#00ff88;
         --nb:#00c8ff;
         --np:#bf5fff; --gold:#ffcc00; --danger:#ff3366;
-        --bg:#080b10; --bg2:#0d1117; --card:rgba(10,15,24,0.75); --border:rgba(255,255,255,0.15);
-        --text:#fff; --text2:#aabbcc; --text3:#ffffff; --shadow:0 8px 32px rgba(0,0,0,0.6);
+        --bg:#06090f; --bg2:#0a1118; --card:rgba(15, 23, 42, 0.45); --border:rgba(255,255,255,0.08);
+        --text:#f8fafc; --text2:#94a3b8; --text3:#cbd5e1; --shadow:0 12px 40px rgba(0,0,0,0.7);
+        --accent-glow: 0 0 20px rgba(0, 200, 255, 0.3);
       }
 
-      *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
-      input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;}
-      input[type=number]{-moz-appearance:textfield;}
-
-      body{
-        min-height:100vh;
-        color:var(--text); font-family:'Rajdhani',sans-serif;
-        overflow-x:hidden; position:relative;
+      /* ── Typography Elitistă ── */
+      body {
+        min-height: 100vh;
+        color: var(--text);
+        font-family: 'Rajdhani', sans-serif;
+        overflow-x: hidden;
+        position: relative;
         background-color: var(--bg, #06090f) !important;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        letter-spacing: 0.02em;
+      }
+
+      h1, h2, h3, .logo-text, .nav-label, .sec-title, .stat-label {
+        font-family: 'Syncopate', sans-serif;
+        letter-spacing: 0.15em !important;
+        text-transform: uppercase;
+      }
+
+      /* ── Neural Grid Background (Animat) ── */
+      @keyframes neuralFlow {
+        from { background-position: 0 0; }
+        to { background-position: 40px 40px; }
+      }
+
+      @keyframes neuralPulse {
+        0%, 100% { opacity: 0.2; }
+        50% { opacity: 0.5; }
+      }
+
+      .bg-overlay::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+          radial-gradient(circle at 2px 2px, rgba(0, 200, 255, 0.05) 1px, transparent 0);
+        background-size: 40px 40px;
+        z-index: -1;
+        animation: neuralFlow 20s linear infinite, neuralPulse 4s ease-in-out infinite;
+      }
+
+      /* ── Glassmorphism 3.0: Reflexii Adaptive ── */
+      .stat-card, .form-card, .bankroll-health-card, .target-card, .chart-wrap, .bet-item, .soc-post-card, .lab-card, .profile-stat-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 24px !important;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow), inset 0 1px 1px rgba(255,255,255,0.05) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      }
+
+      /* Efectul de strălucire pe margine (Reflexie) */
+      .stat-card::after, .form-card::after, .target-card::after, .bet-item::after {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: radial-gradient(circle at center, rgba(0,200,255,0.08) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .stat-card:hover::after, .form-card:hover::after, .target-card:hover::after, .bet-item:hover::after {
+        opacity: 1;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-4px) scale(1.01);
+        border-color: rgba(0, 200, 255, 0.4) !important;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 20px rgba(0, 200, 255, 0.1) !important;
       }
 
       /* ═══ IMAGINE DE FUNDAL rGdbet (DATA ANALYST) ═══ */

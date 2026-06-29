@@ -89,6 +89,29 @@ function scheduleRender() {
         return translations['en'][key] || key;
       }
 
+      /* ── 3D TILT EFFECT FOR HOLOGRAPHIC CARDS ── */
+      document.addEventListener('mousemove', (e) => {
+        if (!document.body.classList.contains('theme-holographic')) return;
+
+        const cards = document.querySelectorAll('.stat-card, .form-card');
+        cards.forEach(card => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          if (x > 0 && x < rect.width && y > 0 && y < rect.height) {
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = (y - centerY) / 10;
+            const rotateY = (centerX - x) / 10;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+          } else {
+            card.style.transform = '';
+          }
+        });
+      });
+
       function applyTranslations() {
         document.querySelectorAll('[data-i18n]').forEach(el => {
           const key = el.getAttribute('data-i18n');

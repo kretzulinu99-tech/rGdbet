@@ -5252,16 +5252,138 @@ body.page-profile-active .top-bar {
 .top-bar-right {
   display: flex; align-items: center; gap: 10px;
 }
-.top-notif-btn {
-  position: relative;
-  width: 36px; height: 36px; border-radius: 50%;
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.1);
-  color: rgba(255,255,255,.6);
-  font-size: 16px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all .2s ease;
-}
+      .top-notif-btn {
+        position: relative;
+        width: 36px; height: 36px; border-radius: 50%;
+        background: rgba(255,255,255,.07);
+        border: 1px solid rgba(255,255,255,.1);
+        color: rgba(255,255,255,.6);
+        font-size: 16px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: all .2s ease;
+      }
+
+      .top-badges-btn {
+        position: relative;
+        width: 36px; height: 36px; border-radius: 50%;
+        background: rgba(255, 204, 0, 0.1);
+        border: 1px solid rgba(255, 204, 0, 0.3);
+        color: var(--gold);
+        font-size: 16px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 10px rgba(255, 204, 0, 0.1);
+      }
+
+      .top-badges-btn:hover {
+        transform: scale(1.1) rotate(5deg);
+        background: rgba(255, 204, 0, 0.2);
+        box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
+        border-color: var(--gold);
+      }
+
+      /* ── Badges Modal & Grid ── */
+      .badges-modal-box {
+        background: #060910 !important;
+        border: 1px solid rgba(255, 204, 0, 0.3) !important;
+        max-width: 450px !important;
+      }
+
+      .badges-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        padding: 10px 0;
+      }
+
+      .badge-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 16px 12px;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .badge-card.locked {
+        filter: grayscale(1) opacity(0.5);
+      }
+
+      .badge-card.unlocked {
+        background: linear-gradient(135deg, rgba(255, 204, 0, 0.08), rgba(0, 0, 0, 0.2));
+        border-color: rgba(255, 204, 0, 0.4);
+        filter: none;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+
+      .badge-icon-wrap {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+      }
+
+      .badge-icon {
+        z-index: 2;
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .badge-card:hover .badge-icon {
+        transform: scale(1.2) rotate(10deg);
+      }
+
+      .badge-lock {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        background: #111;
+        color: #fff;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        border: 1px solid rgba(255,255,255,0.2);
+        z-index: 3;
+      }
+
+      .badge-name {
+        font-family: 'Syncopate', sans-serif;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+      }
+
+      .badge-progress-container {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 2px;
+        margin-bottom: 6px;
+        overflow: hidden;
+      }
+
+      .badge-progress-bar {
+        height: 100%;
+        width: 0;
+        transition: width 1s ease-out;
+      }
+
+      .badge-progress-text {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 11px;
+        color: var(--text2);
+        font-weight: 700;
+      }
 .top-notif-btn:hover {
   border-color: rgba(0,200,255,.4);
   color: var(--nb, #00c8ff);

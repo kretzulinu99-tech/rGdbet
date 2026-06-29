@@ -1277,7 +1277,7 @@ function scheduleRender() {
           }
 
           container.innerHTML += `
-            <div class="bet-item scroll-animate ${statusClass}" style="${borderStyle}">
+            <div class="bet-item scroll-animate ${statusClass} bet-status-${b.status}" style="${borderStyle}">
               <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
                   <div class="bet-match">${b.name} ${statusSymbol} <span class="header-odds">@${b.odds.toFixed(2)}</span></div>

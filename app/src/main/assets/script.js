@@ -89,6 +89,34 @@ function scheduleRender() {
         return translations['en'][key] || key;
       }
 
+      /* ── AI PRO ANALYST LOGIC ── */
+      window.generateAIReport = function() {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-sync fa-spin"></i> CALCULARE PROBABILITĂȚI...';
+
+        const stats = calcUserStats(); // din social.js sau local
+        const insightText = document.getElementById('ai-insight-text');
+
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+
+          let advice = "";
+          if (stats.wr > 60) advice = "Performanță de elită. Recomandăm creșterea mizei prin criteriul Kelly fracționar.";
+          else if (stats.wr > 45) advice = "Ești pe drumul cel bun. Analizează mai atent cotele între 1.80 și 2.10.";
+          else advice = "Risc ridicat detectat. Încearcă să reduci numărul de evenimente pe bilet pentru stabilitate.";
+
+          insightText.innerHTML = `
+            <div style="color:var(--np); font-weight:700; margin-bottom:8px;">RAPORT AI ELITE FINALIZAT:</div>
+            ${advice}<br><br>
+            <div style="font-size:12px; opacity:0.7;">*Analiză bazată pe ultimele ${stats.total} bilete.</div>
+          `;
+          showMsgToast("Raport AI generat cu succes!", "success");
+        }, 2000);
+      };
+
       function applyTranslations() {
         document.querySelectorAll('[data-i18n]').forEach(el => {
           const key = el.getAttribute('data-i18n');

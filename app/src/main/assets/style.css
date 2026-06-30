@@ -5261,6 +5261,7 @@ body.page-profile-active .top-bar {
         font-size: 16px; cursor: pointer;
         display: flex; align-items: center; justify-content: center;
         transition: all .2s ease;
+        z-index: 1001;
       }
 
       .top-badges-btn {
@@ -5273,6 +5274,7 @@ body.page-profile-active .top-bar {
         display: flex; align-items: center; justify-content: center;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 0 10px rgba(255, 204, 0, 0.1);
+        z-index: 1001;
       }
 
       .top-badges-btn:hover {

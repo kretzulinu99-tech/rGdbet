@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
-   badges.js — Sistem Gamificare (Realizări & Insigne)
-   rGdbet ELITE v4.0 — 30+ Achievements Edition
+   badges.js — Sistem Gamificare (Realizări)
+   rGdbet ELITE v4.0 — 30+ Achievements Edition (Optimized)
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -58,13 +58,20 @@ const BADGES_CONFIG = [
 window.openBadgesModal = function() {
   const modal = document.getElementById('badges-modal');
   if (!modal) return;
-  renderBadgesGrid();
-  modal.style.display = 'flex';
+
+  try {
+    renderBadgesGrid();
+    modal.style.display = 'flex';
+  } catch (err) {
+    console.error("Achievement Error:", err);
+    if (typeof showMsgToast === 'function') showMsgToast("Eroare la încărcarea realizărilor.", "error");
+  }
 };
 
 function getUnlockedBadges() {
-  try { return JSON.parse(localStorage.getItem(BADGE_STORAGE_KEY) || '[]'); }
-  catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(BADGE_STORAGE_KEY) || '[]');
+  } catch { return []; }
 }
 
 function saveUnlockedBadge(id) {
@@ -79,13 +86,15 @@ function saveUnlockedBadge(id) {
 function renderBadgesGrid() {
   const grid = document.getElementById('badges-grid');
   if (!grid) return;
+
   const stats = getExtendedStats();
   const unlocked = getUnlockedBadges();
 
   grid.innerHTML = BADGES_CONFIG.map(badge => {
-    const currentProgress = badge.check(stats);
+    const currentProgress = badge.check(stats) || 0;
     const isUnlocked = currentProgress >= badge.goal;
     const progressPct = Math.min(100, Math.round((currentProgress / badge.goal) * 100));
+
     if (isUnlocked && !unlocked.includes(badge.id)) saveUnlockedBadge(badge.id);
 
     return `
@@ -109,90 +118,119 @@ function renderBadgesGrid() {
 
 function getExtendedStats() {
   let bets = [];
-  try { bets = JSON.parse(localStorage.getItem('rgb_bets') || '[]'); } catch {}
+  try {
+    bets = JSON.parse(localStorage.getItem('rgb_bets') || '[]');
+    if (!Array.isArray(bets)) bets = [];
+  } catch { bets = []; }
 
-  let currentStreak = 0, maxStreak = 0, totalWon = 0, maxOdds = 0, netProfit = 0, totalStaked = 0;
-  let winHT = 0, winGoals = 0, winCorners = 0, winCards = 0, winFootball = 0, winTennis = 0, winBasketball = 0, winOther = 0;
-  let currentLossStreak = 0, comebacks = 0, maxCombo = 0, totalEventsPlaced = 0, totalEventsWon = 0;
+  const s = {
+    total: bets.length, maxWinStreak: 0, totalWonAmount: 0, maxSingleOdds: 0, netProfit: 0, totalStaked: 0,
+    winHT: 0, winGoals: 0, winCorners: 0, winCards: 0, winFootball: 0, winTennis: 0, winBasketball: 0, winOther: 0,
+    comebacks: 0, maxComboSize: 0, totalEventsPlaced: 0, totalEventsWon: 0,
+    dailyWinStreak: 0, sportsDiversified: 0, daysActive: 0, followingCount: 0, postsCount: 0
+  };
+
+  let currentStreak = 0, currentLossStreak = 0;
   const winDates = new Set(), winSports = new Set(), activeDays = new Set();
 
   bets.forEach(b => {
+    if (!b) return;
     const eCount = (b.events && b.events.length) || 1;
-    totalEventsPlaced += eCount;
-    totalStaked += (parseFloat(b.stake) || 0);
-    if (b.date) activeDays.add(new Date(b.date).toDateString());
+    s.totalEventsPlaced += eCount;
+    s.totalStaked += (parseFloat(b.stake) || 0);
+
+    if (b.date) {
+      const dStr = new Date(b.date).toDateString();
+      if (dStr !== "Invalid Date") activeDays.add(dStr);
+    }
 
     if (b.status === 'win') {
-      totalEventsWon += eCount;
+      s.totalEventsWon += eCount;
       currentStreak++;
-      if (currentStreak > maxStreak) maxStreak = currentStreak;
-      totalWon += (b.stake * b.odds);
-      netProfit += (b.stake * (b.odds - 1));
-      if (b.odds > maxOdds) maxOdds = b.odds;
-      if (eCount > maxCombo) maxCombo = eCount;
-      if (currentLossStreak >= 3) comebacks++;
+      if (currentStreak > s.maxWinStreak) s.maxWinStreak = currentStreak;
+
+      const won = (parseFloat(b.stake) || 0) * (parseFloat(b.odds) || 1);
+      s.totalWonAmount += won;
+      s.netProfit += (won - (parseFloat(b.stake) || 0));
+
+      if (b.odds > s.maxSingleOdds) s.maxSingleOdds = b.odds;
+      if (eCount > s.maxComboSize) s.maxComboSize = eCount;
+
+      if (currentLossStreak >= 3) s.comebacks++;
       currentLossStreak = 0;
-      if (b.date) winDates.add(new Date(b.date).toDateString());
-      winSports.add(b.sport);
 
-      if (b.sport === 'football') winFootball++;
-      if (b.sport === 'tennis') winTennis++;
-      if (b.sport === 'basketball') winBasketball++;
-      if (b.sport === 'other') winOther++;
+      if (b.date) {
+        const dStr = new Date(b.date).toDateString();
+        if (dStr !== "Invalid Date") winDates.add(dStr);
+      }
+      if (b.sport) winSports.add(b.sport);
 
-      const type = (b.type || '').toLowerCase();
-      if (type.includes('goluri-1p')) winHT++;
-      else if (type.includes('goluri')) winGoals++;
-      if (type.includes('cornere')) winCorners++;
-      if (type.includes('cartonase')) winCards++;
+      if (b.sport === 'football') s.winFootball++;
+      if (b.sport === 'tennis') s.winTennis++;
+      if (b.sport === 'basketball') s.winBasketball++;
+      if (b.sport === 'other') s.winOther++;
+
+      const type = String(b.type || '').toLowerCase();
+      if (type.includes('goluri-1p')) s.winHT++;
+      else if (type.includes('goluri')) s.winGoals++;
+      if (type.includes('cornere')) s.winCorners++;
+      if (type.includes('cartonase')) s.winCards++;
     } else if (b.status === 'loss') {
       currentStreak = 0;
       currentLossStreak++;
-      netProfit -= b.stake;
+      s.netProfit -= (parseFloat(b.stake) || 0);
     }
   });
 
-  let dailyWinStreak = 0;
+  // Daily win streak
   if (winDates.size > 0) {
     const sorted = Array.from(winDates).map(d => new Date(d).getTime()).sort((a, b) => b - a);
     let temp = 1;
     for (let i = 0; i < sorted.length - 1; i++) {
-      if ((sorted[i] - sorted[i+1]) / 86400000 === 1) {
-        temp++; if (temp > dailyWinStreak) dailyWinStreak = temp;
+      if (Math.round((sorted[i] - sorted[i+1]) / 86400000) === 1) {
+        temp++; if (temp > s.dailyWinStreak) s.dailyWinStreak = temp;
       } else temp = 1;
     }
-    if (temp > dailyWinStreak) dailyWinStreak = temp;
+    if (temp > s.dailyWinStreak) s.dailyWinStreak = temp;
   }
 
-  let following = 0, postsCount = 0;
+  s.sportsDiversified = winSports.size;
+  s.daysActive = activeDays.size;
+
   try {
-    const me = JSON.parse(localStorage.getItem('rgb_user') || '{}');
-    const fMap = JSON.parse(localStorage.getItem('rgb_follows') || '{}');
-    following = (fMap[me.username?.toLowerCase()] || []).length;
-    const allPosts = JSON.parse(localStorage.getItem('rgb_social_feed') || '[]');
-    postsCount = allPosts.filter(p => p.author?.toLowerCase() === me.username?.toLowerCase()).length;
+    const meStr = localStorage.getItem('rgb_user');
+    const me = meStr ? JSON.parse(meStr) : {};
+    const fMapStr = localStorage.getItem('rgb_follows');
+    const fMap = fMapStr ? JSON.parse(fMapStr) : {};
+    if (me.username) {
+      s.followingCount = (fMap[me.username.toLowerCase()] || []).length;
+    }
+    const allPostsStr = localStorage.getItem('rgb_social_feed');
+    const allPosts = allPostsStr ? JSON.parse(allPostsStr) : [];
+    if (me.username) {
+      s.postsCount = allPosts.filter(p => p && p.author && p.author.toLowerCase() === me.username.toLowerCase()).length;
+    }
   } catch {}
 
-  return {
-    total: bets.length, maxWinStreak, totalWonAmount: totalWon, maxSingleOdds: maxOdds,
-    winHT, winGoals, winCorners, winCards, winFootball, winTennis, winBasketball, winOther,
-    comebacks, maxComboSize: maxCombo, netProfit, totalEventsPlaced, totalEventsWon,
-    totalStaked, dailyWinStreak, sportsDiversified: winSports.size, daysActive: activeDays.size,
-    followingCount: following, postsCount
-  };
+  return s;
 }
 
 function showBadgeDetail(id) {
   const b = BADGES_CONFIG.find(x => x.id === id);
   if (!b) return;
   const isUnlocked = getUnlockedBadges().includes(id);
-  showMsgToast(`${b.name}: ${b.desc}${isUnlocked ? ' 🎉' : ''}`, isUnlocked ? 'success' : 'info');
+  if (typeof showMsgToast === 'function') {
+    showMsgToast(`${b.name}: ${b.desc}${isUnlocked ? ' 🎉' : ''}`, isUnlocked ? 'success' : 'info');
+  }
 }
 
 function showBadgeUnlockCelebration(id) {
   const b = BADGES_CONFIG.find(x => x.id === id);
+  if (!b) return;
   if (typeof confetti === 'function') {
     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: [b.color, '#fff', '#ffcc00'] });
   }
-  showMsgToast(`FELICITĂRI! Ai deblocat insigna: ${b.name} 🏆`, 'success');
+  if (typeof showMsgToast === 'function') {
+    showMsgToast(`FELICITĂRI! Ai deblocat insigna: ${b.name} 🏆`, 'success');
+  }
 }

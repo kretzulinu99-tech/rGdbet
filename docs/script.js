@@ -134,6 +134,56 @@ function scheduleRender() {
         });
       }, { passive: true });
 
+      /* ── OCR SCANNING LOGIC ── */
+      window.startOCRScan = function() {
+        if (window.Android && typeof window.Android.startOCRScan === 'function') {
+          window.Android.startOCRScan();
+        } else {
+          showMsgToast("Funcția de scanare este disponibilă doar în aplicația Android.", "info");
+          // Simulăm pentru browser/web preview
+          setTimeout(() => {
+            window.onOCRResult({
+              stake: 50,
+              totalWon: 450,
+              events: [
+                { name: "Real Madrid vs Barcelona", odds: 1.95 },
+                { name: "Manchester City vs Arsenal", odds: 2.10 }
+              ]
+            });
+          }, 1500);
+        }
+      };
+
+      window.onOCRResult = function(data) {
+        if (!data) return;
+        showMsgToast("Bilet scanat cu succes! Se procesează...", "success");
+
+        // Resetăm evenimentele curente
+        ticketEvents = [];
+
+        // Adăugăm evenimentele detectate
+        if (data.events && data.events.length > 0) {
+          data.events.forEach(ev => {
+            ticketEvents.push({
+              id: Date.now() + Math.random(),
+              name: ev.name,
+              odds: parseFloat(ev.odds) || 1.85
+            });
+          });
+        }
+
+        // Completăm restul câmpurilor
+        const stakeInp = document.getElementById('stake');
+        if (stakeInp) stakeInp.value = data.stake || "";
+
+        const matchInp = document.getElementById('match');
+        if (matchInp) matchInp.value = "Bilet Scanat " + new Date().toLocaleDateString();
+
+        updateTicketEventsList();
+        updateRiskMeter();
+        showMsgToast("Datele au fost extrase automat.", "info");
+      };
+
       function applyTranslations() {
         document.querySelectorAll('[data-i18n]').forEach(el => {
           const key = el.getAttribute('data-i18n');

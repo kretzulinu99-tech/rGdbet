@@ -247,7 +247,12 @@
   <div id="page-addbet" class="spa-page">
     <div class="page-top-title"><i class="fa-solid fa-ticket" style="color:var(--nb);"></i><span>BILETELE MELE</span></div>
     <div class="form-card">
-      <div class="sec-title">📋 ADAUGĂ BILET NOU</div>
+      <div class="sec-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>📋 ADAUGĂ BILET NOU</span>
+        <button class="icon-btn" onclick="startOCRScan()" style="border-color:var(--gold); color:var(--gold); width:auto; padding:0 12px; gap:6px; height:30px;">
+          <i class="fa-solid fa-camera"></i> <span style="font-size:10px; font-weight:700;">SCAN</span>
+        </button>
+      </div>
       <div class="sport-pills">
         <div class="sport-pill sel" data-sport-pill="football" onclick="setSport('football',this)">⚽ Football</div>
         <div class="sport-pill" data-sport-pill="tennis" onclick="setSport('tennis',this)">🎾 Tennis</div>

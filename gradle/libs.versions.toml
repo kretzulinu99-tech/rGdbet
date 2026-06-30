@@ -17,6 +17,7 @@ firebaseAi = "17.13.0"
 firebaseStorage = "22.0.1"
 firebaseAnalytics = "23.2.0"
 sceneview = "2.2.1"
+mlkitTextRecognition = "19.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +46,7 @@ firebase-storage = { group = "com.google.firebase", name = "firebase-storage", v
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebaseAnalytics" }
 sceneview = { group = "io.github.sceneview", name = "sceneview", version.ref = "sceneview" }
 arsceneview = { group = "io.github.sceneview", name = "arsceneview", version.ref = "sceneview" }
+google-mlkit-text-recognition = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition", version.ref = "mlkitTextRecognition" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

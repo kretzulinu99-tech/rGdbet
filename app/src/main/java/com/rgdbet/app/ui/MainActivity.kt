@@ -2,28 +2,39 @@ package com.rgdbet.app.ui
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.provider.MediaStore
 import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.rgdbet.app.RgdbetApplication
 import com.rgdbet.app.auth.AuthState
 import com.rgdbet.app.databinding.ActivityMainBinding
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
+
+    private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
     private val getFileLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (filePathCallback != null) {
@@ -31,6 +42,10 @@ class MainActivity : AppCompatActivity() {
             filePathCallback?.onReceiveValue(results)
             filePathCallback = null
         }
+    }
+
+    private val scanTicketLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { processImageForOCR(it) }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,7 +136,7 @@ class MainActivity : AppCompatActivity() {
                     const users = JSON.parse(localStorage.getItem('rgb_users_db') || '{}');
                     users["${username.lowercase()}"] = user;
                     localStorage.setItem('rgb_users_db', JSON.stringify(users));
-                    localStorage.setItem('rgd_users', JSON.stringify(users)); // Compatibilitate auth.js
+                    localStorage.setItem('rgd_users', JSON.stringify(users));
                     
                     const session = {
                         username: "$username",
@@ -131,29 +146,24 @@ class MainActivity : AppCompatActivity() {
                     localStorage.setItem('rgd_session', JSON.stringify(session));
                     localStorage.setItem('rgb_session', JSON.stringify(session));
                     
-                    // Marcăm și cheia v3 dacă există
                     localStorage.setItem('rgb_user', JSON.stringify(user));
                     localStorage.setItem('rgd_user', JSON.stringify(user));
 
-                    // Actualizăm bara de sus
                     if (typeof authUpdateTopBar === 'function') {
                         authUpdateTopBar(user);
                     }
 
-                    // Ascundem ecranele de login/age gate locale
                     const authScreen = document.getElementById('auth-screen');
                     if (authScreen) authScreen.style.display = 'none';
                     const ageGate = document.getElementById('age-gate');
                     if (ageGate) ageGate.style.display = 'none';
                     
-                    // Forțăm reconstrucția profilului
                     if (typeof buildProfileUI === 'function') {
                         buildProfileUI(user);
                     } else if (typeof buildProfilePage === 'function') {
                         buildProfilePage();
                     }
                     
-                    // Afișăm butonul de profil și numele
                     const topBtn = document.getElementById('topUserBtn');
                     if (topBtn) topBtn.style.display = 'flex';
                     const nameEl = document.getElementById('topUsername');
@@ -162,7 +172,6 @@ class MainActivity : AppCompatActivity() {
                     const notifBtn = document.getElementById('topNotifBtn');
                     if (notifBtn) notifBtn.style.display = 'flex';
                     
-                    // Sincronizăm UI-ul general
                     if (typeof render === 'function') render();
                 })();
             """.trimIndent()
@@ -171,15 +180,78 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun processImageForOCR(uri: Uri) {
+        try {
+            val image = InputImage.fromFilePath(this, uri)
+            recognizer.process(image)
+                .addOnSuccessListener { visionText ->
+                    val result = parseTicketText(visionText.text)
+                    binding.webView.evaluateJavascript("if(window.onOCRResult) window.onOCRResult(${result.toString()});", null)
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Eroare scanare: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun parseTicketText(text: String): JSONObject {
+        val json = JSONObject()
+        val lines = text.split("\n")
+        
+        var totalOdds = 1.0
+        var stake = 0.0
+        var win = 0.0
+        val events = JSONArray()
+
+        // Regex simple pentru detecție (Superbet, Casa, etc.)
+        val oddsRegex = Regex("""\b(\d+[\.,]\d{2})\b""")
+        val moneyRegex = Regex("""(\d+[\.,]\d{2})\s*(RON|LEI|Lei)""", RegexOption.IGNORE_CASE)
+        
+        lines.forEach { line ->
+            // Detecție meciuri (Linii care conțin " - " sau " v ")
+            if (line.contains(" - ") || line.contains(" v ")) {
+                val event = JSONObject()
+                event.put("name", line.trim())
+                event.put("odds", 1.85) // Default if not found on same line
+                events.put(event)
+            }
+            
+            // Căutăm miza
+            if (line.contains("Miza", true) || line.contains("Suma", true)) {
+                moneyRegex.find(line)?.let { 
+                    stake = it.groupValues[1].replace(",", ".").toDoubleOrNull() ?: 0.0
+                }
+            }
+            
+            // Căutăm câștig potențial
+            if (line.contains("Castig", true) || line.contains("Potential", true)) {
+                moneyRegex.find(line)?.let {
+                    win = it.groupValues[1].replace(",", ".").toDoubleOrNull() ?: 0.0
+                }
+            }
+        }
+
+        // Dacă nu am găsit miza prin cuvinte cheie, căutăm ultima sumă mare
+        if (stake == 0.0) stake = 10.0 // Default fallback
+
+        json.put("events", events)
+        json.put("stake", stake)
+        json.put("totalWon", win)
+        json.put("rawText", text) // Pentru debug sau rafinare in JS
+        
+        return json
+    }
+
     /** Interfață pentru a fi apelată din JavaScript (WebView) */
-    class WebAppInterface(private val mContext: Context) {
+    inner class WebAppInterface(private val mContext: Context) {
         
         @JavascriptInterface
         fun logout() {
             val app = mContext.applicationContext as RgdbetApplication
             app.authManager.logout()
             
-            // Curățăm cheile de sesiune din WebView
             if (mContext is MainActivity) {
                 mContext.runOnUiThread {
                     mContext.binding.webView.evaluateJavascript(
@@ -197,6 +269,13 @@ class MainActivity : AppCompatActivity() {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
             mContext.startActivity(intent)
+        }
+
+        @JavascriptInterface
+        fun startOCRScan() {
+            runOnUiThread {
+                scanTicketLauncher.launch("image/*")
+            }
         }
 
         @JavascriptInterface

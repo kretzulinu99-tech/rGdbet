@@ -26,6 +26,15 @@ const BADGES_CONFIG = [
     color: '#ffcc00'
   },
   {
+    id: 'event_collector',
+    name: 'Colecționarul',
+    desc: 'Adaugă un total de 100 de evenimente pe biletele tale. Analizezi piața în detaliu!',
+    icon: '📚',
+    goal: 100,
+    check: (stats) => stats.totalEventsPlaced || 0,
+    color: '#00c8ff'
+  },
+  {
     id: 'high_roller',
     name: 'High Roller',
     desc: 'Câștigă o sumă totală de 1000 RON. Joci în liga mare a profitului!',
@@ -39,18 +48,18 @@ const BADGES_CONFIG = [
     name: 'Sniper',
     desc: 'Câștigă un bilet cu o cotă de peste 5.00. Precizie chirurgicală!',
     icon: '🎯',
-    goal: 1, // Cel puțin un bilet cu cota mare
+    goal: 1,
     check: (stats) => stats.maxSingleOdds >= 5 ? 1 : 0,
     color: '#00ff88'
   },
   {
-    id: 'strategist',
-    name: 'Strategist',
-    desc: 'Câștigă 10 bilete folosind analizele AI. Demonstrează că stăpânești datele!',
-    icon: '♟️',
-    goal: 10,
-    check: (stats) => stats.winSolist || 0,
-    color: '#ffffff'
+    id: 'event_winner',
+    name: 'Maestrul Selecțiilor',
+    desc: 'Câștigă un total de 50 de evenimente individuale. Ai ochiul format pentru predictii corecte!',
+    icon: '✅',
+    goal: 50,
+    check: (stats) => stats.totalEventsWon || 0,
+    color: '#4caf50'
   },
   {
     id: 'over_achiever',
@@ -71,22 +80,22 @@ const BADGES_CONFIG = [
     color: '#ff9900'
   },
   {
-    id: 'night_owl',
-    name: 'Bufnița de Noapte',
-    desc: 'Plasează 10 bilete după ora 22:00. Pariurile nu dorm niciodată!',
-    icon: '🦉',
-    goal: 10,
-    check: (stats) => stats.nightBets || 0,
-    color: '#3d5afe'
+    id: 'volume_king',
+    name: 'Regele Volumului',
+    desc: 'Câștigă un bilet cu minim 8 evenimente selectate. Record de selecții corecte pe un singur bilet!',
+    icon: '⚡',
+    goal: 1,
+    check: (stats) => stats.maxComboSize >= 8 ? 1 : 0,
+    color: '#ffeb3b'
   },
   {
-    id: 'early_bird',
-    name: 'Pasăre Matinală',
-    desc: 'Plasează 10 bilete înainte de ora 10:00. Începi ziua cu profit!',
-    icon: '☀️',
-    goal: 10,
-    check: (stats) => stats.morningBets || 0,
-    color: '#f4ff81'
+    id: 'steady_winner',
+    name: 'Constantin cel Câștigător',
+    desc: 'Câștigă minim un bilet pe zi timp de 3 zile la rând. Consistența este cheia succesului!',
+    icon: '⚖️',
+    goal: 3,
+    check: (stats) => stats.dailyWinStreak || 0,
+    color: '#8bc34a'
   },
   {
     id: 'bankroll_master',
@@ -105,15 +114,6 @@ const BADGES_CONFIG = [
     goal: 1,
     check: (stats) => stats.maxComboSize >= 5 ? 1 : 0,
     color: '#ffc107'
-  },
-  {
-    id: 'expert_analyst',
-    name: 'Analist Expert',
-    desc: 'Folosește AI Pro Analyst de 10 ori. Tehnologia este aliatul tău!',
-    icon: '🧠',
-    goal: 10,
-    check: (stats) => stats.aiConsultations || 0,
-    color: '#e040fb'
   }
 ];
 
@@ -187,18 +187,20 @@ function getExtendedStats() {
   let winGoals = 0;
   let currentLossStreak = 0;
   let comebacks = 0;
-  let nightBets = 0;
-  let morningBets = 0;
   let maxCombo = 0;
   let netProfit = 0;
+  let totalEventsPlaced = 0;
+  let totalEventsWon = 0;
+
+  // Pentru calcularea streak-ului zilnic
+  const winDates = new Set();
 
   bets.forEach(b => {
-    const d = new Date(b.date || Date.now());
-    const hours = d.getHours();
-    if (hours >= 22 || hours < 6) nightBets++;
-    if (hours >= 6 && hours < 10) morningBets++;
+    const bEventsCount = (b.events && b.events.length) || 1;
+    totalEventsPlaced += bEventsCount;
 
     if (b.status === 'win') {
+      totalEventsWon += bEventsCount;
       currentStreak++;
       if (currentStreak > maxStreak) maxStreak = currentStreak;
       totalWon += (b.stake * b.odds);
@@ -207,16 +209,38 @@ function getExtendedStats() {
       if (b.odds > maxOdds) maxOdds = b.odds;
       if (b.type === 'solist') winSolist++;
       if (b.type === 'goluri') winGoals++;
-      if (b.events && b.events.length > maxCombo) maxCombo = b.events.length;
+      if (bEventsCount > maxCombo) maxCombo = bEventsCount;
 
       if (currentLossStreak >= 3) comebacks++;
       currentLossStreak = 0;
+
+      if (b.date) {
+        winDates.add(new Date(b.date).toDateString());
+      }
     } else if (b.status === 'loss') {
       currentStreak = 0;
       currentLossStreak++;
       netProfit -= b.stake;
     }
   });
+
+  // Calculare daily win streak simplificată
+  let dailyWinStreak = 0;
+  if (winDates.size > 0) {
+    // Sortăm datele și vedem dacă sunt consecutive
+    const sortedDates = Array.from(winDates).map(d => new Date(d).getTime()).sort((a, b) => b - a);
+    let tempStreak = 1;
+    for (let i = 0; i < sortedDates.length - 1; i++) {
+      const diff = (sortedDates[i] - sortedDates[i+1]) / (1000 * 60 * 60 * 24);
+      if (diff === 1) {
+        tempStreak++;
+        if (tempStreak > dailyWinStreak) dailyWinStreak = tempStreak;
+      } else {
+        tempStreak = 1;
+      }
+    }
+    if (tempStreak > dailyWinStreak) dailyWinStreak = tempStreak;
+  }
 
   return {
     total: bets.length,
@@ -226,11 +250,11 @@ function getExtendedStats() {
     winSolist: winSolist,
     winGoals: winGoals,
     comebacks: comebacks,
-    nightBets: nightBets,
-    morningBets: morningBets,
     maxComboSize: maxCombo,
     netProfit: netProfit,
-    aiConsultations: parseInt(localStorage.getItem('rgb_ai_usage') || '0')
+    totalEventsPlaced: totalEventsPlaced,
+    totalEventsWon: totalEventsWon,
+    dailyWinStreak: dailyWinStreak
   };
 }
 

@@ -134,54 +134,88 @@ function scheduleRender() {
         });
       }, { passive: true });
 
-      /* ── OCR SCANNING LOGIC ── */
-      window.startOCRScan = function() {
-        if (window.Android && typeof window.Android.startOCRScan === 'function') {
-          window.Android.startOCRScan();
-        } else {
-          showMsgToast("Funcția de scanare este disponibilă doar în aplicația Android.", "info");
-          // Simulăm pentru browser/web preview
-          setTimeout(() => {
-            window.onOCRResult({
-              stake: 50,
-              totalWon: 450,
-              events: [
-                { name: "Real Madrid vs Barcelona", odds: 1.95 },
-                { name: "Manchester City vs Arsenal", odds: 2.10 }
-              ]
-            });
-          }, 1500);
-        }
+      /* ── GEMINI VISION AI SCANNER LOGIC ── */
+      window.toggleGeminiScanner = function() {
+        const wrap = document.getElementById('gemini-scanner-wrap');
+        if (!wrap) return;
+        wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+
+        // Auto-load saved key
+        const savedKey = localStorage.getItem('rgb_gemini_key');
+        if (savedKey) document.getElementById('gemini-api-key').value = savedKey;
       };
 
-      window.onOCRResult = function(data) {
-        if (!data) return;
-        showMsgToast("Bilet scanat cu succes! Se procesează...", "success");
+      window.processGeminiOCR = async function(input) {
+        const file = input.files[0];
+        const apiKey = document.getElementById('gemini-api-key').value.trim();
+        const status = document.getElementById('gemini-status');
 
-        // Resetăm evenimentele curente
-        ticketEvents = [];
-
-        // Adăugăm evenimentele detectate
-        if (data.events && data.events.length > 0) {
-          data.events.forEach(ev => {
-            ticketEvents.push({
-              id: Date.now() + Math.random(),
-              name: ev.name,
-              odds: parseFloat(ev.odds) || 1.85
-            });
-          });
+        if (!file) return;
+        if (!apiKey) {
+          showMsgToast("Introdu cheia API Gemini!", "error");
+          return;
         }
 
-        // Completăm restul câmpurilor
-        const stakeInp = document.getElementById('stake');
-        if (stakeInp) stakeInp.value = data.stake || "";
+        // Salvează cheia pentru viitor
+        localStorage.setItem('rgb_gemini_key', apiKey);
 
-        const matchInp = document.getElementById('match');
-        if (matchInp) matchInp.value = "Bilet Scanat " + new Date().toLocaleDateString();
+        status.style.display = 'block';
+        status.innerHTML = `<i class="fa-solid fa-sync fa-spin"></i> Procesare Vision AI v1.5 Flash...`;
 
-        updateTicketEventsList();
-        updateRiskMeter();
-        showMsgToast("Datele au fost extrase automat.", "info");
+        try {
+          const base64Data = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = e => reject(e);
+          });
+
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: `Ești un asistent rGdbet care analizează bilete de pariuri. Extrage datele și returnează DOAR un JSON valid (fără alt text):
+                           {
+                             "name": "Nume bilet (Echipe)",
+                             "stake": miza (numar),
+                             "odds": cota totala (numar),
+                             "events": [{"name": "Meci", "odds": cota}]
+                           }
+                           Dacă lipsește ceva, pune null.` },
+                  { inline_data: { mime_type: file.type, data: base64Data } }
+                ]
+              }]
+            })
+          });
+
+          const data = await response.json();
+          const rawText = data.candidates[0].content.parts[0].text;
+          const cleanJson = JSON.parse(rawText.replace(/```json/g, '').replace(/```/g, '').trim());
+
+          if (cleanJson) {
+            ticketEvents = [];
+            if (cleanJson.events) {
+              cleanJson.events.forEach(ev => {
+                ticketEvents.push({ id: Date.now() + Math.random(), name: ev.name, odds: parseFloat(ev.odds) || 1.85 });
+              });
+            }
+
+            document.getElementById('stake').value = cleanJson.stake || "";
+            document.getElementById('match').value = cleanJson.name || ("Scan " + new Date().toLocaleDateString());
+
+            updateTicketEventsList();
+            updateRiskMeter();
+            showMsgToast("Bilet procesat cu Vision AI!", "success");
+            toggleGeminiScanner(); // Închide panoul după succes
+          }
+        } catch (error) {
+          console.error("Gemini OCR Error:", error);
+          showMsgToast("Eroare la procesarea AI. Verifică cheia API.", "error");
+        } finally {
+          status.style.display = 'none';
+        }
       };
 
       function applyTranslations() {

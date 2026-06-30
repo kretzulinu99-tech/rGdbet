@@ -114,7 +114,7 @@ window.respondFriendRequest = function(fromUsername, accept) {
 /* Obține cererile primite de user curent */
 function getMyPendingRequests() {
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-  if (!me) return [];
+  if (!me || !me.username) return [];
   const reqs = getFriendReqs();
   return (reqs[me.username.toLowerCase()] || []).filter(r => r.status === 'pending');
 }
@@ -122,7 +122,7 @@ function getMyPendingRequests() {
 /* Obține lista de prieteni */
 function getMyFriends() {
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-  if (!me) return [];
+  if (!me || !me.username) return [];
   const friends = getFriends();
   return friends[me.username.toLowerCase()] || [];
 }
@@ -253,7 +253,7 @@ window.markAllMsgsRead = function() {
 /* Numără necitiți total - robust */
 function getTotalUnread() {
   const me = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-  if (!me) return 0;
+  if (!me || !me.username) return 0;
   const unread = getUnread();
   const myUnread = unread[me.username.toLowerCase()] || {};
   let total = 0;

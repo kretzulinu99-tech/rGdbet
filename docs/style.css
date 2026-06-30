@@ -246,44 +246,40 @@
         justify-content: space-between;
         padding: 14px 16px 0;
         position: relative;
-        z-index: 9999 !important;
+        z-index: 20000 !important;
         pointer-events: auto !important;
       }
 
       .top-bar-right {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        position: relative;
-        z-index: 10000 !important;
-      }
-
-      .top-notif-btn {
-        position: relative;
-        width: 36px; height: 36px; border-radius: 50%;
-        background: rgba(255,255,255,.07);
-        border: 1px solid rgba(255,255,255,.1);
-        color: rgba(255,255,255,.6);
-        font-size: 16px; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        transition: all .2s ease;
-        z-index: 10001 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        position: relative !important;
+        z-index: 20001 !important;
         pointer-events: auto !important;
       }
 
-      .top-badges-btn {
-        position: relative;
-        width: 36px; height: 36px; border-radius: 50%;
-        background: rgba(255, 204, 0, 0.1);
-        border: 1px solid rgba(255, 204, 0, 0.3);
-        color: var(--gold);
-        font-size: 16px; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 0 10px rgba(255, 204, 0, 0.1);
-        z-index: 10001 !important;
+      .top-notif-btn, .top-badges-btn {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        z-index: 20002 !important;
+        position: relative !important;
         pointer-events: auto !important;
+        -webkit-tap-highlight-color: transparent !important;
       }
+
+      .top-notif-btn { color: #00c8ff !important; box-shadow: 0 0 15px rgba(0, 200, 255, 0.1) !important; }
+      .top-badges-btn { color: #ffcc00 !important; box-shadow: 0 0 15px rgba(255, 204, 0, 0.1) !important; }
 
       .theme-switch-container {
         position: relative;

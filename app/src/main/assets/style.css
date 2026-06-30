@@ -240,7 +240,50 @@
       }
 
       /* ═══ TOP BAR & MODERN THEME SWITCH ═══ */
-      .top-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0;}
+      .top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px 0;
+        position: relative;
+        z-index: 9999 !important;
+        pointer-events: auto !important;
+      }
+
+      .top-bar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        z-index: 10000 !important;
+      }
+
+      .top-notif-btn {
+        position: relative;
+        width: 36px; height: 36px; border-radius: 50%;
+        background: rgba(255,255,255,.07);
+        border: 1px solid rgba(255,255,255,.1);
+        color: rgba(255,255,255,.6);
+        font-size: 16px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: all .2s ease;
+        z-index: 10001 !important;
+        pointer-events: auto !important;
+      }
+
+      .top-badges-btn {
+        position: relative;
+        width: 36px; height: 36px; border-radius: 50%;
+        background: rgba(255, 204, 0, 0.1);
+        border: 1px solid rgba(255, 204, 0, 0.3);
+        color: var(--gold);
+        font-size: 16px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 10px rgba(255, 204, 0, 0.1);
+        z-index: 10001 !important;
+        pointer-events: auto !important;
+      }
 
       .theme-switch-container {
         position: relative;
@@ -5252,30 +5295,7 @@ body.page-profile-active .top-bar {
 .top-bar-right {
   display: flex; align-items: center; gap: 10px;
 }
-      .top-notif-btn {
-        position: relative;
-        width: 36px; height: 36px; border-radius: 50%;
-        background: rgba(255,255,255,.07);
-        border: 1px solid rgba(255,255,255,.1);
-        color: rgba(255,255,255,.6);
-        font-size: 16px; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        transition: all .2s ease;
-        z-index: 1001;
-      }
 
-      .top-badges-btn {
-        position: relative;
-        width: 36px; height: 36px; border-radius: 50%;
-        background: rgba(255, 204, 0, 0.1);
-        border: 1px solid rgba(255, 204, 0, 0.3);
-        color: var(--gold);
-        font-size: 16px; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 0 10px rgba(255, 204, 0, 0.1);
-        z-index: 1001;
-      }
 
       .top-badges-btn:hover {
         transform: scale(1.1) rotate(5deg);

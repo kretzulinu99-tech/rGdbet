@@ -675,9 +675,11 @@ document.addEventListener('click', e => {
 <script>
 /* ══ PANOURI LATERALE ══ */
 function openMessagesPanel() {
+  _navLock = false; // Reset lock safety
   navigateTo('messages', null);
 }
 function closeMessagesPanel() {
+  _navLock = false;
   navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
 }
 </script>

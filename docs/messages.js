@@ -10,6 +10,15 @@
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
+// Helper GLOBAL pentru afișare avatar (Emoji sau Imagine)
+window.renderAvatarContent = (av) => {
+  if (!av || av === 'default' || av === '👤') return '👤';
+  if (av.startsWith('data:') || av.startsWith('http')) {
+    return `<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+  }
+  return av;
+};
+
 /* ═══ STORAGE HELPERS ═══════════════════════════════════════ */
 const MSK = {
   msgs:   'rgb_messages',
@@ -290,15 +299,6 @@ window.updateMsgBadge = function() {
 
 /* ═══ BUILD PAGINA MESAJE ════════════════════════════════════ */
 let _activeConv = null; /* username-ul cu care chatăm acum */
-
-// Helper pentru afișare avatar (Emoji sau Imagine)
-const renderAvatarContent = (av) => {
-  if (!av || av === 'default' || av === '👤') return '👤';
-  if (av.startsWith('data:') || av.startsWith('http')) {
-    return `<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
-  }
-  return av;
-};
 
 window.buildMessagesPage = function(force = false) {
   const page = document.getElementById('page-messages');

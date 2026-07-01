@@ -15,7 +15,10 @@ const CLOUD_KEYS = [
   'rgb_messages',
   'rgb_friends',
   'rgb_friend_reqs',
-  'rgb_unread'
+  'rgb_unread',
+  'rgb_user',
+  'rgb_social_feed',
+  'rgb_gamb_test'
 ];
 
 let _isSyncing = false;

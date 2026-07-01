@@ -89,50 +89,39 @@ function scheduleRender() {
         return translations['en'][key] || key;
       }
 
-      /* ── 3D TILT EFFECT FOR OBSIDIAN CARDS ── */
-      document.addEventListener('mousemove', (e) => {
-        const cards = document.querySelectorAll('.stat-card, .form-card, .bet-item, .bankroll-health-card, .target-card');
-        cards.forEach(card => {
-          const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
+      /* ── OPTIMIZED 3D TILT EFFECT ── */
+      let _tiltRaf;
+      function handleTilt(e) {
+        if (_tiltRaf) cancelAnimationFrame(_tiltRaf);
+        _tiltRaf = requestAnimationFrame(() => {
+          const isTouch = e.type === 'touchmove';
+          const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+          const clientY = isTouch ? e.touches[0].clientY : e.clientY;
 
-          if (x > 0 && x < rect.width && y > 0 && y < rect.height) {
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = (y - centerY) / 12;
-            const rotateY = (centerX - x) / 12;
+          const cards = document.querySelectorAll('.stat-card, .form-card, .bet-item, .bankroll-health-card, .target-card');
+          cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
 
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-            card.style.zIndex = "100";
-          } else {
-            card.style.transform = '';
-            card.style.zIndex = "";
-          }
+            if (x > 0 && x < rect.width && y > 0 && y < rect.height) {
+              const centerX = rect.width / 2;
+              const centerY = rect.height / 2;
+              const rotateX = (y - centerY) / 15;
+              const rotateY = (centerX - x) / 15;
+
+              card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+              card.style.zIndex = "100";
+            } else if (card.style.transform !== '') {
+              card.style.transform = '';
+              card.style.zIndex = "";
+            }
+          });
         });
-      });
+      }
 
-      /* Pentru mobil - atingere */
-      document.addEventListener('touchmove', (e) => {
-        const touch = e.touches[0];
-        const cards = document.querySelectorAll('.stat-card, .form-card, .bet-item, .bankroll-health-card, .target-card');
-        cards.forEach(card => {
-          const rect = card.getBoundingClientRect();
-          const x = touch.clientX - rect.left;
-          const y = touch.clientY - rect.top;
-
-          if (x > 0 && x < rect.width && y > 0 && y < rect.height) {
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = (y - centerY) / 12;
-            const rotateY = (centerX - x) / 12;
-
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-          } else {
-            card.style.transform = '';
-          }
-        });
-      }, { passive: true });
+      document.addEventListener('mousemove', handleTilt);
+      document.addEventListener('touchmove', handleTilt, { passive: true });
 
       function applyTranslations() {
         document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -1175,73 +1164,72 @@ function scheduleRender() {
 
         const formCircles = document.getElementById('form-circles');
         if(formCircles) {
-          formCircles.innerHTML = '';
-          let allSettled = getCurrentBets().filter(b => b.status === 'win' || b.status === 'loss' || b.status === 'cashout');
+          let circlesHtml = '';
+          const allSettled = getCurrentBets().filter(b => b.status === 'win' || b.status === 'loss' || b.status === 'cashout');
 
-          // Streak Calculation
+          // Optimized Streak Calculation
           let winStreak = 0;
           let loseStreak = 0;
 
           if (allSettled.length > 0) {
-            let i = allSettled.length - 1;
-            const lastStatus = allSettled[i].status;
-
+            const lastStatus = allSettled[allSettled.length - 1].status;
             if (lastStatus === 'win' || lastStatus === 'cashout') {
-              while (i >= 0 && (allSettled[i].status === 'win' || allSettled[i].status === 'cashout')) {
-                winStreak++;
-                i--;
+              for (let i = allSettled.length - 1; i >= 0; i--) {
+                if (allSettled[i].status === 'win' || allSettled[i].status === 'cashout') winStreak++;
+                else break;
               }
             } else if (lastStatus === 'loss') {
-              while (i >= 0 && allSettled[i].status === 'loss') {
-                loseStreak++;
-                i--;
+              for (let i = allSettled.length - 1; i >= 0; i--) {
+                if (allSettled[i].status === 'loss') loseStreak++;
+                else break;
               }
             }
           }
 
-          let recentForm = allSettled.slice(-3);
+          const recentForm = allSettled.slice(-3);
           recentForm.forEach(b => {
-            if(b.status === 'win' || b.status === 'cashout') {
-              formCircles.innerHTML += `<span class="fs-badge fs-w">W</span>`;
-            } else if(b.status === 'loss') {
-              formCircles.innerHTML += `<span class="fs-badge fs-l">L</span>`;
-            }
+            const statusClass = (b.status === 'win' || b.status === 'cashout') ? 'fs-w' : 'fs-l';
+            const statusChar = (b.status === 'win' || b.status === 'cashout') ? 'W' : 'L';
+            circlesHtml += `<span class="fs-badge ${statusClass}">${statusChar}</span>`;
           });
 
           if(allSettled.length === 0) {
-            formCircles.innerHTML = '<span style="color:var(--text3); font-size:11px;">-</span>';
+            circlesHtml = '<span style="color:var(--text3); font-size:11px;">-</span>';
           } else if (winStreak > 0) {
-             formCircles.innerHTML += `<div class="win-streak-badge"><i class="fa-solid fa-fire"></i> ${winStreak}</div>`;
+            circlesHtml += `<div class="win-streak-badge"><i class="fa-solid fa-fire"></i> ${winStreak}</div>`;
           } else if (loseStreak > 0) {
-             formCircles.innerHTML += `<div class="lose-streak-badge"><i class="fa-solid fa-snowflake"></i> ${loseStreak}</div>`;
+            circlesHtml += `<div class="lose-streak-badge"><i class="fa-solid fa-snowflake"></i> ${loseStreak}</div>`;
           }
+          formCircles.innerHTML = circlesHtml;
         }
         
         const container = document.getElementById('betsContainer');
         if(!container) return;
-        container.innerHTML = '';
-        
-        let filteredBets = getCurrentBets().filter(b => {
+
+        const currentBets = getCurrentBets();
+        const filteredBets = currentBets.filter(b => {
           const matchesFilter = (currentFilter === 'all') || (b.status === currentFilter);
           const matchesSport = (currentSportFilter === 'all') || (b.sport === currentSportFilter);
           return matchesFilter && matchesSport;
         });
-        let displayBets = [...filteredBets].reverse();
+        const displayBets = [...filteredBets].reverse();
         
         if(displayBets.length === 0) {
           container.innerHTML = `<div class="no-bets">${t('no_tickets')}</div>`;
-          document.getElementById('paginationContainer').innerHTML = ''; // Ascunde paginația
+          const pagCont = document.getElementById('paginationContainer');
+          if (pagCont) pagCont.innerHTML = '';
           updateChart();
           return;
         }
 
-        // Paginație Logic
         const totalPages = Math.ceil(displayBets.length / itemsPerPage);
         if (currentPagPage > totalPages) currentPagPage = totalPages || 1;
 
         const startIndex = (currentPagPage - 1) * itemsPerPage;
         const paginatedBets = displayBets.slice(startIndex, startIndex + itemsPerPage);
 
+        // Batched DOM Update
+        let ticketsHtml = '';
         paginatedBets.forEach(b => {
           let statusControls = '';
           let borderStyle = 'border-left: 4px solid var(--text3);';
@@ -1313,7 +1301,7 @@ function scheduleRender() {
             statusSymbol = '<span class="loss-status-icon"><i class="fa-solid fa-xmark"></i></span>';
           }
 
-          let translatedSportTag = t('sport_' + b.sport);
+          const translatedSportTag = t('sport_' + b.sport);
           
           let dateStr = '-';
           if (b.date) {
@@ -1321,7 +1309,7 @@ function scheduleRender() {
             dateStr = d.toLocaleDateString(currentLang === 'ro' ? 'ro-RO' : 'en-GB', { day: '2-digit', month: 'short' });
           }
 
-          container.innerHTML += `
+          ticketsHtml += `
             <div class="bet-item scroll-animate ${statusClass} bet-status-${b.status}" style="${borderStyle}">
               <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
@@ -1353,6 +1341,8 @@ function scheduleRender() {
           `;
         });
         
+        container.innerHTML = ticketsHtml;
+
         updateChart();
         setupScrollAnimations();
         renderPagination(totalPages);

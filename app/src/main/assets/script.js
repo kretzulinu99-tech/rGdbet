@@ -178,7 +178,7 @@ function scheduleRender() {
             reader.onerror = e => reject(e);
           });
 
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -198,7 +198,7 @@ function scheduleRender() {
                              ]
                            }
                            Dacă un câmp nu este detectat, folosește null.` },
-                  { inline_data: { mime_type: file.type || "image/jpeg", data: base64Data } }
+                  { inline_data: { mime_type: "image/jpeg", data: base64Data } }
                 ]
               }],
               generationConfig: {

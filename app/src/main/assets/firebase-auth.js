@@ -104,6 +104,10 @@ function fbHandleAuthState(user) {
   if (user) {
     fbUser = user;
     fbOnLoginSuccess(user);
+    // Declanșăm sincronizarea datelor din cloud la login
+    if (typeof cloudPullData === 'function') {
+      window.cloudPullData();
+    }
   } else {
     fbUser = null;
   }

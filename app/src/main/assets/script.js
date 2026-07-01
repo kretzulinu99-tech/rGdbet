@@ -176,34 +176,62 @@ function scheduleRender() {
             body: JSON.stringify({
               contents: [{
                 parts: [
-                  { text: `Ești un asistent rGdbet care analizează bilete de pariuri. Extrage datele și returnează DOAR un JSON valid (fără alt text):
+                  { text: `Ești un asistent rGdbet specializat în analiza biletelor de pariuri sportive din România (Superbet, Casa Pariurilor, Fortuna, etc.).
+                           Analizează imaginea atașată și extrage următoarele date într-un format JSON valid, fără niciun alt comentariu sau text Markdown:
                            {
-                             "name": "Nume bilet (Echipe)",
-                             "stake": miza (numar),
-                             "odds": cota totala (numar),
-                             "events": [{"name": "Meci", "odds": cota}]
+                             "name": "Numele biletului (ex: Real Madrid vs Barcelona)",
+                             "stake": miza totală pariată (număr),
+                             "odds": cota totală a biletului (număr),
+                             "events": [
+                               {
+                                 "name": "Numele evenimentului/meciului",
+                                 "odds": cota individuală (număr)
+                               }
+                             ]
                            }
-                           Dacă lipsește ceva, pune null.` },
+                           Dacă un câmp nu este detectat, folosește null. Asigură-te că rezultatul este DOAR obiectul JSON.` },
                   { inline_data: { mime_type: file.type, data: base64Data } }
                 ]
               }]
             })
           });
 
+          if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error?.message || "Eroare API Gemini");
+          }
+
           const data = await response.json();
-          const rawText = data.candidates[0].content.parts[0].text;
-          const cleanJson = JSON.parse(rawText.replace(/```json/g, '').replace(/```/g, '').trim());
+
+          if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content) {
+            throw new Error("AI-ul nu a putut genera un răspuns. Verifică imaginea.");
+          }
+
+          let rawText = data.candidates[0].content.parts[0].text;
+          // Curățăm răspunsul de blocuri de cod json
+          rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+          const cleanJson = JSON.parse(rawText);
 
           if (cleanJson) {
             ticketEvents = [];
-            if (cleanJson.events) {
+            if (Array.isArray(cleanJson.events)) {
               cleanJson.events.forEach(ev => {
-                ticketEvents.push({ id: Date.now() + Math.random(), name: ev.name, odds: parseFloat(ev.odds) || 1.85 });
+                if (ev && ev.name) {
+                  ticketEvents.push({
+                    id: Date.now() + Math.random(),
+                    name: ev.name,
+                    odds: parseFloat(ev.odds) || 1.85
+                  });
+                }
               });
             }
 
-            document.getElementById('stake').value = cleanJson.stake || "";
-            document.getElementById('match').value = cleanJson.name || ("Scan " + new Date().toLocaleDateString());
+            const stakeInp = document.getElementById('stake');
+            if (stakeInp) stakeInp.value = cleanJson.stake || "";
+
+            const matchInp = document.getElementById('match');
+            if (matchInp) matchInp.value = cleanJson.name || ("Bilet Scanat " + new Date().toLocaleDateString());
 
             updateTicketEventsList();
             updateRiskMeter();
@@ -212,7 +240,7 @@ function scheduleRender() {
           }
         } catch (error) {
           console.error("Gemini OCR Error:", error);
-          showMsgToast("Eroare la procesarea AI. Verifică cheia API.", "error");
+          showMsgToast("Eroare AI: " + error.message, "error");
         } finally {
           status.style.display = 'none';
         }

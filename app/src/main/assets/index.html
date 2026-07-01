@@ -247,29 +247,7 @@
   <div id="page-addbet" class="spa-page">
     <div class="page-top-title"><i class="fa-solid fa-ticket" style="color:var(--nb);"></i><span>BILETELE MELE</span></div>
     <div class="form-card">
-      <div class="sec-title" style="display:flex; justify-content:space-between; align-items:center;">
-        <span>📋 ADAUGĂ BILET NOU</span>
-        <button class="icon-btn" onclick="toggleGeminiScanner()" style="border-color:var(--gold); color:var(--gold); width:auto; padding:0 12px; gap:6px; height:30px;">
-          <i class="fa-solid fa-robot"></i> <span style="font-size:10px; font-weight:700;">AI SCAN</span>
-        </button>
-      </div>
-
-      <!-- GEMINI AI SCANNER INTERFACE -->
-      <div id="gemini-scanner-wrap" style="display:none; background:rgba(0,0,0,0.3); padding:15px; border-radius:16px; border:1px dashed var(--gold); margin-bottom:15px;">
-        <label class="ai-label" style="font-size:8px;">CHEIE API GOOGLE GEMINI</label>
-        <input type="password" id="gemini-api-key" class="ai-input" style="font-size:12px; margin-bottom:10px;" placeholder="AIzaSy... (se salvează local)">
-
-        <label class="ai-label" style="font-size:8px;">ÎNCARCĂ IMAGINE BILET</label>
-        <button class="prof-action-btn" style="width:100%; font-size:11px; margin-bottom:10px;" onclick="document.getElementById('gemini-file-input').click()">
-          <i class="fa-solid fa-upload"></i> ALEGE IMAGINE
-        </button>
-        <input type="file" id="gemini-file-input" accept="image/*" style="display:none;" onchange="processGeminiOCR(this)"/>
-
-        <div id="gemini-status" style="display:none; font-family:'Rajdhani'; font-size:12px; color:var(--gold); text-align:center; animation:pulse 1.5s infinite;">
-          <i class="fa-solid fa-sync fa-spin"></i> Analizăm biletul cu Vision AI...
-        </div>
-      </div>
-
+      <div class="sec-title">📋 ADAUGĂ BILET NOU</div>
       <div class="sport-pills">
         <div class="sport-pill sel" data-sport-pill="football" onclick="setSport('football',this)">⚽ Football</div>
         <div class="sport-pill" data-sport-pill="tennis" onclick="setSport('tennis',this)">🎾 Tennis</div>

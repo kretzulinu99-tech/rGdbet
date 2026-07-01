@@ -147,14 +147,18 @@ function scheduleRender() {
 
       window.processGeminiOCR = async function(input) {
         const file = input.files[0];
-        const apiKey = document.getElementById('gemini-api-key').value.trim();
+        const apiKeyInp = document.getElementById('gemini-api-key');
+        const apiKey = apiKeyInp ? apiKeyInp.value.trim() : "";
         const status = document.getElementById('gemini-status');
 
         if (!file) return;
         if (!apiKey) {
-          showMsgToast("Introdu cheia API Gemini!", "error");
+          showMsgToast("Introdu cheia API Gemini în câmpul de mai sus!", "error");
           return;
         }
+
+        // Reset input so it can be used again for same file
+        input.value = "";
 
         // Salvează cheia pentru viitor
         localStorage.setItem('rgb_gemini_key', apiKey);
@@ -166,7 +170,11 @@ function scheduleRender() {
           const base64Data = await new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onload = () => {
+              const res = reader.result;
+              if (typeof res === 'string') resolve(res.split(',')[1]);
+              else reject("Format imagine invalid");
+            };
             reader.onerror = e => reject(e);
           });
 
@@ -176,29 +184,34 @@ function scheduleRender() {
             body: JSON.stringify({
               contents: [{
                 parts: [
-                  { text: `Ești un asistent rGdbet specializat în analiza biletelor de pariuri sportive din România (Superbet, Casa Pariurilor, Fortuna, etc.).
-                           Analizează imaginea atașată și extrage următoarele date într-un format JSON valid, fără niciun alt comentariu sau text Markdown:
+                  { text: `Ești un asistent EXPERT rGdbet specializat în analiza biletelor de pariuri sportive din România (Superbet, Casa Pariurilor, Fortuna, etc.).
+                           Analizează imaginea atașată și extrage următoarele date într-un format JSON valid.
+                           IMPORTANT: Returnează DOAR obiectul JSON, fără niciun alt text explicativ sau formatare Markdown.
+
+                           Structura cerută:
                            {
-                             "name": "Numele biletului (ex: Real Madrid vs Barcelona)",
-                             "stake": miza totală pariată (număr),
-                             "odds": cota totală a biletului (număr),
+                             "name": "Numele biletului (Echipele principale)",
+                             "stake": miza totală (număr),
+                             "odds": cota totală (număr),
                              "events": [
-                               {
-                                 "name": "Numele evenimentului/meciului",
-                                 "odds": cota individuală (număr)
-                               }
+                               { "name": "Meci/Eveniment", "odds": cota }
                              ]
                            }
-                           Dacă un câmp nu este detectat, folosește null. Asigură-te că rezultatul este DOAR obiectul JSON.` },
-                  { inline_data: { mime_type: file.type, data: base64Data } }
+                           Dacă un câmp nu este detectat, folosește null.` },
+                  { inline_data: { mime_type: file.type || "image/jpeg", data: base64Data } }
                 ]
-              }]
+              }],
+              generationConfig: {
+                temperature: 0.1,
+                topP: 1,
+                topK: 32
+              }
             })
           });
 
           if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.error?.message || "Eroare API Gemini");
+            const errJson = await response.json().catch(() => ({}));
+            throw new Error(errJson.error?.message || `Eroare HTTP: ${response.status}`);
           }
 
           const data = await response.json();
@@ -207,11 +220,16 @@ function scheduleRender() {
             throw new Error("AI-ul nu a putut genera un răspuns. Verifică imaginea.");
           }
 
-          let rawText = data.candidates[0].content.parts[0].text;
-          // Curățăm răspunsul de blocuri de cod json
-          rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+          let aiText = data.candidates[0].content.parts[0].text;
+          console.log("AI Raw Response:", aiText);
 
-          const cleanJson = JSON.parse(rawText);
+          // EXTRACTOR ROBUST DE JSON: Căutăm orice seamănă cu un obiect JSON între { și }
+          const jsonMatch = aiText.match(/\{[\s\S]*\}/);
+          if (!jsonMatch) {
+            throw new Error("AI-ul nu a returnat datele într-un format recognoscibil.");
+          }
+
+          const cleanJson = JSON.parse(jsonMatch[0]);
 
           if (cleanJson) {
             ticketEvents = [];
@@ -228,19 +246,24 @@ function scheduleRender() {
             }
 
             const stakeInp = document.getElementById('stake');
-            if (stakeInp) stakeInp.value = cleanJson.stake || "";
+            if (stakeInp && cleanJson.stake) stakeInp.value = cleanJson.stake;
 
             const matchInp = document.getElementById('match');
-            if (matchInp) matchInp.value = cleanJson.name || ("Bilet Scanat " + new Date().toLocaleDateString());
+            if (matchInp) matchInp.value = cleanJson.name || ("Scan " + new Date().toLocaleDateString());
 
             updateTicketEventsList();
             updateRiskMeter();
-            showMsgToast("Bilet procesat cu Vision AI!", "success");
-            toggleGeminiScanner(); // Închide panoul după succes
+            showMsgToast("Bilet procesat cu succes! 🎉", "success");
+
+            // Închidem panoul de scanare
+            const wrap = document.getElementById('gemini-scanner-wrap');
+            if (wrap) wrap.style.display = 'none';
           }
         } catch (error) {
           console.error("Gemini OCR Error:", error);
-          showMsgToast("Eroare AI: " + error.message, "error");
+          let userMsg = "Eroare AI: " + error.message;
+          if (error.message.includes("API key")) userMsg = "Cheie API invalidă sau expirată!";
+          showMsgToast(userMsg, "error");
         } finally {
           status.style.display = 'none';
         }

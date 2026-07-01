@@ -11,7 +11,11 @@ const CLOUD_KEYS = [
   'rgb_current_portfolio',
   'rgb_unlocked_badges',
   'rgb_theme',
-  'rgb_lang'
+  'rgb_lang',
+  'rgb_messages',
+  'rgb_friends',
+  'rgb_friend_reqs',
+  'rgb_unread'
 ];
 
 let _isSyncing = false;
@@ -41,6 +45,8 @@ window.cloudPullData = async function() {
 
       // Forțăm reîncărcarea aplicației pentru a aplica noile date (bilete, temă etc.)
       if (typeof render === 'function') render();
+      if (typeof updateMsgBadge === 'function') updateMsgBadge();
+      if (typeof buildMessagesPage === 'function') buildMessagesPage(true);
       if (typeof applyTheme === 'function' && data['rgb_theme']) {
         // Căutăm obiectul temă și îl aplicăm
         const t = THEMES.find(x => x.id === data['rgb_theme']);

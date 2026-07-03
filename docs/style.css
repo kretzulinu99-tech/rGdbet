@@ -6091,6 +6091,27 @@ body.page-profile-active .top-bar {
   letter-spacing: 1px;
 }
 
+/* ── Profile Transparency (v7.5) ── */
+/* Facem toate cardurile din profil semi-transparente */
+#page-profile .prof-stat-card,
+#page-profile .prof-row,
+#page-profile .prof-theme-row,
+#page-profile .prof-section {
+  background: rgba(255, 255, 255, 0.02) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Containerul de XP rămâne SOLID și premium pentru evidențiere */
+#page-profile .xp-container {
+  background: rgba(13, 17, 23, 0.95) !important;
+  border: 1px solid rgba(0, 224, 255, 0.3) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 224, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
 /* ── Level Up Toast ── */
 .level-up-toast {
   position: fixed;

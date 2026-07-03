@@ -298,7 +298,6 @@ window.buildProfilePage = function(force = false) {
         ${typeof getVerificationBadge === 'function' ? getVerificationBadge(user.username) : ''}
       </div>
       <div style="font-family:Rajdhani,sans-serif;font-size:13px;color:var(--nb);margin-top:-4px;">@${user.username}</div>
-      <div class="prof-email">${user.email || 'fără email'}</div>
       <div class="prof-joined">Membru din ${joinDate}</div>
     </div>
 

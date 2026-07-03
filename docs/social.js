@@ -294,9 +294,14 @@ window.buildProfilePage = function(force = false) {
         <div class="prof-avatar" id="profAvatarDisplay">${avatarDisplay}</div>
         <div class="prof-avatar-edit"><i class="fa-solid fa-camera"></i></div>
       </div>
-      <div class="prof-username" id="profDisplayNameDisplay">${user.displayName || user.username}</div>
-      <div style="font-family:Rajdhani,sans-serif;font-size:13px;color:var(--nb);margin-top:-4px;">@${user.username}</div>
+      <div class="prof-username" id="profDisplayNameDisplay">
+        ${user.displayName || user.username}
+        ${typeof getVerificationBadge === 'function' ? getVerificationBadge(user.username) : ''}
+      </div>
+      ${typeof calculateLevel === 'function' ? `<div class="xp-badge"><i class="fa-solid fa-star"></i> ${calculateLevel(user.xp || 0).name}</div>` : ''}
+      <div style="font-family:Rajdhani,sans-serif;font-size:13px;color:var(--nb);margin-top:2px;">@${user.username}</div>
       <div class="prof-email">${user.email || 'fără email'}</div>
+
       <div class="prof-joined">Membru din ${joinDate}</div>
       <div class="prof-privacy-badge privacy-${user.privacy || 'public'}">
         ${privacyIcon(user.privacy)} ${privacyLabel(user.privacy)}
@@ -1011,7 +1016,10 @@ function socRenderLeaderboard() {
         </div>
         <div class="soc-post-avatar">${renderAvatarContent(r.avatar)}</div>
         <div style="flex:1;">
-          <div class="soc-post-author" style="font-size:15px; color:#fff;">@${r.username}</div>
+          <div class="soc-post-author" style="font-size:15px; color:#fff;">
+            @${r.username}
+            ${typeof getVerificationBadge === 'function' ? getVerificationBadge(r.username) : ''}
+          </div>
           <div class="soc-post-date">${r.total} bilete • <span style="${profitClass === 'pos' ? 'color:var(--ng)' : 'color:var(--danger)'}; font-weight:700;">${r.profit.toFixed(0)} ${currency}</span></div>
         </div>
         <div style="text-align: right;">
@@ -1096,6 +1104,7 @@ function socRenderPost(p, currentUser, myFollows) {
         <div class="soc-post-meta">
           <div class="soc-post-author" onclick="event.stopPropagation(); viewUserProfile('${p.author}')">
             ${displayName}
+            ${typeof getVerificationBadge === 'function' ? getVerificationBadge(p.author) : ''}
             <span style="font-size:10px; color:rgba(255,255,255,0.4); font-weight:normal; margin-left:4px;">@${p.author}</span>
           </div>
           <div class="soc-post-date">${dateStr}</div>

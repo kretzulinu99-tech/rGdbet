@@ -643,7 +643,10 @@ function scheduleRender() {
         };
         bets.push(newBet);
         localStorage.setItem('rgb_bets', JSON.stringify(bets));
-        
+
+        // Recompensă XP pentru adăugare bilet
+        if (typeof addXP === 'function') addXP(150);
+
         document.getElementById('match').value = '';
         document.getElementById('stake').value = '';
         document.getElementById('ticket-photo').value = '';
@@ -669,8 +672,15 @@ function scheduleRender() {
       function changeStatus(id, newStatus) {
         const bet = bets.find(b => b.id === id);
         if(bet) {
+          const oldStatus = bet.status;
           bet.status = newStatus;
           localStorage.setItem('rgb_bets', JSON.stringify(bets));
+
+          // Recompensă XP pentru bilet câștigat
+          if (newStatus === 'win' && oldStatus !== 'win') {
+            if (typeof addXP === 'function') addXP(300);
+          }
+
           if((newStatus === 'win' || (newStatus === 'cashout' && bet.cashoutAmount > 0)) && typeof confetti === 'function') {
             triggerWinConfetti();
           }

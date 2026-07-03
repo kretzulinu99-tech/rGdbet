@@ -181,7 +181,11 @@ window.sendMessage = function(toUsername, text, isSystem = false) {
   unread[to][cid] = (unread[to][cid] || 0) + 1;
   saveUnread(unread);
 
-  if (!isSystem) playSendSnd();
+  if (!isSystem) {
+    playSendSnd();
+    // Recompensă XP pentru mesaj trimis (non-sistem)
+    if (typeof addXP === 'function') addXP(10);
+  }
   return true;
 };
 

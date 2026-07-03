@@ -4846,24 +4846,24 @@ body.page-profile-active .top-bar {
   bottom: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  background: rgba(0, 0, 0, 0.8) !important;
+  background: rgba(0, 0, 0, 0.85) !important;
   z-index: 2000000 !important;
   align-items: center !important;
   justify-content: center !important;
   padding: 20px !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
 }
 .prof-avatar-modal.open { display: flex !important; }
 .prof-avatar-box {
   width: 100% !important;
-  max-width: 360px !important;
+  max-width: 400px !important;
   min-height: auto !important;
   background: #0d1117 !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 28px !important;
-  padding: 24px !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+  padding: 28px 24px !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9) !important;
   animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
   display: flex;
   flex-direction: column;

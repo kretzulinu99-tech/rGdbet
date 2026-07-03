@@ -688,6 +688,51 @@ window.labToggleSection = function(key) {
   if (chev) chev.classList.toggle('collapsed');
 };
 
+window.runStrategySim = function() {
+  const plan = document.getElementById('sim-staking-plan')?.value;
+  const odds = parseFloat(document.getElementById('sim-strat-odds')?.value || 1);
+  const bank = parseFloat(document.getElementById('sim-strat-bank')?.value || 0);
+  const resultDiv = document.getElementById('strat-result');
+  const curr = typeof getCurrency === 'function' ? getCurrency() : 'RON';
+
+  if (!resultDiv) return;
+  if (isNaN(odds) || odds <= 1 || isNaN(bank) || bank <= 0) {
+    resultDiv.innerHTML = `<span style="color:var(--danger);">Introdu date valide (Cotă > 1, Bancă > 0).</span>`;
+    return;
+  }
+
+  let miza = 0;
+  let desc = "";
+
+  if (plan === 'fixed') {
+    miza = bank * 0.05;
+    desc = `Miză recomandată (5% Flat): <strong>${miza.toFixed(2)} ${curr}</strong>`;
+  } else if (plan === 'kelly') {
+    // Probabilitate estimată (valoare subtilă 5% peste cota pieței)
+    const prob = (1 / odds) + 0.05;
+    const f = ((prob * odds) - 1) / (odds - 1);
+    // Folosim un Kelly Fracționar de 0.25 (pentru siguranță/bancă stabilă)
+    miza = bank * Math.max(0, f * 0.25);
+    desc = `Miză Kelly Fracționar (Safe): <strong>${miza.toFixed(2)} ${curr}</strong>`;
+  } else if (plan === 'fibonacci') {
+    // 1% din bancă ca pas inițial în șir
+    miza = bank * 0.01;
+    desc = `Pas inițial Fibonacci (1%): <strong>${miza.toFixed(2)} ${curr}</strong>`;
+  } else if (plan === 'ratio') {
+    // Miza fixă adaptivă (3% din bankroll)
+    miza = bank * 0.03;
+    desc = `Miză Fixed Ratio: <strong>${miza.toFixed(2)} ${curr}</strong>`;
+  }
+
+  resultDiv.innerHTML = `
+    <div style="padding:12px; background:rgba(0,255,163,0.1); border-radius:12px; border:1px solid var(--ng); color:#fff; animation: popIn 0.3s ease;">
+      ${desc}
+      <p style="font-size:11px; color:var(--text3); margin-top:6px; opacity:0.8;">
+        *Calculat profesional pentru managementul riscului.
+      </p>
+    </div>`;
+};
+
 function buildFormPills(team, defaults) {
   const options = ['W', 'D', 'L'];
   return defaults.map((val, i) => `

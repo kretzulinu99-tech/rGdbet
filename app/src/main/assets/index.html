@@ -2,7 +2,12 @@
 <html lang="ro">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#020408">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5971/5971593.png">
   <title>rGdbet — Social Betting Network</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -468,6 +473,15 @@
 </div>
 
 <script>
+/* ══ PWA SERVICE WORKER REGISTRATION ══ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('rGdbet PWA Ready!', reg))
+      .catch(err => console.log('PWA Error:', err));
+  });
+}
+
 /* ══ SPA NAVIGATION ══ */
 let currentPage = 'home';
 let _navLock    = false;

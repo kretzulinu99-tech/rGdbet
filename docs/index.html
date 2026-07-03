@@ -2,7 +2,12 @@
 <html lang="ro">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#020408">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5971/5971593.png">
   <title>rGdbet — Social Betting Network</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -468,6 +473,15 @@
 </div>
 
 <script>
+/* ══ PWA SERVICE WORKER REGISTRATION ══ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('rGdbet PWA Ready!', reg))
+      .catch(err => console.log('PWA Error:', err));
+  });
+}
+
 /* ══ SPA NAVIGATION ══ */
 let currentPage = 'home';
 let _navLock    = false;
@@ -493,17 +507,17 @@ function navigateTo(pageId, btnEl, fromPopState) {
 
   const dir = (NAV_ORDER.indexOf(pageId) >= NAV_ORDER.indexOf(currentPage)) ? 1 : -1;
   if (prev && prev !== next) {
-    prev.style.cssText = `transition:opacity .15s ease,transform .18s cubic-bezier(.4,0,.2,1);opacity:0;transform:translateX(${dir*-24}px);`;
+    prev.style.cssText = `transition:opacity .20s ease,transform .22s cubic-bezier(.4,0,.2,1);opacity:0;transform:translateX(${dir*-32}px);`;
     setTimeout(() => {
       prev.classList.remove('active');
       prev.style.display = 'none'; // Forțăm display none
       prev.style.cssText = '';
-    }, 180);
+    }, 230);
   }
 
   next.style.display = 'block';
   void next.offsetHeight;
-  next.style.cssText = `display:block;opacity:0;transform:translateX(${dir*24}px);transition:opacity .18s ease .01s,transform .20s cubic-bezier(.2,.8,.4,1) .01s;`;
+  next.style.cssText = `display:block;opacity:0;transform:translateX(${dir*32}px);transition:opacity .24s ease .02s,transform .26s cubic-bezier(.2,.8,.4,1) .02s;`;
   requestAnimationFrame(() => {
     next.style.opacity = '1';
     next.style.transform = 'translateX(0)';
@@ -512,7 +526,7 @@ function navigateTo(pageId, btnEl, fromPopState) {
   setTimeout(() => {
     next.style.cssText = 'display:block;opacity:1;';
     _navLock = false;
-  }, 220);
+  }, 300);
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   if (btnEl) btnEl.classList.add('active');
   else { const m = document.querySelector(`.nav-btn[data-page="${pageId}"]`); if(m) m.classList.add('active'); }

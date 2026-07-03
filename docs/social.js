@@ -278,13 +278,12 @@ window.buildProfilePage = function(force = false) {
   const avatarDisplay = renderAvatarContent(user.avatar);
   const joinDate = new Date(user.joinedAt || Date.now()).toLocaleDateString('ro-RO', { year:'numeric', month:'long' });
 
+  /* Date Nivel & XP (v7.0) */
+  const lvl = typeof getUserLevelData === 'function' ? getUserLevelData() : { level:1, xp:0, progressPct:0, progressXP:0, requiredXP:100 };
+
   page.innerHTML = `
     <div class="side-panel-close-btn">
       <button onclick="navigateTo('home', null)"><i class="fa-solid fa-xmark"></i></button>
-      <span>PROFIL</span>
-    </div>
-    <div class="page-top-title" style="display:none;">
-      <i class="fa-solid fa-circle-user" style="color:var(--nb)"></i>
       <span>PROFIL</span>
     </div>
 
@@ -298,15 +297,33 @@ window.buildProfilePage = function(force = false) {
         ${user.displayName || user.username}
         ${typeof getVerificationBadge === 'function' ? getVerificationBadge(user.username) : ''}
       </div>
-      ${typeof calculateLevel === 'function' ? `<div class="xp-badge"><i class="fa-solid fa-star"></i> ${calculateLevel(user.xp || 0).name}</div>` : ''}
-      <div style="font-family:Rajdhani,sans-serif;font-size:13px;color:var(--nb);margin-top:2px;">@${user.username}</div>
+      <div style="font-family:Rajdhani,sans-serif;font-size:13px;color:var(--nb);margin-top:-4px;">@${user.username}</div>
       <div class="prof-email">${user.email || 'fără email'}</div>
-
       <div class="prof-joined">Membru din ${joinDate}</div>
+    </div>
+
+    <!-- ══ XP PROGRESS SYSTEM (v7.0) ══ -->
+    <div class="xp-container">
+      <div class="xp-header">
+        <div class="xp-level-badge">NIVEL ${lvl.level}</div>
+        <div class="xp-total-text">${lvl.xp.toLocaleString()} XP</div>
+      </div>
+      <div class="xp-bar-outer">
+        <div class="xp-bar-inner" style="width: ${lvl.progressPct}%"></div>
+      </div>
+      <div class="xp-footer">
+        <span>PROGRESS</span>
+        <span>${lvl.progressXP} / ${lvl.requiredXP} XP</span>
+      </div>
+    </div>
+
+    <!-- ══ PRIVACY & STATUS ══ -->
+    <div class="prof-section" style="margin-bottom: 20px;">
       <div class="prof-privacy-badge privacy-${user.privacy || 'public'}">
         ${privacyIcon(user.privacy)} ${privacyLabel(user.privacy)}
       </div>
     </div>
+
 
     <!-- ══ STATISTICI LIVE ══ -->
     <div class="prof-stats-grid">

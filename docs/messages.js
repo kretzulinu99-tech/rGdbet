@@ -183,8 +183,8 @@ window.sendMessage = function(toUsername, text, isSystem = false) {
 
   if (!isSystem) {
     playSendSnd();
-    // Recompensă XP pentru mesaj trimis (non-sistem)
-    if (typeof addXP === 'function') addXP(10);
+    // Recompensă XP pentru mesaj trimis
+    if (typeof addXP === 'function') addXP(5);
   }
   return true;
 };

@@ -408,156 +408,42 @@ window.buildProfilePage = function(force = false) {
     <button class="prof-logout-btn" onclick="authLogout()" style="margin-top:0; background:rgba(255,46,99,0.1); border-color:rgba(255,46,99,0.2);">
       <i class="fa-solid fa-power-off"></i> TERMINATE SESSION
     </button>
+
+    <!-- ══ EDIT MODAL ══ -->
+    <div class="prof-edit-modal" id="profEditModal">
+      <div class="prof-edit-box">
+        <div class="prof-edit-title" id="profEditTitle">EDITARE</div>
+        <div class="auth-error" id="prof-edit-error"></div>
+        <div id="profEditBody"></div>
+        <div class="prof-edit-actions">
+          <button class="prof-edit-cancel" onclick="profCloseEdit()">ANULEAZĂ</button>
+          <button class="prof-edit-save"   onclick="profSaveEdit()">SALVEAZĂ</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="prof-avatar-modal" id="profAvatarModal">
+      <div class="prof-avatar-box">
+        <div class="prof-edit-title">ALEGE AVATAR</div>
+
+        <button class="prof-action-btn" style="width:100%; margin-bottom: 16px; font-size: 11px;" onclick="document.getElementById('profAvatarInput').click()">
+          <i class="fa-solid fa-upload"></i> ÎNCARCĂ DIN TELEFON
+        </button>
+        <input type="file" id="profAvatarInput" accept="image/*" style="display:none" onchange="profHandleFileUpload(event)"/>
+
+        <div class="prof-avatar-grid">
+          ${AVATARS.map(a => `
+            <button class="prof-av-option ${a === avatarDisplay ? 'selected' : ''}"
+                    onclick="profSelectAvatar('${a}')">${a}</button>`).join('')}
+        </div>
+        <button class="prof-edit-cancel" style="width:100%;margin-top:12px" onclick="profCloseAvatarPicker()">ÎNCHIDE</button>
+      </div>
+    </div>
   `;
 
-
-    <!-- ══ STATISTICI LIVE ══ -->
-    <div class="prof-stats-grid">
-      <div class="prof-stat-card">
-        <div class="prof-stat-val ${stats.profit >= 0 ? 'pos' : 'neg'}" id="profStatProfit">
-          ${stats.profit >= 0 ? '+' : ''}${stats.profit.toFixed(2)}
-        </div>
-        <div class="prof-stat-lbl">Profit Net (RON)</div>
-      </div>
-      <div class="prof-stat-card">
-        <div class="prof-wr-wrap">
-          <svg class="prof-wr-svg" viewBox="0 0 44 44">
-            <defs>
-              <linearGradient id="wrGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="var(--ng)"/>
-                <stop offset="100%" stop-color="var(--nb)"/>
-              </linearGradient>
-            </defs>
-            <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>
-            <circle cx="22" cy="22" r="18" fill="none" stroke="url(#wrGrad)" stroke-width="5"
-              stroke-linecap="round" stroke-dasharray="113"
-              stroke-dashoffset="${113 - (stats.wr / 100) * 113}"
-              transform="rotate(-90 22 22)"
-              style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);filter:drop-shadow(0 0 6px var(--ng))"/>
-            <text x="22" y="26" text-anchor="middle" fill="white"
-              font-family="Syncopate,sans-serif" font-size="9" font-weight="700">${stats.wr}%</text>
-          </svg>
-        </div>
-        <div class="prof-stat-lbl">Win Rate</div>
-      </div>
-      <div class="prof-stat-card">
-        <div class="prof-stat-val" id="profStatTickets">${stats.total}</div>
-        <div class="prof-stat-lbl">Bilete Plasate</div>
-      </div>
-    </div>
-
-    <!-- ══ SECȚIUNE: PREFERINȚE ══ -->
-    <div class="prof-section">
-      <div class="prof-section-title">PREFERINȚE</div>
-
-      <div class="prof-row" onclick="profOpenEdit('currency')">
-        <div class="prof-row-left">
-          <div class="prof-row-icon gold"><i class="fa-solid fa-coins"></i></div>
-          <div class="prof-row-text">
-            <span class="prof-row-label">Monedă Afișată</span>
-            <span class="prof-row-sub">${getCurrency()}</span>
-          </div>
-        </div>
-        <div class="prof-row-arrow"><i class="fa-solid fa-chevron-right"></i></div>
-      </div>
-
-      <div class="prof-row" onclick="profOpenEdit('displayName')">
-        <div class="prof-row-left">
-          <div class="prof-row-icon blue"><i class="fa-solid fa-id-card"></i></div>
-          <div class="prof-row-text">
-            <span class="prof-row-label">Nickname (Nume afișat)</span>
-            <span class="prof-row-sub">${user.displayName || user.username}</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-pen prof-row-arrow" style="font-size:10px;"></i>
-      </div>
-
-      <div class="prof-row" onclick="profOpenEdit('email')">
-        <div class="prof-row-left">
-          <div class="prof-row-icon blue"><i class="fa-solid fa-envelope"></i></div>
-          <div class="prof-row-text">
-            <span class="prof-row-label">Schimbă Email</span>
-            <span class="prof-row-sub">${user.email || 'nesetat'}</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right prof-row-arrow"></i>
-      </div>
-
-      <div class="prof-row" onclick="profOpenEdit('password')">
-        <div class="prof-row-left">
-          <div class="prof-row-icon purple"><i class="fa-solid fa-lock"></i></div>
-          <div class="prof-row-text">
-            <span class="prof-row-label">Schimbă Parola</span>
-            <span class="prof-row-sub">••••••••</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right prof-row-arrow"></i>
-      </div>
-    </div>
-
-    <!-- ══ SECȚIUNE: PERSONALIZARE ══ -->
-    <div class="prof-section">
-      <div class="prof-section-title">PERSONALIZARE</div>
-
-      <div class="prof-row" onclick="profOpenAvatarPicker()">
-        <div class="prof-row-left">
-          <div class="prof-row-icon gold"><i class="fa-solid fa-face-smile"></i></div>
-          <div class="prof-row-text">
-            <span class="prof-row-label">Avatar</span>
-            <span class="prof-row-sub">Alege un avatar</span>
-          </div>
-        </div>
-        <span style="font-size:22px;">${avatarDisplay}</span>
-      </div>
-
-      <!-- Selector teme integrat -->
-      <div class="prof-theme-row">
-        <div class="prof-row-left" style="pointer-events:none;">
-          <div class="prof-row-icon blue"><i class="fa-solid fa-palette"></i></div>
-          <div class="prof-row-text">
-            <span class="prof-row-label">Temă Vizuală</span>
-          </div>
-        </div>
-        <div class="prof-theme-chips" id="profThemeChips"></div>
-      </div>
-    </div>
-
-    <!-- ══ SECȚIUNE: CONFIDENȚIALITATE ══ -->
-    <div class="prof-section">
-      <div class="prof-section-title">CONFIDENȚIALITATE PROFIL</div>
-      <div class="prof-privacy-selector">
-        ${['public','followers','private'].map(p => `
-          <button class="prof-privacy-btn ${(user.privacy||'public')===p?'active':''}"
-                  data-privacy="${p}" onclick="profSetPrivacy('${p}')">
-            ${privacyIcon(p)} <span>${privacyLabel(p)}</span>
-          </button>`).join('')}
-      </div>
-      <div class="prof-privacy-desc" id="profPrivacyDesc">${privacyDesc(user.privacy)}</div>
-    </div>
-
-    <!-- ══ SECȚIUNE: JOC RESPONSABIL ══ -->
-    <div class="prof-section">
-      <div class="prof-section-title">JOC RESPONSABIL</div>
-      <div class="prof-row" onclick="openGamblingTest()">
-        <div class="prof-row-left">
-          <div class="prof-row-icon red"><i class="fa-solid fa-brain"></i></div>
-          <div class="prof-row-text">
-            <span class="prof-row-label">Test Dependență Jocuri de Noroc</span>
-            <span class="prof-row-sub">Evaluare în 5 întrebări • ${gambTestDoneLabel()}</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right prof-row-arrow"></i>
-      </div>
-      <div class="prof-row" onclick="window.open('https://jocresponsabil.ro','_blank')">
-        <div class="prof-row-left">
-          <div class="prof-row-icon green"><i class="fa-solid fa-heart-pulse"></i></div>
-          <div class="prof-row-text">
-            <span class="prof-row-label">jocresponsabil.ro</span>
-            <span class="prof-row-sub">Resurse de ajutor și suport</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-arrow-up-right-from-square prof-row-arrow"></i>
-      </div>
+  /* Injectăm chipurile de temă */
+  profBuildThemeChips();
+};
     </div>
 
     <!-- ══ SECȚIUNE: DATE ══ -->

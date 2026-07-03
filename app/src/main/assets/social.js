@@ -156,7 +156,11 @@ window.buildProfilePage = function(force = false) {
   }
 
   const stats = calcUserStats();
-  const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(user.xp || 0) : { level:1, xp:0, progressPct:0, progressXP:0, requiredXP:100 };
+
+  // Asigurăm că tragem XP-ul corect (prioritate cheia dedicată pentru persistență)
+  const savedXp = parseInt(localStorage.getItem('rgb_xp')) || user.xp || 0;
+  const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(savedXp) : { level:1, xp:0, progressPct:0, progressXP:0, requiredXP:100 };
+
   const avDisplay = renderAvatarContent(user.avatar);
 
   page.innerHTML = `
@@ -172,14 +176,19 @@ window.buildProfilePage = function(force = false) {
         <div class="prof-user-tag">@${user.username}</div>
       </div>
 
-      <!-- XP BAR -->
+      <!-- XP BAR (RANK PROGRESS) -->
       <div class="xp-container">
         <div class="xp-header">
           <div class="xp-level-badge">LVL ${lvl.level}</div>
-          <div class="xp-total-text">${lvl.xp.toLocaleString()} XP</div>
+          <div class="xp-total-text">${savedXp.toLocaleString()} XP</div>
         </div>
-        <div class="xp-bar-outer"><div class="xp-bar-inner" style="width:${lvl.progressPct}%"></div></div>
-        <div class="xp-footer"><span>RANK PROGRESS</span><span>${lvl.progressXP} / ${lvl.requiredXP} XP</span></div>
+        <div class="xp-bar-outer">
+          <div class="xp-bar-inner" style="width: ${lvl.progressPct}%"></div>
+        </div>
+        <div class="xp-footer">
+          <span>RANK PROGRESS</span>
+          <span>${lvl.progressXP} / ${lvl.requiredXP} XP</span>
+        </div>
       </div>
     </div>
 

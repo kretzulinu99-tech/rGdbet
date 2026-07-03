@@ -444,37 +444,6 @@ function buildLabUI() {
       </div>
     </div>
 
-    <!-- ── ECHIPĂ PRO STRATEGIST — NEW ── -->
-    <div class="lab-card">
-      <div class="lab-card-head" onclick="labToggleSection('strategy')">
-        <div class="lab-card-head-left"><i class="fa-solid fa-brain lab-head-ico purple"></i><span>PRO STRATEGY LAB</span></div>
-        <i class="fa-solid fa-chevron-down lab-chevron" id="lab-chev-strategy"></i>
-      </div>
-      <div class="lab-card-body" id="lab-body-strategy">
-        <div class="lab-stat-grid">
-          <div class="lab-stat-cell" style="grid-column: span 2;">
-            <label class="lab-stat-label">Staking Plan</label>
-            <select id="sim-staking-plan" class="lab-stat-input" style="background:rgba(0,0,0,0.5); border-radius:8px; padding:5px;">
-              <option value="fixed">Miză Fixă (Flat)</option>
-              <option value="kelly">Criteriul Kelly (Pro)</option>
-              <option value="ratio">Fixed Ratio (Dynamic)</option>
-              <option value="fibonacci">Șirul Fibonacci</option>
-            </select>
-          </div>
-          <div class="lab-stat-cell">
-            <label class="lab-stat-label">Cota Bilet</label>
-            <input id="sim-strat-odds" type="number" step="0.1" class="lab-stat-input" value="2.00" />
-          </div>
-          <div class="lab-stat-cell">
-            <label class="lab-stat-label">Banca Actuală</label>
-            <input id="sim-strat-bank" type="number" class="lab-stat-input" value="1000" />
-          </div>
-        </div>
-        <button class="sim-run-btn" onclick="runStrategySim()" style="margin-top:15px; height:45px;">SIMULEAZĂ STRATEGIA</button>
-        <div id="strat-result" style="margin-top:12px; font-family:Rajdhani; font-size:14px; color:var(--nb); text-align:center;"></div>
-      </div>
-    </div>
-
     <!-- ── GOLURI REALE CARD ── -->
     <div class="lab-card">
       <div class="lab-card-head" onclick="labToggleSection('goals')">
@@ -688,16 +657,20 @@ window.labToggleSection = function(key) {
   if (chev) chev.classList.toggle('collapsed');
 };
 
+/* ── PRO STRATEGY LAB LOGIC ── */
 window.runStrategySim = function() {
   const plan = document.getElementById('sim-staking-plan')?.value;
   const odds = parseFloat(document.getElementById('sim-strat-odds')?.value || 1);
   const bank = parseFloat(document.getElementById('sim-strat-bank')?.value || 0);
   const resultDiv = document.getElementById('strat-result');
-  const curr = typeof getCurrency === 'function' ? getCurrency() : 'RON';
 
   if (!resultDiv) return;
+
+  // Get current currency
+  const curr = typeof getCurrency === 'function' ? getCurrency() : 'RON';
+
   if (isNaN(odds) || odds <= 1 || isNaN(bank) || bank <= 0) {
-    resultDiv.innerHTML = `<span style="color:var(--danger);">Introdu date valide (Cotă > 1, Bancă > 0).</span>`;
+    resultDiv.innerHTML = `<span style="color:var(--danger); font-family:Rajdhani;">Introdu date valide (Cotă > 1, Bancă > 0).</span>`;
     return;
   }
 
@@ -705,15 +678,15 @@ window.runStrategySim = function() {
   let desc = "";
 
   if (plan === 'fixed') {
-    miza = bank * 0.05;
+    miza = bank * 0.05; // 5% Flat
     desc = `Miză recomandată (5% Flat): <strong>${miza.toFixed(2)} ${curr}</strong>`;
   } else if (plan === 'kelly') {
-    // Probabilitate estimată (valoare subtilă 5% peste cota pieței)
+    // Probabilitate estimată (valoare subtilă: 5% peste cota pieței pentru a justifica pariul)
     const prob = (1 / odds) + 0.05;
     const f = ((prob * odds) - 1) / (odds - 1);
-    // Folosim un Kelly Fracționar de 0.25 (pentru siguranță/bancă stabilă)
+    // Folosim un Kelly Fracționar de 0.25 pentru management conservator
     miza = bank * Math.max(0, f * 0.25);
-    desc = `Miză Kelly Fracționar (Safe): <strong>${miza.toFixed(2)} ${curr}</strong>`;
+    desc = `Miză Kelly Fracționar (Management de Risc): <strong>${miza.toFixed(2)} ${curr}</strong>`;
   } else if (plan === 'fibonacci') {
     // 1% din bancă ca pas inițial în șir
     miza = bank * 0.01;
@@ -725,10 +698,11 @@ window.runStrategySim = function() {
   }
 
   resultDiv.innerHTML = `
-    <div style="padding:12px; background:rgba(0,255,163,0.1); border-radius:12px; border:1px solid var(--ng); color:#fff; animation: popIn 0.3s ease;">
-      ${desc}
-      <p style="font-size:11px; color:var(--text3); margin-top:6px; opacity:0.8;">
-        *Calculat profesional pentru managementul riscului.
+    <div style="padding:14px; background:rgba(0, 224, 255, 0.08); border-radius:16px; border:1px solid rgba(0, 224, 255, 0.3); color:#fff; animation: popIn 0.3s ease;">
+      <div style="font-family:Syncopate; font-size:9px; color:var(--nb); margin-bottom:8px; letter-spacing:1px;">REZULTAT CALCUL</div>
+      <div style="font-family:Rajdhani; font-size:16px;">${desc}</div>
+      <p style="font-size:11px; color:var(--text2); margin-top:8px; opacity:0.8; font-family:Rajdhani;">
+        *Calculat profesional pentru prezervarea bankroll-ului.
       </p>
     </div>`;
 };

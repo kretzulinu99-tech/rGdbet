@@ -962,52 +962,51 @@ function socRenderLeaderboard() {
   const users = getUsers();
   const allPosts = getPosts();
 
-    // Calculăm statisticile pentru fiecare utilizator
-    const rankings = Object.values(users).map(u => {
-      const userPosts = allPosts.filter(p => p.author?.toLowerCase() === u.username.toLowerCase());
-      const settled = userPosts.filter(p => p.status === 'win' || p.status === 'loss');
-      const wins = settled.filter(p => p.status === 'win').length;
-      const wr = settled.length >= 3 ? Math.round((wins / settled.length) * 100) : 0;
+  // Calculăm statisticile pentru fiecare utilizator care a postat minim 3 bilete
+  const rankings = Object.values(users).map(u => {
+    const userPosts = allPosts.filter(p => p.author?.toLowerCase() === u.username.toLowerCase());
+    const settled = userPosts.filter(p => p.status === 'win' || p.status === 'loss');
+    const wins = settled.filter(p => p.status === 'win').length;
+    const wr = settled.length >= 3 ? Math.round((wins / settled.length) * 100) : 0;
 
-      // Elite Ranking Algorithm: (Win Rate * 0.4) + (Profit Score * 0.4) + (Volume Score * 0.2)
-      // Profit Score is relative to the highest profit in the group to normalize it
-      const profit = userPosts.reduce((acc, p) => {
-        const stake = parseFloat(p.stake || 0);
-        const odds = parseFloat(p.odds || 1);
-        if (p.status === 'win') return acc + (stake * (odds - 1));
-        if (p.status === 'loss') return acc - stake;
-        return acc;
-      }, 0);
+    const profit = userPosts.reduce((acc, p) => {
+      const stake = parseFloat(p.stake || 0);
+      const odds = parseFloat(p.odds || 1);
+      if (p.status === 'win') return acc + (stake * (odds - 1));
+      if (p.status === 'loss') return acc - stake;
+      return acc;
+    }, 0);
 
-      return {
-        username: u.username,
-        avatar: u.avatar,
-        total: settled.length,
-        wins: wins,
-        wr: wr,
-        profit: profit,
-        score: (wr * 0.6) + (profit * 0.2) + (settled.length * 0.2)
-      };
-    }).filter(r => r.total >= 3)
-      .sort((a, b) => b.score - a.score);
+    return {
+      username: u.username,
+      avatar: u.avatar,
+      total: settled.length,
+      wins: wins,
+      wr: wr,
+      profit: profit,
+      score: (wr * 0.6) + (profit * 0.2) + (settled.length * 0.2) // Elite Algorithm
+    };
+  }).filter(r => r.total >= 3)
+    .sort((a, b) => b.score - a.score);
 
   if (!rankings.length) {
     list.innerHTML = `<div class="soc-empty"><div style="font-family:Rajdhani,sans-serif;color:rgba(255,255,255,.4);">Clasamentul se va genera după ce utilizatorii postează minim 3 bilete.</div></div>`;
     return;
   }
 
+  const currency = typeof getCurrency === 'function' ? getCurrency() : 'RON';
+
   list.innerHTML = `
     <div style="padding: 10px 16px; font-family: 'Syncopate', sans-serif; font-size: 8px; color: var(--nb); letter-spacing: 2px; text-align: center; margin-bottom: 10px;">
-      ELITE GLOBAL RANKINGS (ROI + YIELD + VOLUME)
+      ELITE GLOBAL RANKINGS (WINRATE + PROFIT)
     </div>
     ${rankings.map((r, index) => {
       const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
       const profitClass = r.profit >= 0 ? 'pos' : 'neg';
-      const currency = typeof getCurrency === 'function' ? getCurrency() : 'RON';
 
       return `
       <div class="soc-user-card" onclick="viewUserProfile('${r.username}')" style="border-left: 3px solid ${index === 0 ? 'var(--gold)' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'transparent'};">
-        <div style="font-family: 'Syncopate', sans-serif; font-size: 14px; font-weight: 700; width: 28px; color: ${index < 3 ? 'var(--gold)' : 'var(--text3)'}; text-align: center; position: relative;">
+        <div style="font-family: 'Syncopate', sans-serif; font-size: 14px; font-weight: 700; width: 28px; color: ${index < 3 ? 'var(--gold)' : 'var(--text3)'}; text-align: center;">
           ${medal || (index + 1)}
         </div>
         <div class="soc-post-avatar">${renderAvatarContent(r.avatar)}</div>

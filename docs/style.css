@@ -3618,17 +3618,32 @@ body[data-page="social"] .soc-action-bar {
 /* ═══════════════════════════════════════════════════════════
    +18 RESPONSIBLE GAMBLING BANNER
 ═══════════════════════════════════════════════════════════ */
+@keyframes rg-luminous-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(0, 224, 255, 0.2), inset 0 0 10px rgba(0, 224, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 224, 255, 0.8), 0 0 20px rgba(0, 255, 163, 0.5), inset 0 0 20px rgba(0, 224, 255, 0.4);
+    border-color: var(--nb);
+    filter: brightness(1.3);
+  }
+}
+
 .rg-banner {
   margin: 0 16px 20px;
   padding: 18px 16px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(10, 20, 35, 0.6) !important;
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 18px;
+  border-radius: 22px;
   text-align: center;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(15px) !important;
+  -webkit-backdrop-filter: blur(15px) !important;
   position: relative;
   overflow: hidden;
+  animation: rg-luminous-pulse 3s infinite ease-in-out;
+  will-change: filter, box-shadow;
 }
 .rg-banner::before {
   content: '';

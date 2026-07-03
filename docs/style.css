@@ -4785,13 +4785,12 @@ body.page-profile-active .top-bar {
   bottom: 0;
   background: rgba(0,0,0,0.85);
   z-index: 999999; /* Maximized to stay above everything */
-  display: none; /* Controlled by .open class */
   align-items: center;
   justify-content: center;
   padding: 20px;
   backdrop-filter: blur(8px);
 }
-.prof-edit-modal.open { display: flex; }
+.prof-edit-modal.open { display: flex !important; }
 .prof-edit-box {
   width: 100%;
   max-width: 400px;
@@ -4841,13 +4840,12 @@ body.page-profile-active .top-bar {
   bottom: 0;
   background: rgba(0,0,0,0.85);
   z-index: 999999;
-  display: none;
   align-items: center;
   justify-content: center;
   padding: 20px;
   backdrop-filter: blur(8px);
 }
-.prof-avatar-modal.open { display: flex; }
+.prof-avatar-modal.open { display: flex !important; }
 .prof-avatar-box {
   width: 100%;
   max-width: 400px;

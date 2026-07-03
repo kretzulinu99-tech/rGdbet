@@ -4778,20 +4778,30 @@ body.page-profile-active .top-bar {
 /* Edit modal inline */
 .prof-edit-modal {
   display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.82);
-  z-index: 8000;
-  align-items: center; justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 999999; /* Maximized to stay above everything */
+  display: none; /* Controlled by .open class */
+  align-items: center;
+  justify-content: center;
   padding: 20px;
+  backdrop-filter: blur(8px);
 }
 .prof-edit-modal.open { display: flex; }
 .prof-edit-box {
-  width: 100%; max-width: 420px;
+  width: 100%;
+  max-width: 400px;
   background: #090d1a;
-  border: 1px solid rgba(0,200,255,.2);
-  border-radius: 24px;
-  padding: 24px 20px 24px;
-  animation: popIn .2s cubic-bezier(.2,.8,.4,1);
+  border: 1px solid rgba(0,200,255,.3);
+  border-radius: 28px;
+  padding: 28px 24px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+  animation: popIn .25s cubic-bezier(.2,.8,.4,1);
+  position: relative;
 }
 .prof-edit-title {
   font-family: 'Syncopate', sans-serif;
@@ -4824,20 +4834,30 @@ body.page-profile-active .top-bar {
 /* Avatar picker */
 .prof-avatar-modal {
   display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.85);
-  z-index: 8001;
-  align-items: center; justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 999999;
+  display: none;
+  align-items: center;
+  justify-content: center;
   padding: 20px;
+  backdrop-filter: blur(8px);
 }
 .prof-avatar-modal.open { display: flex; }
 .prof-avatar-box {
-  width: 100%; max-width: 420px;
+  width: 100%;
+  max-width: 400px;
   background: #090d1a;
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 24px;
-  padding: 24px 20px 24px;
-  animation: popIn .2s cubic-bezier(.2,.8,.4,1);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 28px;
+  padding: 28px 24px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+  animation: popIn .25s cubic-bezier(.2,.8,.4,1);
+  position: relative;
 }
 .prof-avatar-grid {
   display: grid; grid-template-columns: repeat(6, 1fr);

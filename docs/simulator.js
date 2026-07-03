@@ -444,6 +444,37 @@ function buildLabUI() {
       </div>
     </div>
 
+    <!-- ── ECHIPĂ PRO STRATEGIST — NEW ── -->
+    <div class="lab-card">
+      <div class="lab-card-head" onclick="labToggleSection('strategy')">
+        <div class="lab-card-head-left"><i class="fa-solid fa-brain lab-head-ico purple"></i><span>PRO STRATEGY LAB</span></div>
+        <i class="fa-solid fa-chevron-down lab-chevron" id="lab-chev-strategy"></i>
+      </div>
+      <div class="lab-card-body" id="lab-body-strategy">
+        <div class="lab-stat-grid">
+          <div class="lab-stat-cell" style="grid-column: span 2;">
+            <label class="lab-stat-label">Staking Plan</label>
+            <select id="sim-staking-plan" class="lab-stat-input" style="background:rgba(0,0,0,0.5); border-radius:8px; padding:5px;">
+              <option value="fixed">Miză Fixă (Flat)</option>
+              <option value="kelly">Criteriul Kelly (Pro)</option>
+              <option value="ratio">Fixed Ratio (Dynamic)</option>
+              <option value="fibonacci">Șirul Fibonacci</option>
+            </select>
+          </div>
+          <div class="lab-stat-cell">
+            <label class="lab-stat-label">Cota Bilet</label>
+            <input id="sim-strat-odds" type="number" step="0.1" class="lab-stat-input" value="2.00" />
+          </div>
+          <div class="lab-stat-cell">
+            <label class="lab-stat-label">Banca Actuală</label>
+            <input id="sim-strat-bank" type="number" class="lab-stat-input" value="1000" />
+          </div>
+        </div>
+        <button class="sim-run-btn" onclick="runStrategySim()" style="margin-top:15px; height:45px;">SIMULEAZĂ STRATEGIA</button>
+        <div id="strat-result" style="margin-top:12px; font-family:Rajdhani; font-size:14px; color:var(--nb); text-align:center;"></div>
+      </div>
+    </div>
+
     <!-- ── GOLURI REALE CARD ── -->
     <div class="lab-card">
       <div class="lab-card-head" onclick="labToggleSection('goals')">

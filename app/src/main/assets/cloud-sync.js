@@ -19,7 +19,7 @@ const CLOUD_KEYS = [
   'rgb_user',
   'rgb_social_feed',
   'rgb_gamb_test',
-  'rgb_xp' // XP Persistence ensured
+  'rgb_xp'
 ];
 
 let _isSyncing = false;

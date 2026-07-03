@@ -278,50 +278,137 @@ window.buildProfilePage = function(force = false) {
   const avatarDisplay = renderAvatarContent(user.avatar);
   const joinDate = new Date(user.joinedAt || Date.now()).toLocaleDateString('ro-RO', { year:'numeric', month:'long' });
 
-  /* Date Nivel & XP (v7.0) */
+  /* Date Nivel & XP (v8.0) */
   const lvl = typeof getUserLevelData === 'function' ? getUserLevelData() : { level:1, xp:0, progressPct:0, progressXP:0, requiredXP:100 };
 
   page.innerHTML = `
-    <div class="side-panel-close-btn">
-      <button onclick="navigateTo('home', null)"><i class="fa-solid fa-xmark"></i></button>
-      <span>PROFIL</span>
+    <div class="side-panel-close-btn" style="background: rgba(2,4,8,0.6); border:none;">
+      <button onclick="navigateTo('home', null)"><i class="fa-solid fa-arrow-left"></i></button>
+      <span style="font-family:'Cinzel'; letter-spacing:4px;">ACCOUNT ELITE</span>
     </div>
 
-    <!-- ══ HERO AVATAR ══ -->
-    <div class="prof-hero">
-      <div class="prof-avatar-wrap" onclick="profOpenAvatarPicker()" title="Schimbă Avatar">
-        <div class="prof-avatar" id="profAvatarDisplay">${avatarDisplay}</div>
-        <div class="prof-avatar-edit"><i class="fa-solid fa-camera"></i></div>
+    <!-- ══ MODERN HERO ══ -->
+    <div class="prof-hero-modern">
+      <div class="prof-avatar" id="profAvatarDisplay" onclick="profOpenAvatarPicker()">
+        ${avatarDisplay}
       </div>
-      <div class="prof-username" id="profDisplayNameDisplay">
-        ${user.displayName || user.username}
-        ${typeof getVerificationBadge === 'function' ? getVerificationBadge(user.username) : ''}
+      <div class="prof-name-container">
+        <div class="prof-display-name" id="profDisplayNameDisplay">
+          ${user.displayName || user.username}
+          ${typeof getVerificationBadge === 'function' ? getVerificationBadge(user.username) : ''}
+        </div>
+        <div class="prof-user-tag">@${user.username}</div>
       </div>
-      <div style="font-family:Rajdhani,sans-serif;font-size:13px;color:var(--nb);margin-top:-4px;">@${user.username}</div>
-      <div class="prof-joined">Membru din ${joinDate}</div>
+
+      <!-- XP PROGRESS SYSTEM (v8.0) -->
+      <div class="xp-container" style="margin: 0 16px;">
+        <div class="xp-header">
+          <div class="xp-level-badge">LEVEL ${lvl.level}</div>
+          <div class="xp-total-text">${lvl.xp.toLocaleString()} XP</div>
+        </div>
+        <div class="xp-bar-outer">
+          <div class="xp-bar-inner" style="width: ${lvl.progressPct}%"></div>
+        </div>
+        <div class="xp-footer">
+          <span>RANK PROGRESSION</span>
+          <span>${lvl.progressXP} / ${lvl.requiredXP} XP</span>
+        </div>
+      </div>
     </div>
 
-    <!-- ══ XP PROGRESS SYSTEM (v7.0) ══ -->
-    <div class="xp-container">
-      <div class="xp-header">
-        <div class="xp-level-badge">NIVEL ${lvl.level}</div>
-        <div class="xp-total-text">${lvl.xp.toLocaleString()} XP</div>
+    <!-- ══ QUICK STATS ══ -->
+    <div class="prof-stats-grid" style="margin-top: 10px;">
+      <div class="prof-stat-card">
+        <div class="prof-stat-val ${stats.profit >= 0 ? 'pos' : 'neg'}">
+          ${stats.profit >= 0 ? '+' : ''}${stats.profit.toFixed(0)}
+        </div>
+        <div class="prof-stat-lbl">PROFIT (${getCurrency()})</div>
       </div>
-      <div class="xp-bar-outer">
-        <div class="xp-bar-inner" style="width: ${lvl.progressPct}%"></div>
+      <div class="prof-stat-card">
+        <div class="prof-stat-val" style="color:var(--nb)">${stats.wr}%</div>
+        <div class="prof-stat-lbl">WIN RATE</div>
       </div>
-      <div class="xp-footer">
-        <span>PROGRESS</span>
-        <span>${lvl.progressXP} / ${lvl.requiredXP} XP</span>
+      <div class="prof-stat-card">
+        <div class="prof-stat-val">${stats.total}</div>
+        <div class="prof-stat-lbl">TICKETS</div>
       </div>
     </div>
 
-    <!-- ══ PRIVACY & STATUS ══ -->
-    <div class="prof-section" style="margin-bottom: 20px;">
-      <div class="prof-privacy-badge privacy-${user.privacy || 'public'}">
-        ${privacyIcon(user.privacy)} ${privacyLabel(user.privacy)}
+    <!-- ══ MAIN CONFIGURATION ══ -->
+    <div class="prof-section-card">
+      <div class="prof-section-title">CONFIGURATION</div>
+
+      <div class="prof-row" onclick="profOpenEdit('currency')">
+        <div class="prof-row-left">
+          <div class="prof-row-icon gold"><i class="fa-solid fa-coins"></i></div>
+          <div class="prof-row-text">
+            <span class="prof-row-label">Currency</span>
+            <span class="prof-row-sub">${getCurrency()}</span>
+          </div>
+        </div>
+        <div class="prof-row-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      </div>
+
+      <div class="prof-row" onclick="profOpenEdit('displayName')">
+        <div class="prof-row-left">
+          <div class="prof-row-icon blue"><i class="fa-solid fa-id-card"></i></div>
+          <div class="prof-row-text">
+            <span class="prof-row-label">Nickname</span>
+            <span class="prof-row-sub">${user.displayName || user.username}</span>
+          </div>
+        </div>
+        <i class="fa-solid fa-pen prof-row-arrow"></i>
+      </div>
+
+      <div class="prof-row" onclick="profOpenEdit('password')">
+        <div class="prof-row-left">
+          <div class="prof-row-icon purple"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="prof-row-text">
+            <span class="prof-row-label">Security</span>
+            <span class="prof-row-sub">Update Password</span>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right prof-row-arrow"></i>
       </div>
     </div>
+
+    <!-- ══ CUSTOMIZATION ══ -->
+    <div class="prof-section-card">
+      <div class="prof-section-title">CUSTOMIZATION</div>
+      <div class="prof-row" onclick="profOpenAvatarPicker()">
+        <div class="prof-row-left">
+          <div class="prof-row-icon gold"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          <div class="prof-row-text"><span class="prof-row-label">Profile Identity</span></div>
+        </div>
+        <span style="font-size:24px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));">${avatarDisplay}</span>
+      </div>
+      <div class="prof-theme-row" style="background:none; border:none; padding:0; margin-top:10px;">
+        <div class="prof-theme-chips" id="profThemeChips" style="justify-content: center; width: 100%;"></div>
+      </div>
+    </div>
+
+    <!-- ══ UTILITIES & DATA ══ -->
+    <div class="prof-section-card">
+      <div class="prof-section-title">SYSTEM & DATA</div>
+      <div class="prof-row" onclick="exportAccountData()">
+        <div class="prof-row-left">
+          <div class="prof-row-icon green"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+          <div class="prof-row-text"><span class="prof-row-label">Cloud Backup (Manual)</span></div>
+        </div>
+      </div>
+      <div class="prof-row" onclick="document.getElementById('import-data-input').click()">
+        <div class="prof-row-left">
+          <div class="prof-row-icon blue"><i class="fa-solid fa-cloud-arrow-down"></i></div>
+          <div class="prof-row-text"><span class="prof-row-label">Restore Session</span></div>
+        </div>
+      </div>
+      <input type="file" id="import-data-input" accept="application/json" style="display:none;" onchange="importAccountData(event)"/>
+    </div>
+
+    <button class="prof-logout-btn" onclick="authLogout()" style="margin-top:0; background:rgba(255,46,99,0.1); border-color:rgba(255,46,99,0.2);">
+      <i class="fa-solid fa-power-off"></i> TERMINATE SESSION
+    </button>
+  `;
 
 
     <!-- ══ STATISTICI LIVE ══ -->

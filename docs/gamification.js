@@ -64,6 +64,10 @@ window.addXP = function(amount) {
   const newData = getUserLevelData();
 
   saveCurrentUser(user);
+
+  // Salvare locală dedicată pentru XP (pentru siguranță dublă)
+  localStorage.setItem('rgb_xp', user.xp.toString());
+
   const users = getUsers();
   if (users[user.username.toLowerCase()]) {
     users[user.username.toLowerCase()].xp = user.xp;

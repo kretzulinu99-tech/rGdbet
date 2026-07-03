@@ -6091,26 +6091,96 @@ body.page-profile-active .top-bar {
   letter-spacing: 1px;
 }
 
-/* ── Profile Transparency (v7.5) ── */
-/* Facem toate cardurile din profil semi-transparente */
-#page-profile .prof-stat-card,
-#page-profile .prof-row,
-#page-profile .prof-theme-row,
-#page-profile .prof-section {
-  background: rgba(255, 255, 255, 0.02) !important;
-  backdrop-filter: blur(5px) !important;
-  -webkit-backdrop-filter: blur(5px) !important;
-  border-color: rgba(255, 255, 255, 0.05) !important;
+/* ── MODERN PROFILE RE-DESIGN (v8.0) ── */
+#page-profile {
+  background: transparent;
+  padding-top: 10px;
 }
 
-/* Containerul de XP rămâne SOLID și premium pentru evidențiere */
-#page-profile .xp-container {
-  background: rgba(13, 17, 23, 0.95) !important;
-  border: 1px solid rgba(0, 224, 255, 0.3) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 224, 255, 0.1) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+.prof-hero-modern {
+  text-align: center;
+  padding: 40px 20px 30px;
+  position: relative;
 }
+
+#page-profile .prof-avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 35% 65% 70% 30% / 30% 40% 60% 70%; /* Organic Blob Shape */
+  background: linear-gradient(135deg, var(--nb), var(--np));
+  margin: 0 auto 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 15px 45px rgba(0, 224, 255, 0.3);
+  animation: blob-morph 8s ease-in-out infinite alternate;
+}
+
+@keyframes blob-morph {
+  0% { border-radius: 35% 65% 70% 30% / 30% 40% 60% 70%; }
+  100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+}
+
+.prof-name-container {
+  margin-bottom: 20px;
+}
+
+.prof-display-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: 2px;
+  background: linear-gradient(to bottom, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.prof-user-tag {
+  font-family: 'Syncopate', sans-serif;
+  font-size: 10px;
+  color: var(--nb);
+  opacity: 0.8;
+  letter-spacing: 3px;
+  margin-top: 5px;
+}
+
+/* Glass-Card refinement */
+#page-profile .prof-section-card {
+  background: rgba(10, 20, 35, 0.4) !important;
+  backdrop-filter: blur(15px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 30px;
+  margin: 0 16px 20px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+#page-profile .prof-row {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 20px;
+  padding: 15px;
+  margin-bottom: 10px;
+  transition: 0.3s;
+}
+
+#page-profile .prof-row:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  transform: translateX(5px);
+}
+
+/* XP Bar Master Style */
+#page-profile .xp-container {
+  background: #020408 !important; /* Total Dark for contrast */
+  border: 1.5px solid var(--nb) !important;
+  box-shadow: 0 0 30px rgba(0, 224, 255, 0.2);
+  transform: scale(1.02);
+}
+
 
 /* ── Level Up Toast ── */
 .level-up-toast {

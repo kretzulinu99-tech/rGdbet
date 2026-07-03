@@ -89,6 +89,8 @@ function scheduleRender() {
       };
 
       function getCurrency() {
+        const manual = localStorage.getItem('rgb_manual_currency');
+        if (manual) return manual;
         return currencyMap[currentLang] || 'USD';
       }
 
@@ -98,6 +100,19 @@ function scheduleRender() {
         applyTranslations();
         initPortfolios();
         render();
+        if (typeof buildProfilePage === 'function') buildProfilePage(true);
+      }
+
+      function setManualCurrency(curr) {
+        if (curr === 'auto') {
+          localStorage.removeItem('rgb_manual_currency');
+        } else {
+          localStorage.setItem('rgb_manual_currency', curr);
+        }
+        applyTranslations();
+        initPortfolios();
+        render();
+        if (typeof buildProfilePage === 'function') buildProfilePage(true);
       }
 
       function t(key) {
@@ -1319,14 +1334,13 @@ function scheduleRender() {
           }
 
           const possiblePayout = (b.stake * b.odds).toFixed(2);
-          const curr = getCurrency();
           let payoutHtml = '';
           if (b.status === 'cashout') {
-            payoutHtml = `<span style="color:var(--text2)">${t('cashout_txt')}</span> <strong style="color:var(--gold)">${b.cashoutAmount.toFixed(2)} ${curr}</strong>`;
+            payoutHtml = `<span style="color:var(--text2)">${t('cashout_txt')}</span> <strong style="color:var(--gold)">${b.cashoutAmount.toFixed(2)} RON</strong>`;
           } else if (b.status === 'loss') {
             payoutHtml = `<span style="color:var(--danger); font-weight:700; font-size:15px; letter-spacing:1px;">${t('filter_loss')}</span>`;
           } else {
-            payoutHtml = `<span style="color:var(--text2)">${t('payout')}</span> <strong style="color:var(--ng)">${possiblePayout} ${curr}</strong>`;
+            payoutHtml = `<span style="color:var(--text2)">${t('payout')}</span> <strong style="color:var(--ng)">${possiblePayout} RON</strong>`;
           }
 
           let statusSymbol = '';
@@ -1364,7 +1378,7 @@ function scheduleRender() {
               <div class="event-sub-list">${eventsHtml}</div>
               <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:6px;">
                 <div class="bet-sum">
-                  <span style="color:var(--text2)">${t('miza')}</span> <strong>${b.stake} ${curr}</strong>
+                  <span style="color:var(--text2)">${t('miza')}</span> <strong>${b.stake} RON</strong>
                 </div>
                 <div class="bet-sum" style="text-align:right;">
                    ${payoutHtml}

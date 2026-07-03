@@ -338,9 +338,20 @@ window.buildProfilePage = function(force = false) {
       </div>
     </div>
 
-    <!-- ══ SECȚIUNE: CONT ══ -->
+    <!-- ══ SECȚIUNE: PREFERINȚE ══ -->
     <div class="prof-section">
-      <div class="prof-section-title">SETĂRI CONT</div>
+      <div class="prof-section-title">PREFERINȚE</div>
+
+      <div class="prof-row" onclick="profOpenEdit('currency')">
+        <div class="prof-row-left">
+          <div class="prof-row-icon gold"><i class="fa-solid fa-coins"></i></div>
+          <div class="prof-row-text">
+            <span class="prof-row-label">Monedă Afișată</span>
+            <span class="prof-row-sub">${getCurrency()}</span>
+          </div>
+        </div>
+        <div class="prof-row-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      </div>
 
       <div class="prof-row" onclick="profOpenEdit('displayName')">
         <div class="prof-row-left">
@@ -682,6 +693,30 @@ window.profOpenEdit = function(type) {
           Acest nume va apărea în feed-ul social și la căutări.
         </p>
       </div>`;
+  } else if (type === 'currency') {
+    const current = getCurrency();
+    const isManual = !!localStorage.getItem('rgb_manual_currency');
+
+    if (title) title.textContent = 'MONEDĂ AFIȘATĂ';
+    if (body) body.innerHTML = `
+      <div class="auth-field" style="margin-bottom:12px;">
+        <label>ALEGE MONEDA</label>
+        <select id="edit-currency-select" class="auth-input" style="padding-left:14px; background:var(--bg2);">
+          <option value="auto" ${!isManual ? 'selected' : ''}>Auto (După limbă)</option>
+          <option value="RON" ${isManual && current === 'RON' ? 'selected' : ''}>RON (Leu Românesc)</option>
+          <option value="EUR" ${isManual && current === 'EUR' ? 'selected' : ''}>EUR (Euro)</option>
+          <option value="USD" ${isManual && current === 'USD' ? 'selected' : ''}>USD (Dolar American)</option>
+          <option value="GBP" ${isManual && current === 'GBP' ? 'selected' : ''}>GBP (Liră Sterlină)</option>
+          <option value="TRY" ${isManual && current === 'TRY' ? 'selected' : ''}>TRY (Liră Turcească)</option>
+          <option value="BGN" ${isManual && current === 'BGN' ? 'selected' : ''}>BGN (Leva Bulgară)</option>
+          <option value="CZK" ${isManual && current === 'CZK' ? 'selected' : ''}>CZK (Coroană Cehă)</option>
+          <option value="RUB" ${isManual && current === 'RUB' ? 'selected' : ''}>RUB (Rublă)</option>
+          <option value="CNY" ${isManual && current === 'CNY' ? 'selected' : ''}>CNY (Yuan Chinezesc)</option>
+        </select>
+        <p style="font-family:Rajdhani,sans-serif;font-size:11px;color:var(--text2);margin-top:8px;">
+          Dacă alegi 'Auto', moneda se va schimba automat când schimbi limba aplicației.
+        </p>
+      </div>`;
   } else if (type === 'password') {
     if (title) title.textContent = 'SCHIMBĂ PAROLA';
     if (body) body.innerHTML = `
@@ -735,6 +770,12 @@ window.profSaveEdit = function() {
     if (nw.length < 6) return showErr('Parola nouă trebuie să aibă minim 6 caractere.');
     user.passwordHash = hashStr(nw);
     if (users[key]) users[key].passwordHash = hashStr(nw);
+  } else if (_currentEditType === 'currency') {
+    const nc = document.getElementById('edit-currency-select')?.value || 'auto';
+    setManualCurrency(nc);
+    // Nu salvăm moneda pe obiectul 'user' de server momentan, doar local
+    profCloseEdit();
+    return; // setManualCurrency face deja rebuild
   }
   saveCurrentUser(user);
   saveUsers(users);

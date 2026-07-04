@@ -644,8 +644,10 @@ function scheduleRender() {
         bets.push(newBet);
         localStorage.setItem('rgb_bets', JSON.stringify(bets));
 
-        // Recompensă XP pentru adăugare bilet
-        if (typeof addXP === 'function') addXP(50);
+        // Recompensă XP (v8.5 Platinum - Logică Anti-Double)
+        const baseXP = 50; // XP de bază pentru bilet adăugat (Pending)
+        newBet.rewardedXP = baseXP;
+        if (typeof addXP === 'function') addXP(baseXP);
 
         document.getElementById('match').value = '';
         document.getElementById('stake').value = '';
@@ -673,16 +675,26 @@ function scheduleRender() {
         const bet = bets.find(b => b.id === id);
         if(bet) {
           const oldStatus = bet.status;
-          bet.status = newStatus;
-          localStorage.setItem('rgb_bets', JSON.stringify(bets));
+          const oldXP = bet.rewardedXP || 0;
 
-          // Recompensă XP (v8.5)
-          if (newStatus !== oldStatus && (newStatus === 'win' || newStatus === 'loss' || newStatus === 'cashout')) {
-            if (typeof addXP === 'function' && typeof calculateTicketXP === 'function') {
-              const xpAmount = calculateTicketXP(bet);
-              addXP(xpAmount);
+          bet.status = newStatus;
+
+          // Recompensă XP (v8.5 Platinum - Logică Anti-Double)
+          if (newStatus !== oldStatus) {
+            // Calculăm XP-ul nou pentru noul status
+            const newXP = (newStatus === 'win' || newStatus === 'loss' || newStatus === 'cashout')
+              ? (typeof calculateTicketXP === 'function' ? calculateTicketXP(bet) : 0)
+              : 0;
+
+            // Ajustăm XP-ul total (Eliminăm ce am dat anterior și adăugăm noua valoare)
+            const diff = newXP - oldXP;
+            if (diff !== 0) {
+              if (typeof addXP === 'function') addXP(diff, true);
+              bet.rewardedXP = newXP;
             }
           }
+
+          localStorage.setItem('rgb_bets', JSON.stringify(bets));
 
           if((newStatus === 'win' || (newStatus === 'cashout' && bet.cashoutAmount > 0)) && typeof confetti === 'function') {
             triggerWinConfetti();

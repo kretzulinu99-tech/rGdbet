@@ -47,12 +47,16 @@ window.getUserLevelData = function(xp = 0) {
 /**
  * Adaugă XP utilizatorului curent și salvează permanent.
  */
-window.addXP = function(amount) {
+window.addXP = function(amount, isAdjustment = false) {
   const user = getCurrentUser();
   if (!user) return;
 
   const oldData = getUserLevelData(user.xp || 0);
   user.xp = (user.xp || 0) + Math.floor(amount);
+
+  // XP nu poate fi negativ
+  if (user.xp < 0) user.xp = 0;
+
   const newData = getUserLevelData(user.xp);
 
   saveCurrentUser(user);
@@ -68,7 +72,8 @@ window.addXP = function(amount) {
     saveUsers(users);
   }
 
-  if (newData.level > oldData.level) {
+  // Notificăm level up doar dacă nu este o ajustare negativă și am crescut efectiv
+  if (!isAdjustment && newData.level > oldData.level) {
     showLevelUpToast(newData.level);
   }
 

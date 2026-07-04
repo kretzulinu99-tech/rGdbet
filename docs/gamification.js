@@ -87,19 +87,22 @@ window.addXP = function(amount, isAdjustment = false) {
 };
 
 /**
- * Calculează XP primit dintr-un bilet.
+ * Calculează XP primit dintr-un bilet în funcție de statusul său.
+ * Sursă unică de adevăr pentru valoarea XP a unui bilet.
  */
 window.calculateTicketXP = function(bet) {
-  const base = 50;
+  const base = 50; // XP de bază pentru adăugare/pending
+  if (!bet.status || bet.status === 'pending') return base;
+
   const odds = parseFloat(bet.totalOdds || bet.odds || 1);
 
   let bonus = 0;
   if (bet.status === 'win') {
-    bonus = odds * 25;
+    bonus = odds * 25; // Bonus consistent pentru victorie
   } else if (bet.status === 'loss') {
-    bonus = 10;
+    bonus = 10; // Mic bonus de consolare
   } else if (bet.status === 'cashout') {
-    bonus = odds * 12;
+    bonus = odds * 12; // Bonus mediu
   }
 
   return Math.floor(base + bonus);

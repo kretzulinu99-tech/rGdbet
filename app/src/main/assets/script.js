@@ -671,28 +671,37 @@ function scheduleRender() {
         render();
       }
 
+      /* ── LOGICĂ AJUSTARE XP (v8.5 Platinum) ── */
+      function applyXPDelta(bet, newStatus) {
+        if (typeof addXP !== 'function' || typeof calculateTicketXP !== 'function') return;
+
+        // 1. Determinăm XP-ul acordat anterior (fallback pentru bilete vechi)
+        if (bet.rewardedXP === undefined) {
+          // Dacă e bilet vechi, presupunem că a primit XP bazat pe statusul curent
+          bet.rewardedXP = calculateTicketXP(bet);
+        }
+        const oldXP = bet.rewardedXP;
+
+        // 2. Calculăm noul XP bazat pe noul status
+        const tempBet = { ...bet, status: newStatus };
+        const newXP = calculateTicketXP(tempBet);
+
+        // 3. Aplicăm diferența
+        const diff = newXP - oldXP;
+        if (diff !== 0) {
+          addXP(diff, true); // Ajustare silențioasă (fără popup la scădere)
+          bet.rewardedXP = newXP;
+        }
+      }
+
       function changeStatus(id, newStatus) {
         const bet = bets.find(b => b.id === id);
         if(bet) {
           const oldStatus = bet.status;
-          const oldXP = bet.rewardedXP || 0;
+          if (newStatus === oldStatus) return;
 
+          applyXPDelta(bet, newStatus);
           bet.status = newStatus;
-
-          // Recompensă XP (v8.5 Platinum - Logică Anti-Double)
-          if (newStatus !== oldStatus) {
-            // Calculăm XP-ul nou pentru noul status
-            const newXP = (newStatus === 'win' || newStatus === 'loss' || newStatus === 'cashout')
-              ? (typeof calculateTicketXP === 'function' ? calculateTicketXP(bet) : 0)
-              : 0;
-
-            // Ajustăm XP-ul total (Eliminăm ce am dat anterior și adăugăm noua valoare)
-            const diff = newXP - oldXP;
-            if (diff !== 0) {
-              if (typeof addXP === 'function') addXP(diff, true);
-              bet.rewardedXP = newXP;
-            }
-          }
 
           localStorage.setItem('rgb_bets', JSON.stringify(bets));
 
@@ -700,7 +709,6 @@ function scheduleRender() {
             triggerWinConfetti();
           }
           scheduleRender();
-          // streak detection
           if (window.streakMode) setTimeout(window.streakMode.detect, 150);
         }
       }
@@ -740,6 +748,7 @@ function scheduleRender() {
         if (amount !== null && !isNaN(amount) && amount > 0) {
           const bet = bets.find(b => b.id === id);
           if (bet) {
+            applyXPDelta(bet, 'cashout');
             bet.status = 'cashout';
             bet.cashoutAmount = parseFloat(amount);
             localStorage.setItem('rgb_bets', JSON.stringify(bets));
@@ -754,6 +763,7 @@ function scheduleRender() {
       function makeStatusPending(id) {
         const bet = bets.find(b => b.id === id);
         if(bet) {
+          applyXPDelta(bet, 'pending');
           bet.status = 'pending';
           if(bet.cashoutAmount) delete bet.cashoutAmount;
           localStorage.setItem('rgb_bets', JSON.stringify(bets));
@@ -789,6 +799,12 @@ function scheduleRender() {
       }
 
       function deleteBet(id) {
+        const bet = bets.find(b => b.id === id);
+        if (bet) {
+          // Eliminăm tot XP-ul acordat pentru acest bilet
+          const xpToRemove = bet.rewardedXP || (typeof calculateTicketXP === 'function' ? calculateTicketXP(bet) : 0);
+          if (typeof addXP === 'function') addXP(-xpToRemove, true);
+        }
         bets = bets.filter(b => b.id !== id);
         localStorage.setItem('rgb_bets', JSON.stringify(bets));
         render();

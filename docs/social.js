@@ -146,15 +146,22 @@ window.renderAvatarContent = function(av) {
 window.buildProfilePage = function(force = false) {
   const page = document.getElementById('page-profile');
   if (!page) return;
-  if (page._built && !force) return;
-  page._built = true;
 
   const user = getCurrentUser();
   if (!user) {
     page.innerHTML = `<div class="prof-login-prompt"><div class="prof-login-icon">👤</div><div class="prof-login-title">LOGIN REQUIRED</div><button class="prof-action-btn" onclick="authShowScreen()">INTRĂ ÎN CONT</button></div>`;
+    page._built = false;
     return;
   }
 
+  // Dacă pagina este deja construită, actualizăm doar datele dinamice și ieșim (pentru viteză/animatii)
+  if (page._built && !force) {
+    updateXPUI();
+    updateProfileStatsUI();
+    return;
+  }
+
+  page._built = true;
   const stats = calcUserStats();
 
   // Asigurăm că tragem XP-ul corect (prioritate cheia dedicată pentru persistență)
@@ -172,36 +179,36 @@ window.buildProfilePage = function(force = false) {
     <div class="prof-hero-modern">
       <div class="prof-avatar-modern" id="profAvatarDisplay" onclick="profOpenAvatarPicker()">${avDisplay}</div>
       <div class="prof-name-container">
-        <div class="prof-display-name">${user.displayName || user.username} ${typeof getVerificationBadge === 'function' ? getVerificationBadge(user.username) : ''}</div>
+        <div class="prof-display-name" id="profDisplayNameUI">${user.displayName || user.username} ${typeof getVerificationBadge === 'function' ? getVerificationBadge(user.username) : ''}</div>
         <div class="prof-user-tag">@${user.username}</div>
       </div>
 
       <!-- XP BAR (RANK PROGRESS) -->
-      <div class="xp-container">
+      <div class="xp-container" id="xpContainerUI">
         <div class="xp-header">
-          <div class="xp-level-badge">LVL ${lvl.level}</div>
-          <div class="xp-total-text">${savedXp.toLocaleString()} XP</div>
+          <div class="xp-level-badge" id="xpLevelBadgeUI">LVL ${lvl.level}</div>
+          <div class="xp-total-text" id="xpTotalTextUI">${savedXp.toLocaleString()} XP</div>
         </div>
         <div class="xp-bar-outer">
-          <div class="xp-bar-inner" style="width: ${lvl.progressPct}%"></div>
+          <div class="xp-bar-inner" id="xpBarInnerUI" style="width:${lvl.progressPct}%"></div>
         </div>
         <div class="xp-footer">
           <span>RANK PROGRESS</span>
-          <span>${lvl.progressXP} / ${lvl.requiredXP} XP</span>
+          <span id="xpProgressTextUI">${lvl.progressXP} / ${lvl.requiredXP} XP</span>
         </div>
       </div>
     </div>
 
-    <div class="prof-stats-grid">
-      <div class="prof-stat-card"><div class="prof-stat-val ${stats.profit >= 0 ? 'pos' : 'neg'}">${stats.profit >= 0 ? '+' : ''}${stats.profit.toFixed(0)}</div><div class="prof-stat-lbl">PROFIT</div></div>
-      <div class="prof-stat-card"><div class="prof-stat-val" style="color:var(--nb)">${stats.wr}%</div><div class="prof-stat-lbl">WR</div></div>
-      <div class="prof-stat-card"><div class="prof-stat-val">${stats.total}</div><div class="prof-stat-lbl">TICKETS</div></div>
+    <div class="prof-stats-grid" id="profStatsGridUI">
+      <div class="prof-stat-card"><div class="prof-stat-val ${stats.profit >= 0 ? 'pos' : 'neg'}" id="profStatProfitUI">${stats.profit >= 0 ? '+' : ''}${stats.profit.toFixed(0)}</div><div class="prof-stat-lbl">PROFIT</div></div>
+      <div class="prof-stat-card"><div class="prof-stat-val" style="color:var(--nb)" id="profStatWRUI">${stats.wr}%</div><div class="prof-stat-lbl">WR</div></div>
+      <div class="prof-stat-card"><div class="prof-stat-val" id="profStatTotalUI">${stats.total}</div><div class="prof-stat-lbl">TICKETS</div></div>
     </div>
 
     <div class="prof-section-card">
       <div class="prof-section-title">CONFIG</div>
-      <div class="prof-row" onclick="profOpenEdit('currency')"><div class="prof-row-left"><div class="prof-row-icon gold"><i class="fa-solid fa-coins"></i></div><div class="prof-row-text"><span class="prof-row-label">Currency</span><span class="prof-row-sub">${typeof getCurrency === 'function' ? getCurrency() : 'RON'}</span></div></div><i class="fa-solid fa-chevron-right prof-row-arrow"></i></div>
-      <div class="prof-row" onclick="profOpenEdit('displayName')"><div class="prof-row-left"><div class="prof-row-icon blue"><i class="fa-solid fa-id-card"></i></div><div class="prof-row-text"><span class="prof-row-label">Nickname</span><span class="prof-row-sub">${user.displayName || user.username}</span></div></div><i class="fa-solid fa-pen prof-row-arrow"></i></div>
+      <div class="prof-row" onclick="profOpenEdit('currency')"><div class="prof-row-left"><div class="prof-row-icon gold"><i class="fa-solid fa-coins"></i></div><div class="prof-row-text"><span class="prof-row-label">Currency</span><span class="prof-row-sub" id="profCurrencySubUI">${typeof getCurrency === 'function' ? getCurrency() : 'RON'}</span></div></div><i class="fa-solid fa-chevron-right prof-row-arrow"></i></div>
+      <div class="prof-row" onclick="profOpenEdit('displayName')"><div class="prof-row-left"><div class="prof-row-icon blue"><i class="fa-solid fa-id-card"></i></div><div class="prof-row-text"><span class="prof-row-label">Nickname</span><span class="prof-row-sub" id="profNicknameSubUI">${user.displayName || user.username}</span></div></div><i class="fa-solid fa-pen prof-row-arrow"></i></div>
     </div>
 
     <div class="prof-section-card">
@@ -228,6 +235,65 @@ function calcUserStats() {
   });
   return { total: bets.length, settled: settled.length, wins, wr: settled.length ? Math.round((wins / settled.length) * 100) : 0, profit };
 }
+
+/**
+ * Actualizează doar valorile de stats din UI (fără re-render)
+ */
+function updateProfileStatsUI() {
+  const stats = calcUserStats();
+  const profitEl = document.getElementById('profStatProfitUI');
+  const wrEl = document.getElementById('profStatWRUI');
+  const totalEl = document.getElementById('profStatTotalUI');
+
+  if (profitEl) {
+    profitEl.textContent = (stats.profit >= 0 ? '+' : '') + stats.profit.toFixed(0);
+    profitEl.className = 'prof-stat-val ' + (stats.profit >= 0 ? 'pos' : 'neg');
+  }
+  if (wrEl) wrEl.textContent = stats.wr + '%';
+  if (totalEl) totalEl.textContent = stats.total;
+
+  const currSub = document.getElementById('profCurrencySubUI');
+  if (currSub && typeof getCurrency === 'function') currSub.textContent = getCurrency();
+
+  const nickSub = document.getElementById('profNicknameSubUI');
+  const user = getCurrentUser();
+  if (nickSub && user) nickSub.textContent = user.displayName || user.username;
+}
+
+function profBuildThemeChips() {
+  const wrap = document.getElementById('profThemeChips');
+  if (!wrap || typeof window.THEMES === 'undefined') return;
+  wrap.innerHTML = window.THEMES.map(t => `<button class="prof-theme-chip" style="width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#fff;" onclick="profApplyTheme('${t.id}')">${t.icon}</button>`).join('');
+}
+
+window.profApplyTheme = function(id) {
+  const t = window.THEMES.find(x => x.id === id);
+  if (t && typeof applyTheme === 'function') applyTheme(t);
+};
+
+/**
+ * Actualizează instantaneu bara de XP din UI fără a re-randa toată pagina.
+ * Apelat din gamification.js
+ */
+window.updateXPUI = function() {
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const savedXp = parseInt(localStorage.getItem('rgb_xp')) || user.xp || 0;
+  if (typeof getUserLevelData !== 'function') return;
+
+  const lvl = getUserLevelData(savedXp);
+
+  const badge = document.getElementById('xpLevelBadgeUI');
+  const totalText = document.getElementById('xpTotalTextUI');
+  const barInner = document.getElementById('xpBarInnerUI');
+  const progressText = document.getElementById('xpProgressTextUI');
+
+  if (badge) badge.textContent = `LVL ${lvl.level}`;
+  if (totalText) totalText.textContent = `${savedXp.toLocaleString()} XP`;
+  if (barInner) barInner.style.width = `${lvl.progressPct}%`;
+  if (progressText) progressText.textContent = `${lvl.progressXP} / ${lvl.requiredXP} XP`;
+};
 
 /* -- EDIT LOGIC -- */
 window.profOpenEdit = function(type) {

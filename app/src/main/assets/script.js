@@ -645,7 +645,7 @@ function scheduleRender() {
         localStorage.setItem('rgb_bets', JSON.stringify(bets));
 
         // Recompensă XP (v8.5 Platinum - Logică Anti-Double)
-        const baseXP = 50; // XP de bază pentru bilet adăugat (Pending)
+        const baseXP = typeof calculateTicketXP === 'function' ? calculateTicketXP(newBet) : 50;
         newBet.rewardedXP = baseXP;
         if (typeof addXP === 'function') addXP(baseXP);
 
@@ -677,7 +677,6 @@ function scheduleRender() {
 
         // 1. Determinăm XP-ul acordat anterior (fallback pentru bilete vechi)
         if (bet.rewardedXP === undefined) {
-          // Dacă e bilet vechi, presupunem că a primit XP bazat pe statusul curent
           bet.rewardedXP = calculateTicketXP(bet);
         }
         const oldXP = bet.rewardedXP;
@@ -689,7 +688,7 @@ function scheduleRender() {
         // 3. Aplicăm diferența
         const diff = newXP - oldXP;
         if (diff !== 0) {
-          addXP(diff, true); // Ajustare silențioasă (fără popup la scădere)
+          addXP(diff, true); // Ajustare silențioasă
           bet.rewardedXP = newXP;
         }
       }
@@ -801,7 +800,6 @@ function scheduleRender() {
       function deleteBet(id) {
         const bet = bets.find(b => b.id === id);
         if (bet) {
-          // Eliminăm tot XP-ul acordat pentru acest bilet
           const xpToRemove = bet.rewardedXP || (typeof calculateTicketXP === 'function' ? calculateTicketXP(bet) : 0);
           if (typeof addXP === 'function') addXP(-xpToRemove, true);
         }

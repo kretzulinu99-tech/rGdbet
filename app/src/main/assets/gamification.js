@@ -47,16 +47,12 @@ window.getUserLevelData = function(xp = 0) {
 /**
  * Adaugă XP utilizatorului curent și salvează permanent.
  */
-window.addXP = function(amount, isAdjustment = false) {
+window.addXP = function(amount) {
   const user = getCurrentUser();
   if (!user) return;
 
   const oldData = getUserLevelData(user.xp || 0);
   user.xp = (user.xp || 0) + Math.floor(amount);
-
-  // XP nu poate fi negativ
-  if (user.xp < 0) user.xp = 0;
-
   const newData = getUserLevelData(user.xp);
 
   saveCurrentUser(user);
@@ -72,37 +68,38 @@ window.addXP = function(amount, isAdjustment = false) {
     saveUsers(users);
   }
 
-  // Notificăm level up doar dacă nu este o ajustare negativă și am crescut efectiv
-  if (!isAdjustment && newData.level > oldData.level) {
+  if (newData.level > oldData.level) {
     showLevelUpToast(newData.level);
   }
 
   // Declanșăm push în cloud
   if (typeof cloudPushData === 'function') cloudPushData();
 
-  // Re-randăm profilul dacă suntem pe pagina de profil
-  if (typeof buildProfilePage === 'function' && document.body.dataset.page === 'profile') {
+  // Actualizăm UI-ul instantaneu (fără re-randare completă)
+  if (typeof updateXPUI === 'function') {
+    updateXPUI();
+  }
+
+  // Backup: Re-randăm profilul dacă funcția updateXPUI lipsește
+  else if (typeof buildProfilePage === 'function' && document.body.dataset.page === 'profile') {
     buildProfilePage(true);
   }
 };
 
 /**
- * Calculează XP primit dintr-un bilet în funcție de statusul său.
- * Sursă unică de adevăr pentru valoarea XP a unui bilet.
+ * Calculează XP primit dintr-un bilet.
  */
 window.calculateTicketXP = function(bet) {
-  const base = 50; // XP de bază pentru adăugare/pending
-  if (!bet.status || bet.status === 'pending') return base;
-
+  const base = 50;
   const odds = parseFloat(bet.totalOdds || bet.odds || 1);
 
   let bonus = 0;
   if (bet.status === 'win') {
-    bonus = odds * 25; // Bonus consistent pentru victorie
+    bonus = odds * 25;
   } else if (bet.status === 'loss') {
-    bonus = 10; // Mic bonus de consolare
+    bonus = 10;
   } else if (bet.status === 'cashout') {
-    bonus = odds * 12; // Bonus mediu
+    bonus = odds * 12;
   }
 
   return Math.floor(base + bonus);

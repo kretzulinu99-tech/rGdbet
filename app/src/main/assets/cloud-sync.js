@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
-   cloud-sync.js — Sistem Sincronizare Hibrid (Web + Native)
-   v11.3 Elite Sovereign Platinum (The Barrier Fix)
-   Garantează salvarea prin blocarea deconectării până la confirmare.
+   cloud-sync.js — Sistem Sincronizare Cloud Ultra-Persistent
+   v11.0 Elite Sovereign Platinum
+   Asigură salvarea IMEDIATĂ și PERMANENTĂ în Firebase Firestore.
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -24,92 +24,131 @@ const CLOUD_KEYS = [
 ];
 
 let _isSyncing = false;
+let _pendingSync = false;
 
 /**
- * Salvează datele folosind cel mai bun motor disponibil.
- * Acum returnează un PROMISE pentru a permite "await" la logout.
- */
-window.cloudPushData = function() {
-  return new Promise((resolve) => {
-    const payload = {};
-    CLOUD_KEYS.forEach(key => {
-      const raw = localStorage.getItem(key);
-      if (raw !== null) {
-        try { payload[key] = JSON.parse(raw); } catch { payload[key] = raw; }
-      }
-    });
-
-    payload.lastSync = Date.now();
-    payload.v = "11.3";
-
-    // 1. Motor NATIV (Prioritate maximă)
-    if (typeof Android !== 'undefined' && Android.saveToCloud) {
-      console.log('[CloudSync] Salvare Nativă în curs...');
-      Android.saveToCloud(JSON.stringify(payload));
-      // Deoarece apelul bridge este asincron pe Android, simulăm o mică așteptare
-      // pentru a permite sistemului de operare să inițieze scrierea.
-      setTimeout(() => resolve(true), 600);
-      return;
-    }
-
-    // 2. Motor WEB (Fallback)
-    if (typeof fbDb !== 'undefined' && typeof fbUser !== 'undefined' && fbUser) {
-      console.log('[CloudSync] Salvare Web Firebase în curs...');
-      fbDb.collection('user_data').doc(fbUser.uid).set(payload, { merge: true })
-        .then(() => { console.log('[CloudSync] OK (Web)'); resolve(true); })
-        .catch((err) => { console.error('[CloudSync] ERR (Web):', err); resolve(false); });
-      return;
-    }
-
-    resolve(false);
-  });
-};
-
-/**
- * Încarcă datele din Cloud.
+ * Încarcă toate datele din Firestore și le aplică în LocalStorage.
+ * Restaurare automată la login sau intrare în aplicație.
  */
 window.cloudPullData = async function() {
-  let uid = null;
-  if (typeof window.nativeUID !== 'undefined') uid = window.nativeUID;
-  else if (typeof fbUser !== 'undefined' && fbUser) uid = fbUser.uid;
+  if (!fbDb || !fbUser) {
+    console.warn('[CloudSync] Pull anulat: Firebase nu este logat.');
+    return;
+  }
 
-  if (!uid || typeof fbDb === 'undefined') return;
+  console.log('[CloudSync] Pornire descărcare date permanente...');
 
   try {
-    const doc = await fbDb.collection('user_data').doc(uid).get();
+    const doc = await fbDb.collection('user_data').doc(fbUser.uid).get();
     if (doc.exists) {
       const data = doc.data();
+
+      // Aplicăm fiecare cheie în LocalStorage pentru a restaura starea contului
       CLOUD_KEYS.forEach(key => {
         if (data[key] !== undefined) {
-          localStorage.setItem(key, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
+          const val = data[key];
+          localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
         }
       });
-      console.log('[CloudSync] Date restaurate cu succes.');
 
-      // Forțăm actualizarea elementelor vizuale (v11.4)
-      const restoredUser = JSON.parse(localStorage.getItem('rgb_user') || '{}');
-      if (typeof authUpdateTopBar === 'function' && restoredUser.username) {
-        authUpdateTopBar(restoredUser);
-      }
+      console.log('[CloudSync] Date restaurate cu succes din Cloud.');
+
+      // Notificăm interfața să se actualizeze cu noile date descărcate
       if (typeof render === 'function') render();
-      if (typeof updateXPUI === 'function') updateXPUI();
+      if (typeof updateMsgBadge === 'function') updateMsgBadge();
       if (typeof buildProfilePage === 'function') buildProfilePage(true);
+      if (typeof updateXPUI === 'function') updateXPUI();
+
+    } else {
+      console.log('[CloudSync] Cont nou: Se inițializează prima salvare în Cloud.');
+      await window.cloudPushData();
     }
-  } catch (err) {}
+  } catch (err) {
+    console.error('[CloudSync] Eroare critică la descărcare date:', err);
+  }
 };
 
 /**
- * MOTORUL DE PERSISTENȚĂ
+ * Salvează starea curentă a aplicației în Firebase Firestore.
+ * Funcția este acum optimizată pentru apeluri instantanee.
  */
-(function initSyncEngine() {
+window.cloudPushData = async function() {
+  if (!fbDb || !fbUser) return false;
+
+  // Dacă deja se salvează, marcăm că avem un sync în așteptare
+  if (_isSyncing) {
+    _pendingSync = true;
+    return false;
+  }
+
+  _isSyncing = true;
+  _pendingSync = false;
+
+  const payload = {};
+  CLOUD_KEYS.forEach(key => {
+    const raw = localStorage.getItem(key);
+    if (raw !== null) {
+      try {
+        payload[key] = JSON.parse(raw);
+      } catch {
+        payload[key] = raw;
+      }
+    }
+  });
+
+  // Metadata pentru integritate
+  payload.lastSync = firebase.firestore.FieldValue.serverTimestamp();
+  payload.email = fbUser.email;
+  payload.uid = fbUser.uid;
+  payload.v = "11.0";
+
+  try {
+    await fbDb.collection('user_data').doc(fbUser.uid).set(payload, { merge: true });
+    console.log('[CloudSync] Date salvate permanent în Firebase.');
+    return true;
+  } catch (err) {
+    console.error('[CloudSync] Eroare la salvarea în Firebase:', err);
+    return false;
+  } finally {
+    _isSyncing = false;
+    // Dacă au apărut modificări noi în timpul salvării, declanșăm un nou sync
+    if (_pendingSync) {
+      setTimeout(window.cloudPushData, 500);
+    }
+  }
+};
+
+/**
+ * MOTORUL DE PERSISTENȚĂ REAL-TIME (v11.0)
+ * Interceptează orice modificare de date și forțează salvarea.
+ */
+(function setupUltraPersistence() {
+  // 1. Interceptăm modificările locale imediate
   const originalSetItem = localStorage.setItem;
   localStorage.setItem = function(key, value) {
     originalSetItem.apply(this, arguments);
     if (CLOUD_KEYS.includes(key)) {
-      clearTimeout(window._syncTimeout);
-      window._syncTimeout = setTimeout(() => {
+      // Salvare ultra-rapidă (debounce de 500ms pentru a nu suprasolicita Firebase la scrieri masive)
+      clearTimeout(this._syncTimeout);
+      this._syncTimeout = setTimeout(() => {
         window.cloudPushData();
-      }, 500); // Reducem timpul de reacție la 500ms
+      }, 500);
     }
   };
+
+  // 2. Salvare la închiderea aplicației (Lifecycle Hooks)
+  // visibilitychange este cel mai sigur mod pe mobil
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      console.log('[CloudSync] Aplicație în fundal: Salvare forțată.');
+      window.cloudPushData();
+    }
+  });
+
+  // 3. Salvare la părăsirea paginii
+  window.addEventListener('beforeunload', () => {
+    window.cloudPushData();
+  });
+
+  console.log('[CloudSync] Sistemul de Persistență Real-Time v11.0 este ACTIV.');
 })();

@@ -48,6 +48,10 @@ class MainActivity : AppCompatActivity() {
         uri?.let { processImageForOCR(it) }
     }
 
+    private val pickAvatarLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { convertUriToBase64AndSendToWeb(it) }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -118,16 +122,13 @@ class MainActivity : AppCompatActivity() {
         if (currentUser is AuthState.SignedIn) {
             val email = currentUser.email ?: ""
             val username = currentUser.displayName ?: email.substringBefore("@")
-            val uid = currentUser.uid
             
             val js = """
                 (function() {
-                    window.nativeUID = "$uid";
                     const existingUser = JSON.parse(localStorage.getItem('rgb_user') || '{}');
                     const user = {
                         username: "$username",
                         email: "$email",
-                        uid: "$uid",
                         passwordHash: "firebase_auth",
                         createdAt: "${System.currentTimeMillis()}",
                         avatar: existingUser.avatar || "👤",
@@ -176,11 +177,6 @@ class MainActivity : AppCompatActivity() {
                     if (notifBtn) notifBtn.style.display = 'flex';
                     
                     if (typeof render === 'function') render();
-                    
-                    // Declanșăm descărcarea datelor din Cloud (v11.4)
-                    if (typeof window.cloudPullData === 'function') {
-                        window.cloudPullData();
-                    }
                 })();
             """.trimIndent()
             
@@ -201,6 +197,29 @@ class MainActivity : AppCompatActivity() {
                 }
         } catch (e: IOException) {
             e.printStackTrace()
+        }
+    }
+
+    private fun convertUriToBase64AndSendToWeb(uri: Uri) {
+        try {
+            val inputStream = contentResolver.openInputStream(uri)
+            val bytes = inputStream?.readBytes()
+            inputStream?.close()
+            
+            if (bytes != null) {
+                val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
+                val dataUrl = "data:image/jpeg;base64,${base64.replace("\n", "").replace("\r", "")}"
+                
+                runOnUiThread {
+                    binding.webView.evaluateJavascript(
+                        "if(typeof window.onAvatarUploaded === 'function') window.onAvatarUploaded('$dataUrl');",
+                        null
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Eroare procesare imagine", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -256,29 +275,6 @@ class MainActivity : AppCompatActivity() {
     inner class WebAppInterface(private val mContext: Context) {
         
         @JavascriptInterface
-        fun saveToCloud(json: String) {
-            val app = mContext.applicationContext as RgdbetApplication
-            val currentUser = app.authManager.authState.value
-            
-            if (currentUser is AuthState.SignedIn) {
-                try {
-                    val payload = JSONObject(json)
-                    val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                    db.collection("user_data").document(currentUser.uid)
-                        .set(payload, com.google.firebase.firestore.SetOptions.merge())
-                        .addOnSuccessListener {
-                            // Trimitem confirmarea înapoi în JS
-                            (mContext as MainActivity).runOnUiThread {
-                                mContext.binding.webView.evaluateJavascript("console.log('[NativeSync] Salvare reușită');", null)
-                            }
-                        }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-
-        @JavascriptInterface
         fun logout() {
             val app = mContext.applicationContext as RgdbetApplication
             app.authManager.logout()
@@ -306,6 +302,13 @@ class MainActivity : AppCompatActivity() {
         fun startOCRScan() {
             runOnUiThread {
                 scanTicketLauncher.launch("image/*")
+            }
+        }
+
+        @JavascriptInterface
+        fun selectAvatarFromPhone() {
+            runOnUiThread {
+                pickAvatarLauncher.launch("image/*")
             }
         }
 

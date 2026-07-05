@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v10.6 Sovereign Edition (ZERO-LOSS LOGOUT)
-   Conține: Auth, Profile, Social Feed, Rank, Highlights, Sync Barrier
+   Versiune: v10.5 Sovereign Edition (DEFINITIVE LOGOUT & REDIRECT)
+   Conține: Auth, Profile, Social Feed, Rank, Highlights, Fix Logout
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -110,7 +110,10 @@ function authHideScreen() {
 
 function authShowScreen() {
   const s = document.getElementById('auth-screen');
-  if (s) { s.style.display = 'flex'; s.classList.remove('hiding'); }
+  if (s) {
+    s.style.display = 'flex';
+    s.classList.remove('hiding');
+  }
 }
 
 function authUpdateTopBar(user) {
@@ -128,44 +131,37 @@ function authUpdateTopBar(user) {
 }
 
 /**
- * 🛠️ DECONECTARE SECURIZATĂ (SYNC BARRIER v10.6)
- * Această versiune AȘTEAPTĂ salvarea finală în Cloud înainte de a ieși.
+ * 🛠️ DECONECTARE TOTALĂ (WEB + NATIV ANDROID)
+ * Aceasta este versiunea finală care comunică cu aplicația nativă
+ * pentru a te trimite la ecranul "Intră pe teren".
  */
 window.authLogout = async function() {
-  console.log('[Auth] Inițiere Logout Securizat (Așteptare Sincronizare)...');
+  console.log('[Auth] Inițiere Logout Total...');
 
-  // 1. UI Feedback: Arătăm un mesaj de "Salvare"
-  if (typeof showMsgToast === 'function') showMsgToast('Saving data...', 'info');
-
-  // 2. FORȚARE PUSH CLOUD (AWAIT)
-  // Această funcție blochează restul codului până când datele ajung în Cloud.
-  if (typeof window.cloudPushData === 'function') {
-    await window.cloudPushData();
-    console.log('[Auth] Date salvate cu succes în Cloud.');
-  }
-
-  // 3. ȘTERGERE SESIUNE WEB
+  // 1. Ștergere date locale (WEB)
   localStorage.removeItem(SK.user);
   sessionStorage.clear();
 
-  // 4. DECONECTARE FIREBASE (WEB)
+  // 2. COMUNICARE CU ANDROID (CRITIC)
+  // Dacă suntem în aplicația mobilă, cerem deconectarea nativă
+  if (typeof Android !== 'undefined' && Android.logout) {
+    console.log('[Auth] Apelare logout nativ Android...');
+    Android.logout();
+    return; // Android va gestiona redirect-ul la LoginActivity
+  }
+
+  // 3. Fallback pentru Browser (PWA)
   if (typeof fbAuth !== 'undefined' && fbAuth) {
     try { await fbAuth.signOut(); } catch(e) {}
   }
 
-  // 5. DECONECTARE NATIVĂ ANDROID (Dacă există bridge)
-  if (typeof Android !== 'undefined' && Android.logout) {
-    console.log('[Auth] Executare logout hibrid...');
-    Android.logout();
-    return;
-  }
-
-  // 6. REDIRECT HOME + LOGIN
   authUpdateTopBar(null);
   authShowScreen();
+
   if (typeof navigateTo === 'function') {
     navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
   }
+
   window.location.reload();
 };
 
@@ -200,8 +196,9 @@ window.buildProfilePage = function(force = false) {
   const savedXp = parseInt(localStorage.getItem('rgb_xp')) || user.xp || 0;
   const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(savedXp) : { level:1, xp:0, progressPct:0, progressXP:0, requiredXP:100 };
   const avDisplay = renderAvatarContent(user.avatar);
+  const dbUsers = getUsers();
+  const totalUsers = Object.keys(dbUsers).length || 1;
   const globalRankData = calcGlobalRank(user.username, savedXp, stats);
-  const totalUsers = Object.keys(getUsers()).length || 1;
 
   page.innerHTML = `
     <div class="side-panel-close-btn" style="background:rgba(2,4,8,0.5); border:none;">
@@ -257,7 +254,18 @@ window.buildProfilePage = function(force = false) {
 
     <!-- MODALS -->
     <div class="prof-edit-modal" id="profEditModal"><div class="prof-edit-box"><div class="prof-edit-title" id="profEditTitle">EDIT</div><div class="auth-error" id="prof-edit-error"></div><div id="profEditBody"></div><div class="prof-edit-actions"><button class="prof-edit-cancel" onclick="profCloseEdit()">CANCEL</button><button class="prof-edit-save" onclick="profSaveEdit()">SAVE</button></div></div></div>
-    <div class="prof-avatar-modal" id="profAvatarModal"><div class="prof-avatar-box"><div class="prof-edit-title">AVATAR</div><div class="prof-avatar-grid">${AVATARS.map(a => `<button class="prof-av-option" onclick="profSelectAvatar('${a}')">${a}</button>`).join('')}</div><button class="prof-edit-cancel" style="width:100%" onclick="profCloseAvatarPicker()">CLOSE</button></div></div>
+    <div class="prof-avatar-modal" id="profAvatarModal">
+      <div class="prof-avatar-box">
+        <div class="prof-edit-title">AVATAR</div>
+        <div style="padding:0 0 15px; text-align:center;">
+          <button class="prof-action-btn" onclick="profUploadPhoto()" style="width:100%; background:linear-gradient(135deg, var(--nb), var(--ng)); color:#000;">
+            <i class="fa-solid fa-camera"></i> ÎNCARCĂ POZĂ DIN TELEFON
+          </button>
+        </div>
+        <div class="prof-avatar-grid">${AVATARS.map(a => `<button class="prof-av-option" onclick="profSelectAvatar('${a}')">${a}</button>`).join('')}</div>
+        <button class="prof-edit-cancel" style="width:100%" onclick="profCloseAvatarPicker()">CLOSE</button>
+      </div>
+    </div>
   `;
 };
 
@@ -358,16 +366,40 @@ window.profSaveEdit = function() {
 
 window.profOpenAvatarPicker = function() { document.getElementById('profAvatarModal')?.classList.add('open'); };
 window.profCloseAvatarPicker = function() { document.getElementById('profAvatarModal')?.classList.remove('open'); };
-window.profSelectAvatar = function(av) {
+
+window.profUploadPhoto = function() {
+  if (typeof Android !== 'undefined' && Android.selectAvatarFromPhone) {
+    Android.selectAvatarFromPhone();
+  } else {
+    // Fallback pentru browser standard
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (re) => window.onAvatarUploaded(re.target.result);
+      reader.readAsDataURL(file);
+    };
+    inp.click();
+  }
+};
+
+window.onAvatarUploaded = function(dataUrl) {
   const user = getCurrentUser();
   if (user) {
-    user.avatar = av;
+    user.avatar = dataUrl;
     saveCurrentUser(user);
-    // Trigger salvare Cloud IMEDIATĂ pentru avatar (v11.3)
-    if (typeof window.cloudPushData === 'function') window.cloudPushData();
     buildProfilePage(true);
     authUpdateTopBar(user);
+    if (typeof window.cloudPushData === 'function') window.cloudPushData();
   }
+  profCloseAvatarPicker();
+};
+
+window.profSelectAvatar = function(av) {
+  const user = getCurrentUser();
+  if (user) { user.avatar = av; saveCurrentUser(user); buildProfilePage(true); authUpdateTopBar(user); }
   profCloseAvatarPicker();
 };
 
@@ -536,5 +568,11 @@ window.getVerificationBadge = function(username) {
 
 (function init() {
   const user = getCurrentUser();
+
+  // Guard Logout: Dacă nu avem user, arătăm ecranul de login (V10.5 - FIX VISIBILITY)
+  if (!user) {
+    authShowScreen();
+  }
+
   if (user) authUpdateTopBar(user);
 })();

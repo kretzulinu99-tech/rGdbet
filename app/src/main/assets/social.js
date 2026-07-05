@@ -386,14 +386,43 @@ window.profUploadPhoto = function() {
 };
 
 window.onAvatarUploaded = function(dataUrl) {
-  const user = getCurrentUser();
-  if (user) {
-    user.avatar = dataUrl;
-    saveCurrentUser(user);
-    buildProfilePage(true);
-    authUpdateTopBar(user);
-    if (typeof window.cloudPushData === 'function') window.cloudPushData();
-  }
+  // 📸 COMPRESIE INTELIGENTĂ (v11.7 Sovereign)
+  // Deoarece Firebase Firestore are o limită de 1MB pe document,
+  // trebuie să reducem dimensiunea pozelor mari din telefon.
+
+  const img = new Image();
+  img.src = dataUrl;
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    const MAX_SIZE = 400; // Rezoluție Elite (suficientă pentru orice ecran de telefon)
+    let width = img.width;
+    let height = img.height;
+
+    if (width > height) {
+      if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+    } else {
+      if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+
+    // Convertim în JPG cu calitate 0.7 (balanță perfectă între claritate și mărime)
+    const compressedUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+    console.log('[Avatar] Imagine comprimată de la ' + (dataUrl.length/1024).toFixed(0) + 'KB la ' + (compressedUrl.length/1024).toFixed(0) + 'KB');
+
+    const user = getCurrentUser();
+    if (user) {
+      user.avatar = compressedUrl;
+      saveCurrentUser(user);
+      buildProfilePage(true);
+      authUpdateTopBar(user);
+      if (typeof window.cloudPushData === 'function') window.cloudPushData();
+    }
+  };
   profCloseAvatarPicker();
 };
 

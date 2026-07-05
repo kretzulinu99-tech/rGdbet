@@ -7233,3 +7233,28 @@ body.page-profile-active .top-bar {
   0% { background-position: 0% center; }
   100% { background-position: 200% center; }
 }
+
+/* -- AVATAR DISPLAY FIX (v11.5) -- */
+.top-avatar, .prof-avatar-modern, .soc-post-avatar, .msg-av, .pv-avatar {
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.top-avatar img, 
+.prof-avatar-modern img, 
+.soc-post-avatar img, 
+.msg-av img, 
+.pv-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: inherit !important;
+  display: block !important;
+}
+
+/* Ensure emoji avatars remain centered and visible */
+.top-avatar, .prof-avatar-modern, .soc-post-avatar {
+  line-height: 1;
+}

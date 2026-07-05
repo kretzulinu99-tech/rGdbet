@@ -3642,7 +3642,7 @@ body[data-page="social"] .soc-action-bar {
   -webkit-backdrop-filter: blur(15px) !important;
   position: relative;
   overflow: hidden;
-  animation: rg-luminous-pulse 3s infinite ease-in-out;
+  animation: rg-luminous-pulse 1.2s infinite ease-in-out;
   will-change: filter, box-shadow;
 }
 .rg-banner::before {

@@ -250,12 +250,16 @@ function updateProfileStatsUI() {
     profitEl.textContent = val;
     profitEl.className = 'prof-stat-val ' + (stats.profit >= 0 ? 'pos' : 'neg');
 
-    // Scalare dinamică font (v9.0)
-    let fs = 16; // base prof
-    if (val.length > 8)  fs = 14;
-    if (val.length > 10) fs = 12;
-    if (val.length > 13) fs = 10;
+    // Scalare dinamică font ultra-adaptivă (v9.1)
+    let fs = 15; // base prof
+    const len = val.length;
+    if (len > 6)  fs = 13;
+    if (len > 8)  fs = 11;
+    if (len > 10) fs = 9;
+    if (len > 12) fs = 8;
     profitEl.style.fontSize = fs + 'px';
+    profitEl.style.whiteSpace = 'nowrap';
+    profitEl.style.overflow = 'hidden';
   }
   if (wrEl) wrEl.textContent = stats.wr + '%';
   if (totalEl) totalEl.textContent = stats.total;

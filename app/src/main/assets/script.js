@@ -1030,13 +1030,19 @@ function scheduleRender() {
           totalP.textContent = val;
           totalP.className = 'stat-val ' + (displayedProfit >= 0 ? 'pos' : 'neg');
 
-          // Scalare dinamică font (v9.0)
-          let fs = 28; // base
-          if (val.length > 8)  fs = 22;
-          if (val.length > 11) fs = 18;
-          if (val.length > 14) fs = 14;
-          if (val.length > 17) fs = 11;
+          // Scalare dinamică font ultra-adaptivă (v9.1)
+          let fs = 26; // Redus de la 28 pentru siguranță
+          const len = val.length;
+          if (len > 6)  fs = 22;
+          if (len > 8)  fs = 19;
+          if (len > 10) fs = 16;
+          if (len > 12) fs = 13;
+          if (len > 14) fs = 11;
+          if (len > 16) fs = 9;
           totalP.style.fontSize = fs + 'px';
+          totalP.style.whiteSpace = 'nowrap';
+          totalP.style.overflow = 'hidden';
+          totalP.style.textOverflow = 'clip';
         }
 
         const totalWr = document.getElementById('total-wr');

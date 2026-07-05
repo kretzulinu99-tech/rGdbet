@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v10.0 Sovereign Edition
-   Conține: Auth, Profile, Social Feed, Rank, Highlights, Fix Logout
+   Versiune: v9.7 Elite Platinum
+   Conține: Auth, Profile, Social Feed (Multi-Ticket), Rank, Notificări
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -132,35 +132,39 @@ function authUpdateTopBar(user) {
  * Șterge toate cheile de sesiune și forțează reîncărcarea aplicației
  * pentru a preveni auto-login-ul din cloud-sync sau firebase.
  */
-window.authLogout = function() {
+window.authLogout = async function() {
   console.log('[Auth] Inițiere deconectare completă...');
 
-  // 1. Ștergem toate urmele locale ale sesiunii
+  // 1. Deconectare Firebase (dacă există)
+  if (typeof fbAuth !== 'undefined' && fbAuth) {
+    try { await fbAuth.signOut(); } catch(e) { console.error('Firebase signOut error:', e); }
+  }
+
+  // 2. Ștergem toate urmele locale ale sesiunii
   localStorage.removeItem(SK.user);
   localStorage.removeItem('rgb_auth_seen');
   localStorage.removeItem('rgd_session');
   localStorage.removeItem('rgb_session');
+  localStorage.removeItem('firebase:previous_websocket_success');
 
-  // 2. Resetăm vizual interfața (fallback dacă redirect-ul întârzie)
-  authUpdateTopBar(null);
+  // 3. Resetăm vizual interfața
+  if (typeof authUpdateTopBar === 'function') authUpdateTopBar(null);
 
-  // 3. Forțăm afișarea ecranului de login imediat
-  authShowScreen();
+  // 4. Forțăm afișarea ecranului de login imediat
+  if (typeof authShowScreen === 'function') authShowScreen();
 
-  // 4. Navigăm la pagina principală
+  // 5. Navigăm la pagina principală
   if (typeof navigateTo === 'function') {
     navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
   }
 
-  // 5. Dacă există Firebase, declanșăm signOut (va fi captat de firebase-auth.js)
-  // Folosim un delay mic pentru a permite executarea altor hook-uri de logout
+  // REÎNCĂRCARE PAGINĂ (Hard Reset): Singura metodă sigură de a curăța starea JS a aplicației
   setTimeout(() => {
-    // REÎNCĂRCARE PAGINĂ (Hard Reset): Singura metodă sigură de a curăța starea JS a aplicației
     location.reload();
-  }, 100);
+  }, 150);
 };
 
-/* ── MODUL PROFIL MODERN ── */
+/* ── MODUL PROFIL MODERN (v8.5+) ── */
 const AVATARS = ['👤','⚽','🏆','👑','🔥','💎','🦁','🐉','🌟','🎯','💥','🏅'];
 
 window.renderAvatarContent = function(av) {
@@ -242,15 +246,6 @@ window.buildProfilePage = function(force = false) {
     <div class="prof-section-card">
       <div class="prof-section-title">SECURITY & DATA</div>
       <div class="prof-row" onclick="exportAccountData()"><div class="prof-row-left"><div class="prof-row-icon green"><i class="fa-solid fa-cloud-arrow-up"></i></div><div class="prof-row-text"><span class="prof-row-label">Cloud Backup</span></div></div></div>
-
-      <!-- DEVELOPER TESTING BUTTON -->
-      <div class="prof-row" onclick="devGrantMaxXP()" style="border-color:var(--gold); background:rgba(255,204,0,0.05);">
-        <div class="prof-row-left">
-          <div class="prof-row-icon gold"><i class="fa-solid fa-code"></i></div>
-          <div class="prof-row-text"><span class="prof-row-label" style="color:var(--gold);">ELITE DEV MODE</span><span class="prof-row-sub">Deblochează Nivelul 120 (Test)</span></div>
-        </div>
-      </div>
-
       <div class="prof-row" onclick="authLogout()"><div class="prof-row-left"><div class="prof-row-icon red"><i class="fa-solid fa-power-off"></i></div><div class="prof-row-text"><span class="prof-row-label">Log Out</span></div></div></div>
     </div>
 
@@ -363,7 +358,7 @@ window.profSelectAvatar = function(av) {
   profCloseAvatarPicker();
 };
 
-/* ── SOCIAL FEED & RANK ── */
+/* ── SOCIAL FEED & RANK (v9.7) ── */
 window.buildSocialPage = function() {
   const page = document.getElementById('page-social'); if (!page) return;
   const user = getCurrentUser();
@@ -471,10 +466,12 @@ function socRenderFeed() {
     const authorUser = allUsers[p.author?.toLowerCase()];
     const tickets = p.tickets || [{ name: p.name, odds: p.totalOdds || p.odds, status: p.status, events: p.events || [] }];
 
+    // Verificăm statutul Elite (v10.0 Sovereign)
     const xp = authorUser?.xp || 0;
     const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(xp) : { level:1 };
     const vBadgeHtml = typeof getVerificationBadge === 'function' ? getVerificationBadge(p.author) : '';
-    const isElite = lvl.level >= 80 || vBadgeHtml.includes('fb-verified-wrap');
+    const isVerified = vBadgeHtml.includes('fb-verified-wrap');
+    const isElite = lvl.level >= 80 || isVerified;
 
     return `
     <div class="soc-post-card ${isElite ? 'elite-aura' : ''}">
@@ -485,9 +482,30 @@ function socRenderFeed() {
           <div class="soc-post-date">${new Date(p.postedAt).toLocaleDateString()} ${new Date(p.postedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} ${vBadgeHtml}</div>
         </div>
       </div>
+
       <div class="soc-post-tickets-wrap" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
         ${tickets.map(t => `
-          <div class="soc-ticket-mini" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:10px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;"><div style="font-weight:700; font-size:14px; color:#fff;">${t.name}</div><div style="font-family:'Syncopate'; font-size:12px; color:var(--nb);">@${parseFloat(t.odds).toFixed(2)}</div></div><div style="font-size:11px; font-weight:700; color:${t.status === 'win' ? 'var(--ng)' : t.status === 'loss' ? 'var(--danger)' : 'var(--gold)'}; text-transform:uppercase;">${t.status}</div>${t.events && t.events.length > 0 ? `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:3px;">${t.events.slice(0, 3).map(ev => `<div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.6);"><span>${ev.name}</span><span style="color:var(--nb);">@${parseFloat(ev.odds).toFixed(2)}</span></div>`).join('')}${t.events.length > 3 ? `<div style="font-size:10px; color:rgba(255,255,255,0.3); text-align:right;">+ încă ${t.events.length - 3}</div>` : ''}</div>` : ''}</div>`).join('')}
+          <div class="soc-ticket-mini" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <div style="font-weight:700; font-size:14px; color:#fff;">${t.name}</div>
+              <div style="font-family:'Syncopate'; font-size:12px; color:var(--nb);">@${parseFloat(t.odds).toFixed(2)}</div>
+            </div>
+            <div style="font-size:11px; font-weight:700; color:${t.status === 'win' ? 'var(--ng)' : t.status === 'loss' ? 'var(--danger)' : 'var(--gold)'}; text-transform:uppercase;">
+              ${t.status}
+            </div>
+            ${t.events && t.events.length > 0 ? `
+              <div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:3px;">
+                ${t.events.slice(0, 3).map(ev => `
+                  <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.6);">
+                    <span>${ev.name}</span>
+                    <span style="color:var(--nb);">@${parseFloat(ev.odds).toFixed(2)}</span>
+                  </div>
+                `).join('')}
+                ${t.events.length > 3 ? `<div style="font-size:10px; color:rgba(255,255,255,0.3); text-align:right;">+ încă ${t.events.length - 3}</div>` : ''}
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
       </div>
     </div>`;
   }).join('');
@@ -496,20 +514,27 @@ function socRenderFeed() {
 window.socSearch = function(q) {
   const res = document.getElementById('soc-search-results'); if (!res || !q) { if(res) res.innerHTML = ''; return; }
   const allUsers = getUsers();
-  const matches = Object.values(allUsers).filter(u => u.username.toLowerCase().includes(q.toLowerCase()) || (u.displayName && u.displayName.toLowerCase().includes(q.toLowerCase())));
+  const matches = Object.values(allUsers).filter(u =>
+    u.username.toLowerCase().includes(q.toLowerCase()) ||
+    (u.displayName && u.displayName.toLowerCase().includes(q.toLowerCase()))
+  );
+
   res.innerHTML = matches.map(u => {
-    const xp = u.xp || 0; const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(xp) : { level:1 };
+    const xp = u.xp || 0;
+    const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(xp) : { level:1 };
     const vBadgeHtml = typeof getVerificationBadge === 'function' ? getVerificationBadge(u.username) : '';
     const isElite = lvl.level >= 80 || vBadgeHtml.includes('fb-verified-wrap');
-    return `<div class="soc-user-card" onclick="viewUserProfile('${u.username}')"><div class="soc-post-avatar">${renderAvatarContent(u.avatar)}</div><div style="flex:1;"><div class="soc-post-author ${isElite ? 'elite-nickname-platinum' : ''}">@${u.username} ${vBadgeHtml}</div><div class="soc-post-date">${u.displayName || 'Utilizator Elite'}</div></div><i class="fa-solid fa-chevron-right" style="opacity:0.3; font-size:10px;"></i></div>`;
-  }).join('');
-};
 
-window.devGrantMaxXP = function() {
-  const user = getCurrentUser(); if (!user) return;
-  if (confirm("Activezi modul Elite Developer? Contul va fi promovat la Nivelul Maxim (120).")) {
-    if (typeof addXP === 'function') { addXP(1000000 - (user.xp || 0)); buildProfilePage(true); }
-  }
+    return `
+    <div class="soc-user-card" onclick="viewUserProfile('${u.username}')">
+      <div class="soc-post-avatar">${renderAvatarContent(u.avatar)}</div>
+      <div style="flex:1;">
+        <div class="soc-post-author ${isElite ? 'elite-nickname-platinum' : ''}">@${u.username} ${vBadgeHtml}</div>
+        <div class="soc-post-date">${u.displayName || 'Utilizator Elite'}</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="opacity:0.3; font-size:10px;"></i>
+    </div>`;
+  }).join('');
 };
 
 /* ── SISTEM VERIFIED TIPSTER (v9.5 Elite) ── */
@@ -532,6 +557,9 @@ window.getVerificationBadge = function(username) {
   if (recentProfit > 0) return `<span class="fb-verified-wrap" title="Verified Tipster (30D Profit: +${recentProfit.toFixed(0)})"><i class="fa-solid fa-certificate fb-verified-bg"></i><i class="fa-solid fa-check fb-verified-check"></i></span>`;
   return '';
 };
+function privacyIcon(p) { return '🌐'; }
+function privacyLabel(p) { return 'Public'; }
+function privacyDesc(p) { return ''; }
 
 (function init() {
   const user = getCurrentUser(); if (user) authUpdateTopBar(user);

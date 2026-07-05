@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v10.0 Sovereign Edition (Enhanced Logout Fix)
+   Versiune: v10.1 Sovereign Edition (RADICAL LOGOUT FIX)
    Conține: Auth, Profile, Social Feed, Rank, Highlights
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
@@ -110,7 +110,10 @@ function authHideScreen() {
 
 function authShowScreen() {
   const s = document.getElementById('auth-screen');
-  if (s) s.style.display = 'flex';
+  if (s) {
+    s.style.setProperty('display', 'flex', 'important');
+    s.classList.remove('hiding');
+  }
 }
 
 function authUpdateTopBar(user) {
@@ -128,34 +131,30 @@ function authUpdateTopBar(user) {
 }
 
 /**
- * 🛠️ DECONECTARE SECURIZATĂ (FORCE LOGOUT)
- * Garantează delogarea și blocarea accesului la cont.
+ * 🛠️ DECONECTARE RADICALĂ (FORCE LOCKDOWN v10.1)
+ * Aceasta este versiunea supremă care blochează interfața IMEDIAT.
  */
 window.authLogout = async function() {
-  console.log('[Auth] Inițiere deconectare radicală...');
+  console.log('[Auth] DECONECTARE RADICALĂ ACTIVATĂ');
 
-  // 1. Marcam starea de "logout activ" pentru a forța ecranul de login la refresh
-  sessionStorage.setItem('rgb_force_auth', '1');
-
-  // 2. Salvare finală în Cloud (optional)
-  if (typeof window.cloudPushData === 'function') {
-    try { await window.cloudPushData(); } catch (e) {}
+  // 1. BLOCARE IMEDIATĂ VIZUALĂ (Fără animații, fără delay)
+  const authScreen = document.getElementById('auth-screen');
+  if (authScreen) {
+    authScreen.style.setProperty('display', 'flex', 'important');
+    authScreen.style.zIndex = "999999999";
   }
 
-  // 3. Deconectare Firebase
+  // 2. Ștergere locală instantanee
+  localStorage.clear(); // Curățăm TOT pentru siguranță maximă
+  sessionStorage.clear();
+
+  // 3. Deconectare Firebase (dacă există)
   if (typeof fbAuth !== 'undefined' && fbAuth) {
     try { await fbAuth.signOut(); } catch(e) {}
   }
 
-  // 4. Ștergere TOTALĂ chei locale
-  localStorage.removeItem(SK.user);
-  localStorage.removeItem('rgb_auth_seen');
-  localStorage.removeItem('rgd_session');
-  localStorage.removeItem('rgb_session');
-  localStorage.removeItem('firebase:previous_websocket_success');
-
-  // 5. Hard reload - va fi interceptat de guard-ul din init()
-  location.reload();
+  // 4. Redirecționare forțată a memoriei browserului
+  window.location.href = window.location.pathname + "?logged_out=" + Date.now();
 };
 
 /* ── MODUL PROFIL MODERN ── */
@@ -534,10 +533,14 @@ window.getVerificationBadge = function(username) {
 (function init() {
   const user = getCurrentUser();
 
-  // Guard Logout: Dacă am ieșit recent, forțăm ecranul de login
-  if (sessionStorage.getItem('rgb_force_auth') === '1' || !user) {
-    sessionStorage.removeItem('rgb_force_auth');
+  // Guard Ultimativ: Verificăm dacă suntem în proces de logout forțat
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('logged_out') || !user) {
     authShowScreen();
+    // Curățăm URL-ul după afișare
+    if (params.has('logged_out')) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }
 
   if (user) authUpdateTopBar(user);

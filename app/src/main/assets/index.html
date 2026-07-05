@@ -11,6 +11,42 @@
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body class="theme-neon mode-standard" data-page="home">
+
+<!-- ── 4D ULTRA HD SPLASH SCREEN ── -->
+<div id="splash-screen" class="splash-screen">
+  <div class="splash-bg-fx"></div>
+
+  <div class="splash-logo-container">
+    <div class="splash-ring-4d"></div>
+    <i class="fa-solid fa-crown splash-crown-4d"></i>
+    <div class="splash-text-4d">rGdbet</div>
+  </div>
+
+  <div class="splash-progress-track">
+    <div class="splash-progress-fill"></div>
+  </div>
+
+  <!-- Liquid 4D Filter -->
+  <svg style="position: absolute; width: 0; height: 0;">
+    <filter id="liquid-fx">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="liquid" />
+    </filter>
+  </svg>
+</div>
+
+<script>
+  // Splash Screen Logic (v9.8)
+  window.addEventListener('load', () => {
+    const splash = document.getElementById('splash-screen');
+    // Simulăm încărcarea resurselor HD (3.5s)
+    setTimeout(() => {
+      splash.classList.add('hidden');
+      setTimeout(() => splash.remove(), 1000);
+    }, 3800);
+  });
+</script>
+
 <img src="rGdbet_bg.png" class="bg-fix bg-home" alt="">
 <img src="simulator_bg.png" class="bg-fix bg-sim" alt="">
 <img src="addbet_bg.png" class="bg-fix bg-addbet" alt="">

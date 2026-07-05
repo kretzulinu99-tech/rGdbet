@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v10.4 Sovereign Edition (FATAL FIX: AUTH VISIBILITY)
+   Versiune: v10.5 Sovereign Edition (DEFINITIVE LOGOUT & REDIRECT)
    Conține: Auth, Profile, Social Feed, Rank, Highlights, Fix Logout
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
@@ -131,8 +131,7 @@ function authUpdateTopBar(user) {
 }
 
 /**
- * 🛠️ DECONECTARE TOTALĂ (LOGOUT & SWITCH FIX)
- * Am eliminat blocajul CSS și am forțat curățarea localStorage.
+ * 🛠️ DECONECTARE TOTALĂ (DEFINITIVE REDIRECT)
  */
 window.authLogout = async function() {
   console.log('[Auth] Inițiere Logout...');
@@ -142,12 +141,22 @@ window.authLogout = async function() {
     try { await fbAuth.signOut(); } catch(e) {}
   }
 
-  // 2. Ștergere TOTALĂ (Resetare fabrică pe acest browser)
-  localStorage.clear();
+  // 2. Ștergere locală a sesiunii (FĂRĂ clear total pentru a păstra DB-ul utilizatorilor locali)
+  localStorage.removeItem(SK.user);
   sessionStorage.clear();
 
-  // 3. Forțare redirect & refresh
-  window.location.href = window.location.origin + window.location.pathname + "?auth_reset=1";
+  // 3. Resetarea stării UI și navigarea la Home
+  authUpdateTopBar(null);
+
+  if (typeof navigateTo === 'function') {
+    navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
+  }
+
+  // 4. Afișarea imediată a ecranului de Auth
+  authShowScreen();
+
+  // 5. Opțional: reload pentru un stat curat, dar marcăm logout-ul
+  // window.location.reload();
 };
 
 /* ── MODUL PROFIL MODERN ── */
@@ -512,7 +521,7 @@ window.getVerificationBadge = function(username) {
 (function init() {
   const user = getCurrentUser();
 
-  // Guard Logout: Dacă nu avem user, arătăm ecranul de login (V10.4 - FIX VISIBILITY)
+  // Guard Logout: Dacă nu avem user, arătăm ecranul de login (V10.5 - FIX VISIBILITY)
   if (!user) {
     authShowScreen();
   }

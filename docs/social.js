@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v10.2 Sovereign Edition (Multi-Account & Hard Reset Fix)
-   Conține: Auth, Profile, Social Feed, Rank, Highlights
+   Versiune: v10.3 Sovereign Edition (TOTAL ACCOUNT SWITCH FIX)
+   Conține: Auth, Profile, Social Feed, Rank, Highlights, Deep Purge
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -134,34 +134,41 @@ function authUpdateTopBar(user) {
 }
 
 /**
- * 🛠️ DECONECTARE SECURIZATĂ (LOGOUT & SWITCH ACCOUNT)
- * Șterge sesiunea curentă și forțează întoarcerea la Login.
+ * 🛠️ DECONECTARE SECURIZATĂ (LOGOUT & FORCE ACCOUNT SWITCH)
+ * Aceasta este versiunea care forțează Firebase să uite userul curent.
  */
 window.authLogout = async function() {
-  console.log('[Auth] Inițiere Logout pentru schimbare cont...');
+  console.log('[Auth] DECONECTARE PROFUNDĂ: Schimbare cont detectată.');
 
-  // 1. Salvare Cloud finală (dacă e posibil)
+  // 1. SALVARE CLOUD (dacă este posibil)
   if (typeof window.cloudPushData === 'function') {
     try { await window.cloudPushData(); } catch (e) {}
   }
 
-  // 2. Ștergere date sesiune locală + globală
+  // 2. DECONECTARE FIREBASE OBLIGATORIE
+  // Această parte este critică pentru a opri auto-login-ul social
+  if (typeof fbAuth !== 'undefined' && fbAuth) {
+    try {
+      await fbAuth.signOut();
+      console.log('[Auth] Firebase SignOut complet.');
+    } catch(e) { console.error('Eroare Firebase SignOut:', e); }
+  }
+
+  // 3. CURĂȚARE TOTALĂ MEMORIE BROWSER
+  // Ștergem absolut toate urmele sesiunii
   sessionStorage.clear();
   localStorage.removeItem(SK.user);
   localStorage.removeItem('rgb_auth_seen');
+  localStorage.removeItem('rgb_bets'); // Opțional: curățăm biletele locale pentru noul user
+  localStorage.removeItem('rgb_xp');
 
-  // 3. Deconectare Firebase
-  if (typeof fbAuth !== 'undefined' && fbAuth) {
-    try { await fbAuth.signOut(); } catch(e) {}
-  }
-
-  // 4. Redirect forțat la Login
+  // 4. BLOCARE UI
   authUpdateTopBar(null);
   authShowScreen();
-  navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
 
-  // 5. Parametru URL pentru a forța starea de logout la refresh
-  window.location.href = window.location.pathname + "?switch_account=1";
+  // 5. HARD REFRESH CU PARAMETRU DE SIGURANȚĂ
+  // Forțăm browserul să curețe starea internă a scripturilor
+  window.location.href = window.location.origin + window.location.pathname + "?force_login=1&t=" + Date.now();
 };
 
 /* ── MODUL PROFIL MODERN ── */
@@ -195,6 +202,7 @@ window.buildProfilePage = function(force = false) {
   const savedXp = parseInt(localStorage.getItem('rgb_xp')) || user.xp || 0;
   const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(savedXp) : { level:1, xp:0, progressPct:0, progressXP:0, requiredXP:100 };
   const avDisplay = renderAvatarContent(user.avatar);
+  const totalUsers = Object.keys(getUsers()).length;
   const globalRankData = calcGlobalRank(user.username, savedXp, stats);
 
   page.innerHTML = `
@@ -210,7 +218,7 @@ window.buildProfilePage = function(force = false) {
         <div class="prof-user-tag">@${user.username}</div>
         <div style="margin-top:8px;">
           <span class="xp-level-badge" style="background:linear-gradient(135deg, var(--gold), #aa771c); box-shadow:0 0 15px rgba(255,204,0,0.3);">
-            <i class="fa-solid fa-earth-europe"></i> RANK #${globalRankData.rank} / ${globalRankData.total}
+            <i class="fa-solid fa-earth-europe"></i> RANK #${globalRankData.rank} / ${totalUsers}
           </span>
         </div>
       </div>
@@ -247,11 +255,11 @@ window.buildProfilePage = function(force = false) {
       <div class="prof-section-title">SECURITY & DATA</div>
       <div class="prof-row" onclick="exportAccountData()"><div class="prof-row-left"><div class="prof-row-icon green"><i class="fa-solid fa-cloud-arrow-up"></i></div><div class="prof-row-text"><span class="prof-row-label">Cloud Backup</span></div></div></div>
 
-      <!-- SWITCH ACCOUNT BUTTON (LOGOUT) -->
+      <!-- LOGOUT BUTON (Către Login Screen) -->
       <div class="prof-row" onclick="authLogout()">
         <div class="prof-row-left">
           <div class="prof-row-icon red"><i class="fa-solid fa-power-off"></i></div>
-          <div class="prof-row-text"><span class="prof-row-label">Switch Account / Logout</span><span class="prof-row-sub">Deconectează-te pentru a intra cu alt cont</span></div>
+          <div class="prof-row-text"><span class="prof-row-label">Log Out / Schimbă Contul</span><span class="prof-row-sub">Închide sesiunea actuală</span></div>
         </div>
       </div>
     </div>
@@ -538,11 +546,12 @@ window.getVerificationBadge = function(username) {
 (function init() {
   const user = getCurrentUser();
 
-  // Guard switch account: Dacă am forțat ieșirea, arătăm direct ecranul de login
+  // Guard switch account: Dacă avem parametrul force_login, arătăm direct ecranul de login
   const params = new URLSearchParams(window.location.search);
-  if (params.has('switch_account') || !user) {
+  if (params.has('force_login') || !user) {
     authShowScreen();
-    if (params.has('switch_account')) {
+    // Curățăm URL-ul pentru o experiență impecabilă
+    if (params.has('force_login')) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }

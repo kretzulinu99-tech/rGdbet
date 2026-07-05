@@ -170,6 +170,9 @@ window.buildProfilePage = function(force = false) {
 
   const avDisplay = renderAvatarContent(user.avatar);
 
+  // Calculăm Rank-ul Global (v9.4)
+  const globalRankData = calcGlobalRank(user.username, savedXp, stats);
+
   page.innerHTML = `
     <div class="side-panel-close-btn" style="background:rgba(2,4,8,0.5); border:none;">
       <button onclick="navigateTo('home', null)"><i class="fa-solid fa-arrow-left"></i></button>
@@ -181,6 +184,13 @@ window.buildProfilePage = function(force = false) {
       <div class="prof-name-container">
         <div class="prof-display-name" id="profDisplayNameUI">${user.displayName || user.username} ${typeof getVerificationBadge === 'function' ? getVerificationBadge(user.username) : ''}</div>
         <div class="prof-user-tag">@${user.username}</div>
+
+        <!-- GLOBAL RANK BADGE -->
+        <div style="margin-top:8px;">
+          <span class="xp-level-badge" style="background:linear-gradient(135deg, var(--gold), #aa771c); box-shadow:0 0 15px rgba(255,204,0,0.3);">
+            <i class="fa-solid fa-earth-europe"></i> RANK #${globalRankData.rank} / ${globalRankData.total}
+          </span>
+        </div>
       </div>
 
       <!-- XP BAR (RANK PROGRESS) -->
@@ -234,6 +244,52 @@ function calcUserStats() {
     else if (b.status === 'cashout') profit += (b.cashoutAmount - s);
   });
   return { total: bets.length, settled: settled.length, wins, wr: settled.length ? Math.round((wins / settled.length) * 100) : 0, profit };
+}
+
+/**
+ * Calculează poziția utilizatorului în ierarhia globală rGdbet (v9.4)
+ */
+function calcGlobalRank(currentUsername, currentXP, currentStats) {
+  const users = getUsers();
+  const allPosts = getPosts();
+
+  // Mapăm toți utilizatorii la un obiect de ranking
+  const leaderboard = Object.values(users).map(u => {
+    // Dacă e userul curent, folosim datele lui live (din stats calculate recent)
+    if (u.username.toLowerCase() === currentUsername.toLowerCase()) {
+      return { username: u.username, score: (currentXP * 0.5) + (currentStats.wr * 10) + (currentStats.profit * 0.1) };
+    }
+
+    // Altfel, calculăm sumarul din ce a postat
+    const uPosts = allPosts.filter(p => p.author?.toLowerCase() === u.username.toLowerCase());
+    const uSettled = uPosts.filter(p => p.status === 'win' || p.status === 'loss' || p.status === 'cashout');
+    const uWins = uSettled.filter(p => p.status === 'win').length;
+    const uWR = uSettled.length ? (uWins / uSettled.length) * 100 : 0;
+
+    let uProfit = 0;
+    uSettled.forEach(p => {
+      const s = parseFloat(p.stake || 10), o = parseFloat(p.totalOdds || p.odds || 1);
+      if (p.status === 'win') uProfit += s * (o - 1);
+      else if (p.status === 'loss') uProfit -= s;
+      else if (p.status === 'cashout') uProfit += (p.cashoutAmount - s);
+    });
+
+    return {
+      username: u.username,
+      score: ((u.xp || 0) * 0.5) + (uWR * 10) + (uProfit * 0.1)
+    };
+  });
+
+  // Sortăm descrescător după scor
+  leaderboard.sort((a, b) => b.score - a.score);
+
+  // Găsim poziția
+  const rankIndex = leaderboard.findIndex(u => u.username.toLowerCase() === currentUsername.toLowerCase());
+
+  return {
+    rank: rankIndex !== -1 ? rankIndex + 1 : leaderboard.length,
+    total: leaderboard.length
+  };
 }
 
 /**

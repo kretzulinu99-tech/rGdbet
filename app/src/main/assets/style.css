@@ -7138,16 +7138,17 @@ body.page-profile-active .top-bar {
 
 .splash-text-4d {
   margin-top: 40px;
-  font-family: 'Syncopate', sans-serif;
-  font-size: 32px;
-  font-weight: 900;
-  letter-spacing: 12px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: 8px;
   background: linear-gradient(to bottom, #fff 0%, #d4af37 50%, #aa771c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));
   animation: textReveal 2s ease-out forwards;
   position: relative;
+  text-transform: none !important;
 }
 
 .splash-text-4d::after {

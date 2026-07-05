@@ -122,61 +122,16 @@ class MainActivity : AppCompatActivity() {
         if (currentUser is AuthState.SignedIn) {
             val email = currentUser.email ?: ""
             val username = currentUser.displayName ?: email.substringBefore("@")
+            val uid = currentUser.uid
             
+            // v11.8: Nu mai injectăm obiectul întreg pentru a nu declanșa sync-ul automat
             val js = """
                 (function() {
-                    const existingUser = JSON.parse(localStorage.getItem('rgb_user') || '{}');
-                    const user = {
-                        username: "$username",
-                        email: "$email",
-                        passwordHash: "firebase_auth",
-                        createdAt: "${System.currentTimeMillis()}",
-                        avatar: existingUser.avatar || "👤",
-                        theme: "neon",
-                        language: "ro"
-                    };
-                    
-                    // Salvăm în toate locațiile posibile folosite de scripturile web
-                    const users = JSON.parse(localStorage.getItem('rgb_users_db') || '{}');
-                    users["${username.lowercase()}"] = user;
-                    localStorage.setItem('rgb_users_db', JSON.stringify(users));
-                    localStorage.setItem('rgd_users', JSON.stringify(users));
-                    
-                    const session = {
-                        username: "$username",
-                        email: "$email",
-                        loginAt: new Date().toISOString()
-                    };
-                    localStorage.setItem('rgd_session', JSON.stringify(session));
-                    localStorage.setItem('rgb_session', JSON.stringify(session));
-                    
-                    localStorage.setItem('rgb_user', JSON.stringify(user));
-                    localStorage.setItem('rgd_user', JSON.stringify(user));
-
-                    if (typeof authUpdateTopBar === 'function') {
-                        authUpdateTopBar(user);
+                    if (typeof window.nativeInitSession === 'function') {
+                        window.nativeInitSession("$uid", "$email", "$username");
+                    } else {
+                        window.nativeUID = "$uid";
                     }
-
-                    const authScreen = document.getElementById('auth-screen');
-                    if (authScreen) authScreen.style.display = 'none';
-                    const ageGate = document.getElementById('age-gate');
-                    if (ageGate) ageGate.style.display = 'none';
-                    
-                    if (typeof buildProfileUI === 'function') {
-                        buildProfileUI(user);
-                    } else if (typeof buildProfilePage === 'function') {
-                        buildProfilePage();
-                    }
-                    
-                    const topBtn = document.getElementById('topUserBtn');
-                    if (topBtn) topBtn.style.display = 'flex';
-                    const nameEl = document.getElementById('topUsername');
-                    if (nameEl) nameEl.textContent = "$username".toUpperCase().substring(0, 12);
-
-                    const notifBtn = document.getElementById('topNotifBtn');
-                    if (notifBtn) notifBtn.style.display = 'flex';
-                    
-                    if (typeof render === 'function') render();
                 })();
             """.trimIndent()
             

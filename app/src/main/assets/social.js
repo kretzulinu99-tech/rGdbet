@@ -600,11 +600,41 @@ window.socSearch = function(q) {
     </div>`).join('');
 };
 
-/* ── PRIVACY & VERIFICATION (legacy) ── */
+/* ── SISTEM VERIFIED TIPSTER (v9.5 Elite) ── */
+/**
+ * Verifică automat dacă un utilizator merită insigna de Tipster Verificat (Blue Check).
+ * Criterii: min. 10 bilete postate ȘI profit net pozitiv în ultimele 30 de zile.
+ */
 window.getVerificationBadge = function(username) {
-  const posts = getPosts().filter(p => p.author?.toLowerCase() === username.toLowerCase());
-  const wins = posts.filter(p => p.status === 'win').length;
-  if (posts.length >= 5 && (wins/posts.length) > 0.5) return `<i class="fa-solid fa-circle-check" style="color:var(--nb); font-size:10px; margin-left:4px;"></i>`;
+  if (!username) return '';
+
+  const allPosts = getPosts();
+  const userPosts = allPosts.filter(p => p.author?.toLowerCase() === username.toLowerCase());
+
+  // Criteriul 1: Minim 10 bilete postate
+  if (userPosts.length < 10) return '';
+
+  // Criteriul 2: Profit Net pozitiv în ultimele 30 de zile
+  const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+  const recentPosts = userPosts.filter(p => p.postedAt >= thirtyDaysAgo);
+
+  let recentProfit = 0;
+  recentPosts.forEach(p => {
+    // Dacă postarea are un singur bilet (v9.2 sau mai vechi)
+    const tickets = p.tickets || [{ status: p.status, stake: p.stake || 10, odds: p.totalOdds || p.odds || 1 }];
+
+    tickets.forEach(t => {
+      const s = parseFloat(t.stake || 10), o = parseFloat(t.odds || 1);
+      if (t.status === 'win') recentProfit += s * (o - 1);
+      else if (t.status === 'loss') recentProfit -= s;
+      else if (t.status === 'cashout') recentProfit += (t.cashoutAmount - s);
+    });
+  });
+
+  if (recentProfit > 0) {
+    return `<i class="fa-solid fa-circle-check" style="color:var(--nb); font-size:11px; margin-left:4px; filter: drop-shadow(0 0 5px rgba(0, 200, 255, 0.5));" title="Verified Tipster (30D Profit: +${recentProfit.toFixed(0)})"></i>`;
+  }
+
   return '';
 };
 function privacyIcon(p) { return '🌐'; }

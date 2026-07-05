@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
-   cloud-sync.js — Sistem Sincronizare Hibrid (Web + Native)
-   v11.3 Elite Sovereign Platinum (The Barrier Fix)
-   Garantează salvarea prin blocarea deconectării până la confirmare.
+   cloud-sync.js — Sistem Sincronizare Hibrid (Storage Sync)
+   v11.5 Elite Sovereign Platinum (The Persistence Fix)
+   Garantează restaurarea avatarului în ambele straturi de memorie.
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -23,11 +23,8 @@ const CLOUD_KEYS = [
   'rgb_currency'
 ];
 
-let _isSyncing = false;
-
 /**
  * Salvează datele folosind cel mai bun motor disponibil.
- * Acum returnează un PROMISE pentru a permite "await" la logout.
  */
 window.cloudPushData = function() {
   return new Promise((resolve) => {
@@ -40,24 +37,21 @@ window.cloudPushData = function() {
     });
 
     payload.lastSync = Date.now();
-    payload.v = "11.3";
+    payload.v = "11.5";
 
-    // 1. Motor NATIV (Prioritate maximă)
+    // 1. Motor NATIV (Android Bridge)
     if (typeof Android !== 'undefined' && Android.saveToCloud) {
-      console.log('[CloudSync] Salvare Nativă în curs...');
+      console.log('[CloudSync] Trimitere date profil către Android...');
       Android.saveToCloud(JSON.stringify(payload));
-      // Deoarece apelul bridge este asincron pe Android, simulăm o mică așteptare
-      // pentru a permite sistemului de operare să inițieze scrierea.
-      setTimeout(() => resolve(true), 600);
+      setTimeout(() => resolve(true), 800); // Barrieră de 800ms pentru siguranță
       return;
     }
 
-    // 2. Motor WEB (Fallback)
+    // 2. Motor WEB (Firebase JS)
     if (typeof fbDb !== 'undefined' && typeof fbUser !== 'undefined' && fbUser) {
-      console.log('[CloudSync] Salvare Web Firebase în curs...');
       fbDb.collection('user_data').doc(fbUser.uid).set(payload, { merge: true })
-        .then(() => { console.log('[CloudSync] OK (Web)'); resolve(true); })
-        .catch((err) => { console.error('[CloudSync] ERR (Web):', err); resolve(false); });
+        .then(() => resolve(true))
+        .catch(() => resolve(false));
       return;
     }
 
@@ -66,7 +60,7 @@ window.cloudPushData = function() {
 };
 
 /**
- * Încarcă datele din Cloud.
+ * Încarcă datele din Cloud și forțează sincronizarea MEMORIEI.
  */
 window.cloudPullData = async function() {
   let uid = null;
@@ -75,27 +69,45 @@ window.cloudPullData = async function() {
 
   if (!uid || typeof fbDb === 'undefined') return;
 
+  console.log('[CloudSync] Restaurare date cont pentru UID:', uid);
+
   try {
     const doc = await fbDb.collection('user_data').doc(uid).get();
     if (doc.exists) {
       const data = doc.data();
+
       CLOUD_KEYS.forEach(key => {
         if (data[key] !== undefined) {
-          localStorage.setItem(key, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
+          const val = typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]);
+
+          // CRITIC: Actualizăm LocalStorage
+          localStorage.setItem(key, val);
+
+          // SPECIAL: Dacă cheia este 'rgb_user', forțăm și SessionStorage (Unde stă avatarul activ)
+          if (key === 'rgb_user' && typeof window.saveCurrentUser === 'function') {
+            try {
+              const restoredUser = JSON.parse(val);
+              window.saveCurrentUser(restoredUser);
+              console.log('[CloudSync] Avatar restaurat:', restoredUser.avatar ? 'DETECTOR ACTIV' : 'DEFAULT');
+            } catch(e) {}
+          }
         }
       });
-      console.log('[CloudSync] Date restaurate cu succes.');
 
-      // Forțăm actualizarea elementelor vizuale (v11.4)
-      const restoredUser = JSON.parse(localStorage.getItem('rgb_user') || '{}');
-      if (typeof authUpdateTopBar === 'function' && restoredUser.username) {
-        authUpdateTopBar(restoredUser);
+      console.log('[CloudSync] Sincronizare memorie completă.');
+
+      // Notificăm interfața să se actualizeze IMEDIAT
+      if (typeof buildProfilePage === 'function') buildProfilePage(true);
+      if (typeof authUpdateTopBar === 'function') {
+        const u = JSON.parse(localStorage.getItem('rgb_user') || '{}');
+        if (u.username) authUpdateTopBar(u);
       }
       if (typeof render === 'function') render();
       if (typeof updateXPUI === 'function') updateXPUI();
-      if (typeof buildProfilePage === 'function') buildProfilePage(true);
     }
-  } catch (err) {}
+  } catch (err) {
+    console.error('[CloudSync] Eroare la pull date:', err);
+  }
 };
 
 /**
@@ -109,7 +121,7 @@ window.cloudPullData = async function() {
       clearTimeout(window._syncTimeout);
       window._syncTimeout = setTimeout(() => {
         window.cloudPushData();
-      }, 500); // Reducem timpul de reacție la 500ms
+      }, 500);
     }
   };
 })();

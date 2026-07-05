@@ -185,6 +185,10 @@ window.sendMessage = function(toUsername, text, isSystem = false) {
     playSendSnd();
     // Recompensă XP pentru mesaj trimis
     if (typeof addXP === 'function') addXP(5);
+    // Notificare Push (v9.7)
+    if (typeof window.notifyNewMessage === 'function') {
+      window.notifyNewMessage(from, text);
+    }
   }
   return true;
 };

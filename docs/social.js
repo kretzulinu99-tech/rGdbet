@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v8.5 Elite Evolution
-   Conține: Auth, Profile Modern, Social Feed, Rank System
+   Versiune: v9.7 Elite Platinum
+   Conține: Auth, Profile, Social Feed (Multi-Ticket), Rank, Notificări
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -134,7 +134,7 @@ window.authLogout = function() {
   navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
 };
 
-/* ── MODUL PROFIL MODERN (v8.5) ── */
+/* ── MODUL PROFIL MODERN (v8.5+) ── */
 const AVATARS = ['👤','⚽','🏆','👑','🔥','💎','🦁','🐉','🌟','🎯','💥','🏅'];
 
 window.renderAvatarContent = function(av) {
@@ -154,7 +154,6 @@ window.buildProfilePage = function(force = false) {
     return;
   }
 
-  // Dacă pagina este deja construită, actualizăm doar datele dinamice și ieșim (pentru viteză/animatii)
   if (page._built && !force) {
     updateXPUI();
     updateProfileStatsUI();
@@ -163,14 +162,9 @@ window.buildProfilePage = function(force = false) {
 
   page._built = true;
   const stats = calcUserStats();
-
-  // Asigurăm că tragem XP-ul corect (prioritate cheia dedicată pentru persistență)
   const savedXp = parseInt(localStorage.getItem('rgb_xp')) || user.xp || 0;
   const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(savedXp) : { level:1, xp:0, progressPct:0, progressXP:0, requiredXP:100 };
-
   const avDisplay = renderAvatarContent(user.avatar);
-
-  // Calculăm Rank-ul Global (v9.4)
   const globalRankData = calcGlobalRank(user.username, savedXp, stats);
 
   page.innerHTML = `
@@ -184,8 +178,6 @@ window.buildProfilePage = function(force = false) {
       <div class="prof-name-container">
         <div class="prof-display-name" id="profDisplayNameUI">${user.displayName || user.username} ${typeof getVerificationBadge === 'function' ? getVerificationBadge(user.username) : ''}</div>
         <div class="prof-user-tag">@${user.username}</div>
-
-        <!-- GLOBAL RANK BADGE -->
         <div style="margin-top:8px;">
           <span class="xp-level-badge" style="background:linear-gradient(135deg, var(--gold), #aa771c); box-shadow:0 0 15px rgba(255,204,0,0.3);">
             <i class="fa-solid fa-earth-europe"></i> RANK #${globalRankData.rank} / ${globalRankData.total}
@@ -246,26 +238,40 @@ function calcUserStats() {
   return { total: bets.length, settled: settled.length, wins, wr: settled.length ? Math.round((wins / settled.length) * 100) : 0, profit };
 }
 
-/**
- * Calculează poziția utilizatorului în ierarhia globală rGdbet (v9.4)
- */
+function updateProfileStatsUI() {
+  const stats = calcUserStats();
+  const profitEl = document.getElementById('profStatProfitUI');
+  const wrEl = document.getElementById('profStatWRUI');
+  const totalEl = document.getElementById('profStatTotalUI');
+  if (profitEl) {
+    const val = (stats.profit >= 0 ? '+' : '') + stats.profit.toFixed(0);
+    profitEl.textContent = val;
+    profitEl.className = 'prof-stat-val ' + (stats.profit >= 0 ? 'pos' : 'neg');
+    let fs = 15; const len = val.length;
+    if (len > 6) fs = 13; if (len > 8) fs = 11; if (len > 10) fs = 9; if (len > 12) fs = 8;
+    profitEl.style.fontSize = fs + 'px';
+    profitEl.style.whiteSpace = 'nowrap'; profitEl.style.overflow = 'hidden';
+  }
+  if (wrEl) wrEl.textContent = stats.wr + '%';
+  if (totalEl) totalEl.textContent = stats.total;
+  const currSub = document.getElementById('profCurrencySubUI');
+  if (currSub && typeof getCurrency === 'function') currSub.textContent = getCurrency();
+  const nickSub = document.getElementById('profNicknameSubUI');
+  const user = getCurrentUser();
+  if (nickSub && user) nickSub.textContent = user.displayName || user.username;
+}
+
 function calcGlobalRank(currentUsername, currentXP, currentStats) {
   const users = getUsers();
   const allPosts = getPosts();
-
-  // Mapăm toți utilizatorii la un obiect de ranking
   const leaderboard = Object.values(users).map(u => {
-    // Dacă e userul curent, folosim datele lui live (din stats calculate recent)
     if (u.username.toLowerCase() === currentUsername.toLowerCase()) {
       return { username: u.username, score: (currentXP * 0.5) + (currentStats.wr * 10) + (currentStats.profit * 0.1) };
     }
-
-    // Altfel, calculăm sumarul din ce a postat
     const uPosts = allPosts.filter(p => p.author?.toLowerCase() === u.username.toLowerCase());
     const uSettled = uPosts.filter(p => p.status === 'win' || p.status === 'loss' || p.status === 'cashout');
     const uWins = uSettled.filter(p => p.status === 'win').length;
     const uWR = uSettled.length ? (uWins / uSettled.length) * 100 : 0;
-
     let uProfit = 0;
     uSettled.forEach(p => {
       const s = parseFloat(p.stake || 10), o = parseFloat(p.totalOdds || p.odds || 1);
@@ -273,90 +279,22 @@ function calcGlobalRank(currentUsername, currentXP, currentStats) {
       else if (p.status === 'loss') uProfit -= s;
       else if (p.status === 'cashout') uProfit += (p.cashoutAmount - s);
     });
-
-    return {
-      username: u.username,
-      score: ((u.xp || 0) * 0.5) + (uWR * 10) + (uProfit * 0.1)
-    };
+    return { username: u.username, score: ((u.xp || 0) * 0.5) + (uWR * 10) + (uProfit * 0.1) };
   });
-
-  // Sortăm descrescător după scor
   leaderboard.sort((a, b) => b.score - a.score);
-
-  // Găsim poziția
   const rankIndex = leaderboard.findIndex(u => u.username.toLowerCase() === currentUsername.toLowerCase());
-
-  return {
-    rank: rankIndex !== -1 ? rankIndex + 1 : leaderboard.length,
-    total: leaderboard.length
-  };
+  return { rank: rankIndex !== -1 ? rankIndex + 1 : leaderboard.length, total: leaderboard.length };
 }
 
-/**
- * Actualizează doar valorile de stats din UI (fără re-render)
- */
-function updateProfileStatsUI() {
-  const stats = calcUserStats();
-  const profitEl = document.getElementById('profStatProfitUI');
-  const wrEl = document.getElementById('profStatWRUI');
-  const totalEl = document.getElementById('profStatTotalUI');
-
-  if (profitEl) {
-    const val = (stats.profit >= 0 ? '+' : '') + stats.profit.toFixed(0);
-    profitEl.textContent = val;
-    profitEl.className = 'prof-stat-val ' + (stats.profit >= 0 ? 'pos' : 'neg');
-
-    // Scalare dinamică font ultra-adaptivă (v9.1)
-    let fs = 15; // base prof
-    const len = val.length;
-    if (len > 6)  fs = 13;
-    if (len > 8)  fs = 11;
-    if (len > 10) fs = 9;
-    if (len > 12) fs = 8;
-    profitEl.style.fontSize = fs + 'px';
-    profitEl.style.whiteSpace = 'nowrap';
-    profitEl.style.overflow = 'hidden';
-  }
-  if (wrEl) wrEl.textContent = stats.wr + '%';
-  if (totalEl) totalEl.textContent = stats.total;
-
-  const currSub = document.getElementById('profCurrencySubUI');
-  if (currSub && typeof getCurrency === 'function') currSub.textContent = getCurrency();
-
-  const nickSub = document.getElementById('profNicknameSubUI');
-  const user = getCurrentUser();
-  if (nickSub && user) nickSub.textContent = user.displayName || user.username;
-}
-
-function profBuildThemeChips() {
-  const wrap = document.getElementById('profThemeChips');
-  if (!wrap || typeof window.THEMES === 'undefined') return;
-  wrap.innerHTML = window.THEMES.map(t => `<button class="prof-theme-chip" style="width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#fff;" onclick="profApplyTheme('${t.id}')">${t.icon}</button>`).join('');
-}
-
-window.profApplyTheme = function(id) {
-  const t = window.THEMES.find(x => x.id === id);
-  if (t && typeof applyTheme === 'function') applyTheme(t);
-};
-
-/**
- * Actualizează instantaneu bara de XP din UI fără a re-randa toată pagina.
- * Apelat din gamification.js
- */
 window.updateXPUI = function() {
-  const user = getCurrentUser();
-  if (!user) return;
-
+  const user = getCurrentUser(); if (!user) return;
   const savedXp = parseInt(localStorage.getItem('rgb_xp')) || user.xp || 0;
   if (typeof getUserLevelData !== 'function') return;
-
   const lvl = getUserLevelData(savedXp);
-
   const badge = document.getElementById('xpLevelBadgeUI');
   const totalText = document.getElementById('xpTotalTextUI');
   const barInner = document.getElementById('xpBarInnerUI');
   const progressText = document.getElementById('xpProgressTextUI');
-
   if (badge) badge.textContent = `LVL ${lvl.level}`;
   if (totalText) totalText.textContent = `${savedXp.toLocaleString()} XP`;
   if (barInner) barInner.style.width = `${lvl.progressPct}%`;
@@ -376,13 +314,10 @@ window.profOpenEdit = function(type) {
 };
 window.profCloseEdit = function() { document.getElementById('profEditModal')?.classList.remove('open'); };
 window.profSaveEdit = function() {
-  const user = getCurrentUser();
-  if (!user) return;
+  const user = getCurrentUser(); if (!user) return;
   if (window._currentEditType === 'displayName') user.displayName = document.getElementById('edit-displayname-new').value;
   else if (window._currentEditType === 'currency') if (typeof setManualCurrency === 'function') setManualCurrency(document.getElementById('edit-currency-select').value);
-  saveCurrentUser(user);
-  profCloseEdit();
-  buildProfilePage(true);
+  saveCurrentUser(user); profCloseEdit(); buildProfilePage(true);
 };
 
 window.profOpenAvatarPicker = function() { document.getElementById('profAvatarModal')?.classList.add('open'); };
@@ -393,50 +328,22 @@ window.profSelectAvatar = function(av) {
   profCloseAvatarPicker();
 };
 
-/* ── SOCIAL FEED & RANK (v9.3 Elite) ── */
+/* ── SOCIAL FEED & RANK (v9.7) ── */
 window.buildSocialPage = function() {
-  const page = document.getElementById('page-social');
-  if (!page) return;
+  const page = document.getElementById('page-social'); if (!page) return;
   const user = getCurrentUser();
-
   page.innerHTML = `
     <div class="page-top-title"><i class="fa-solid fa-users" style="color:var(--ng)"></i><span>SOCIAL FEED</span></div>
-
-    <!-- Bară acțiuni -->
     <div class="soc-action-bar">
       <button class="soc-tab active" id="soc-tab-feed" onclick="socSwitchTab('feed')"><i class="fa-solid fa-fire"></i> FEED</button>
       <button class="soc-tab" id="soc-tab-rank" onclick="socSwitchTab('rank')"><i class="fa-solid fa-trophy"></i> RANK</button>
       <button class="soc-tab" id="soc-tab-search" onclick="socSwitchTab('search')"><i class="fa-solid fa-magnifying-glass"></i> CAUTĂ</button>
     </div>
-
-    <!-- Buton postează bilet (v9.3) -->
-    ${user ? `
-    <div style="padding:10px 16px 0;">
-      <button class="soc-post-btn" onclick="socOpenPostPicker()">
-        <i class="fa-solid fa-share-from-square"></i> POSTEAZĂ BILETE ÎN COMUNITATE
-      </button>
-    </div>` : ''}
-
+    ${user ? `<div style="padding:10px 16px 0;"><button class="soc-post-btn" onclick="socOpenPostPicker()"><i class="fa-solid fa-share-from-square"></i> POSTEAZĂ BILETE</button></div>` : ''}
     <div id="soc-panel-feed" class="soc-panel active"><div id="soc-feed-list"></div></div>
     <div id="soc-panel-rank" class="soc-panel"><div id="soc-rank-list"></div></div>
-    <div id="soc-panel-search" class="soc-panel">
-      <div class="soc-search-wrap">
-        <input class="auth-input" id="soc-search-inp" type="text" placeholder="Caută utilizatori..." oninput="socSearch(this.value)" style="padding-left:15px;"/>
-      </div>
-      <div id="soc-search-results"></div>
-    </div>
-
-    <!-- Post Picker Modal (Multi-Ticket) -->
-    <div class="prof-avatar-modal" id="socPickModal">
-      <div class="prof-avatar-box" style="max-width:440px;">
-        <div class="prof-edit-title">ALEGE BILETELE</div>
-        <div id="socPickList" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin:15px 0;"></div>
-        <div class="prof-edit-actions">
-          <button class="prof-edit-cancel" onclick="socClosePostPicker()">ANULEAZĂ</button>
-          <button class="prof-edit-save" onclick="socConfirmPost()">POSTEAZĂ SELECȚIA</button>
-        </div>
-      </div>
-    </div>
+    <div id="soc-panel-search" class="soc-panel"><div class="soc-search-wrap"><input class="auth-input" id="soc-search-inp" type="text" placeholder="Caută utilizatori..." oninput="socSearch(this.value)" style="padding-left:15px;"/></div><div id="soc-search-results"></div></div>
+    <div class="prof-avatar-modal" id="socPickModal"><div class="prof-avatar-box" style="max-width:440px;"><div class="prof-edit-title">ALEGE BILETELE</div><div id="socPickList" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin:15px 0;"></div><div class="prof-edit-actions"><button class="prof-edit-cancel" onclick="socClosePostPicker()">ANULEAZĂ</button><button class="prof-edit-save" onclick="socConfirmPost()">POSTEAZĂ SELECȚIA</button></div></div></div>
   `;
   socRenderFeed();
 };
@@ -449,180 +356,86 @@ window.socSwitchTab = function(tab) {
   if (tab === 'rank') socRenderLeaderboard();
 };
 
+window.socToggleFollow = function(targetUsername, btn) {
+  const user = getCurrentUser(); if (!user) return authShowScreen();
+  const follows = getFollows();
+  const myKey = user.username.toLowerCase();
+  const targetKey = targetUsername.toLowerCase();
+  if (!follows[myKey]) follows[myKey] = [];
+  const idx = follows[myKey].indexOf(targetKey);
+  if (idx >= 0) { follows[myKey].splice(idx, 1); if(btn) btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Urmărește'; }
+  else {
+    follows[myKey].push(targetKey); if(btn) btn.innerHTML = '<i class="fa-solid fa-user-check"></i> Urmărești';
+    if (typeof window.notifyFollow === 'function') window.notifyFollow(user.username);
+  }
+  saveFollows(follows);
+};
+
 function socRenderLeaderboard() {
-  const list = document.getElementById('soc-rank-list');
-  if (!list) return;
-  const users = getUsers();
-  const allPosts = getPosts();
+  const list = document.getElementById('soc-rank-list'); if (!list) return;
+  const users = getUsers(); const allPosts = getPosts();
   const rankings = Object.values(users).map(u => {
     const userPosts = allPosts.filter(p => p.author?.toLowerCase() === u.username.toLowerCase());
-    const settled = userPosts.filter(p => p.status === 'win' || p.status === 'loss');
+    const settled = userPosts.filter(p => p.status === 'win' || p.status === 'loss' || p.status === 'cashout');
     const wins = settled.filter(p => p.status === 'win').length;
     const wr = settled.length >= 3 ? Math.round((wins / settled.length) * 100) : 0;
     return { username: u.username, avatar: u.avatar, wr, total: settled.length, score: (wr * 0.7) + (settled.length * 0.3) };
   }).filter(r => r.total >= 3).sort((a,b) => b.score - a.score);
   if (!rankings.length) { list.innerHTML = `<div class="soc-empty">Minimum 3 tickets needed for rank.</div>`; return; }
-  list.innerHTML = rankings.map((r, i) => `
-    <div class="soc-user-card" onclick="viewUserProfile('${r.username}')">
-      <div style="font-weight:700; width:20px;">${i+1}</div>
-      <div class="soc-post-avatar">${renderAvatarContent(r.avatar)}</div>
-      <div style="flex:1;">
-        <div class="soc-post-author">@${r.username} ${typeof getVerificationBadge === 'function' ? getVerificationBadge(r.username) : ''}</div>
-        <div class="soc-post-date">${r.wr}% WR • ${r.total} bilete</div>
-      </div>
-    </div>`).join('');
+  list.innerHTML = rankings.map((r, i) => `<div class="soc-user-card" onclick="viewUserProfile('${r.username}')"><div style="font-weight:700; width:20px;">${i+1}</div><div class="soc-post-avatar">${renderAvatarContent(r.avatar)}</div><div style="flex:1;"><div class="soc-post-author">@${r.username} ${typeof getVerificationBadge === 'function' ? getVerificationBadge(r.username) : ''}</div><div class="soc-post-date">${r.wr}% WR • ${r.total} bilete</div></div></div>`).join('');
 }
 
 window.socConfirmPost = function() {
-  const user = getCurrentUser();
-  if (!user) return;
-
+  const user = getCurrentUser(); if (!user) return;
   const selectedCheckboxes = document.querySelectorAll('.soc-pick-check:checked');
-  if (selectedCheckboxes.length === 0) {
-    alert('Selectează minim un bilet.');
-    return;
-  }
-
+  if (selectedCheckboxes.length === 0) { alert('Selectează minim un bilet.'); return; }
   const bets = JSON.parse(localStorage.getItem('rgb_bets') || '[]');
-  const selectedBets = Array.from(selectedCheckboxes).map(cb => {
-    const betId = parseInt(cb.value);
-    return bets.find(b => b.id === betId);
-  }).filter(b => b);
-
+  const selectedBets = Array.from(selectedCheckboxes).map(cb => { return bets.find(b => b.id === parseInt(cb.value)); }).filter(b => b);
   const posts = getPosts();
-  const post = {
-    id: 'post_' + Date.now() + '_' + user.username,
-    author: user.username,
-    postedAt: Date.now(),
-    tickets: selectedBets.map(b => ({
-      name: b.name,
-      odds: b.odds,
-      status: b.status,
-      events: b.events || []
-    }))
-  };
-
-  posts.unshift(post);
-  savePosts(posts);
-  socClosePostPicker();
-  socRenderFeed();
+  const post = { id: 'post_' + Date.now() + '_' + user.username, author: user.username, postedAt: Date.now(), tickets: selectedBets.map(b => ({ name: b.name, odds: b.odds, status: b.status, events: b.events || [] })) };
+  posts.unshift(post); savePosts(posts);
+  const maxOdds = Math.max(...selectedBets.map(b => b.odds || 1));
+  if (maxOdds >= 10 && typeof window.notifySpectacularPost === 'function') window.notifySpectacularPost(user.username, maxOdds);
+  socClosePostPicker(); socRenderFeed();
 };
 
 window.socOpenPostPicker = function() {
-  const modal = document.getElementById('socPickModal');
-  const list = document.getElementById('socPickList');
-  if (!modal || !list) return;
-
+  const modal = document.getElementById('socPickModal'); const list = document.getElementById('socPickList'); if (!modal || !list) return;
   const bets = JSON.parse(localStorage.getItem('rgb_bets') || '[]').reverse();
-  if (bets.length === 0) {
-    list.innerHTML = `<div class="soc-empty" style="padding:10px;">Nu ai bilete plasate.</div>`;
-  } else {
-    list.innerHTML = bets.slice(0, 20).map(b => `
-      <label class="soc-pick-item" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-        <input type="checkbox" class="soc-pick-check" value="${b.id}" style="width:20px; height:20px; accent-color:var(--nb);"/>
-        <div style="flex:1;">
-          <div style="font-weight:700; font-size:13px;">${b.name}</div>
-          <div style="font-size:11px; color:var(--nb);">@${parseFloat(b.odds).toFixed(2)} • ${b.status.toUpperCase()}</div>
-        </div>
-      </label>
-    `).join('');
-  }
+  if (bets.length === 0) list.innerHTML = `<div class="soc-empty" style="padding:10px;">Nu ai bilete plasate.</div>`;
+  else list.innerHTML = bets.slice(0, 20).map(b => `<label class="soc-pick-item" style="display:flex; align-items:center; gap:12px; cursor:pointer;"><input type="checkbox" class="soc-pick-check" value="${b.id}" style="width:20px; height:20px; accent-color:var(--nb);"/><div style="flex:1;"><div style="font-weight:700; font-size:13px;">${b.name}</div><div style="font-size:11px; color:var(--nb);">@${parseFloat(b.odds).toFixed(2)} • ${b.status.toUpperCase()}</div></div></label>`).join('');
   modal.classList.add('open');
 };
 
-window.socClosePostPicker = function() {
-  document.getElementById('socPickModal')?.classList.remove('open');
-};
+window.socClosePostPicker = function() { document.getElementById('socPickModal')?.classList.remove('open'); };
 
 function socRenderFeed() {
-  const list = document.getElementById('soc-feed-list');
-  if (!list) return;
+  const list = document.getElementById('soc-feed-list'); if (!list) return;
   const posts = getPosts().sort((a,b) => b.postedAt - a.postedAt);
   if (!posts.length) { list.innerHTML = `<div class="soc-empty">Feed-ul este gol.</div>`; return; }
-
   list.innerHTML = posts.map(p => {
     const authorUser = getUsers()[p.author?.toLowerCase()];
     const tickets = p.tickets || [{ name: p.name, odds: p.totalOdds || p.odds, status: p.status, events: p.events || [] }];
-
-    return `
-    <div class="soc-post-card">
-      <div class="soc-post-header">
-        <div class="soc-post-avatar" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">${renderAvatarContent(authorUser?.avatar)}</div>
-        <div class="soc-post-meta">
-          <div class="soc-post-author" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">@${p.author}</div>
-          <div class="soc-post-date">${new Date(p.postedAt).toLocaleDateString()} ${new Date(p.postedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-        </div>
-      </div>
-
-      <div class="soc-post-tickets-wrap" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
-        ${tickets.map(t => `
-          <div class="soc-ticket-mini" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <div style="font-weight:700; font-size:14px; color:#fff;">${t.name}</div>
-              <div style="font-family:'Syncopate'; font-size:12px; color:var(--nb);">@${parseFloat(t.odds).toFixed(2)}</div>
-            </div>
-            <div style="font-size:11px; font-weight:700; color:${t.status === 'win' ? 'var(--ng)' : t.status === 'loss' ? 'var(--danger)' : 'var(--gold)'}; text-transform:uppercase;">
-              ${t.status}
-            </div>
-            ${t.events && t.events.length > 0 ? `
-              <div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:3px;">
-                ${t.events.slice(0, 3).map(ev => `
-                  <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.6);">
-                    <span>${ev.name}</span>
-                    <span style="color:var(--nb);">@${parseFloat(ev.odds).toFixed(2)}</span>
-                  </div>
-                `).join('')}
-                ${t.events.length > 3 ? `<div style="font-size:10px; color:rgba(255,255,255,0.3); text-align:right;">+ încă ${t.events.length - 3}</div>` : ''}
-              </div>
-            ` : ''}
-          </div>
-        `).join('')}
-      </div>
-    </div>`;
+    return `<div class="soc-post-card"><div class="soc-post-header"><div class="soc-post-avatar" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">${renderAvatarContent(authorUser?.avatar)}</div><div class="soc-post-meta"><div class="soc-post-author" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">@${p.author}</div><div class="soc-post-date">${new Date(p.postedAt).toLocaleDateString()} ${new Date(p.postedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div></div></div><div class="soc-post-tickets-wrap" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">${tickets.map(t => `<div class="soc-ticket-mini" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:10px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;"><div style="font-weight:700; font-size:14px; color:#fff;">${t.name}</div><div style="font-family:'Syncopate'; font-size:12px; color:var(--nb);">@${parseFloat(t.odds).toFixed(2)}</div></div><div style="font-size:11px; font-weight:700; color:${t.status === 'win' ? 'var(--ng)' : t.status === 'loss' ? 'var(--danger)' : 'var(--gold)'}; text-transform:uppercase;">${t.status}</div>${t.events && t.events.length > 0 ? `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:3px;">${t.events.slice(0, 3).map(ev => `<div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.6);"><span>${ev.name}</span><span style="color:var(--nb);">@${parseFloat(ev.odds).toFixed(2)}</span></div>`).join('')}${t.events.length > 3 ? `<div style="font-size:10px; color:rgba(255,255,255,0.3); text-align:right;">+ încă ${t.events.length - 3}</div>` : ''}</div>` : ''}</div>`).join('')}</div></div>`;
   }).join('');
 }
 
 window.socSearch = function(q) {
-  const res = document.getElementById('soc-search-results');
-  if (!res || !q) { if(res) res.innerHTML = ''; return; }
-  const matches = Object.values(getUsers()).filter(u =>
-    u.username.toLowerCase().includes(q.toLowerCase()) ||
-    (u.displayName && u.displayName.toLowerCase().includes(q.toLowerCase()))
-  );
-  res.innerHTML = matches.map(u => `
-    <div class="soc-user-card" onclick="viewUserProfile('${u.username}')">
-      <div class="soc-post-avatar">${renderAvatarContent(u.avatar)}</div>
-      <div style="flex:1;">
-        <div class="soc-post-author">@${u.username}</div>
-        <div class="soc-post-date">${u.displayName || 'Utilizator Elite'}</div>
-      </div>
-      <i class="fa-solid fa-chevron-right" style="opacity:0.3; font-size:10px;"></i>
-    </div>`).join('');
+  const res = document.getElementById('soc-search-results'); if (!res || !q) { if(res) res.innerHTML = ''; return; }
+  const matches = Object.values(getUsers()).filter(u => u.username.toLowerCase().includes(q.toLowerCase()) || (u.displayName && u.displayName.toLowerCase().includes(q.toLowerCase())));
+  res.innerHTML = matches.map(u => `<div class="soc-user-card" onclick="viewUserProfile('${u.username}')"><div class="soc-post-avatar">${renderAvatarContent(u.avatar)}</div><div style="flex:1;"><div class="soc-post-author">@${u.username}</div><div class="soc-post-date">${u.displayName || 'Utilizator Elite'}</div></div><i class="fa-solid fa-chevron-right" style="opacity:0.3; font-size:10px;"></i></div>`).join('');
 };
 
 /* ── SISTEM VERIFIED TIPSTER (v9.5 Elite) ── */
-/**
- * Verifică automat dacă un utilizator merită insigna de Tipster Verificat (Blue Check).
- * Criterii: min. 10 bilete postate ȘI profit net pozitiv în ultimele 30 de zile.
- */
 window.getVerificationBadge = function(username) {
   if (!username) return '';
-
-  const allPosts = getPosts();
-  const userPosts = allPosts.filter(p => p.author?.toLowerCase() === username.toLowerCase());
-
-  // Criteriul 1: Minim 10 bilete postate
+  const allPosts = getPosts(); const userPosts = allPosts.filter(p => p.author?.toLowerCase() === username.toLowerCase());
   if (userPosts.length < 10) return '';
-
-  // Criteriul 2: Profit Net pozitiv în ultimele 30 de zile
   const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
   const recentPosts = userPosts.filter(p => p.postedAt >= thirtyDaysAgo);
-
   let recentProfit = 0;
   recentPosts.forEach(p => {
-    // Dacă postarea are un singur bilet (v9.2 sau mai vechi)
     const tickets = p.tickets || [{ status: p.status, stake: p.stake || 10, odds: p.totalOdds || p.odds || 1 }];
-
     tickets.forEach(t => {
       const s = parseFloat(t.stake || 10), o = parseFloat(t.odds || 1);
       if (t.status === 'win') recentProfit += s * (o - 1);
@@ -630,16 +443,7 @@ window.getVerificationBadge = function(username) {
       else if (t.status === 'cashout') recentProfit += (t.cashoutAmount - s);
     });
   });
-
-  if (recentProfit > 0) {
-    // Insignă stil Facebook (v9.6) - Scalloped Circle + Check
-    return `
-      <span class="fb-verified-wrap" title="Verified Tipster (30D Profit: +${recentProfit.toFixed(0)})">
-        <i class="fa-solid fa-certificate fb-verified-bg"></i>
-        <i class="fa-solid fa-check fb-verified-check"></i>
-      </span>`;
-  }
-
+  if (recentProfit > 0) return `<span class="fb-verified-wrap" title="Verified Tipster (30D Profit: +${recentProfit.toFixed(0)})"><i class="fa-solid fa-certificate fb-verified-bg"></i><i class="fa-solid fa-check fb-verified-check"></i></span>`;
   return '';
 };
 function privacyIcon(p) { return '🌐'; }
@@ -647,6 +451,5 @@ function privacyLabel(p) { return 'Public'; }
 function privacyDesc(p) { return ''; }
 
 (function init() {
-  const user = getCurrentUser();
-  if (user) authUpdateTopBar(user);
+  const user = getCurrentUser(); if (user) authUpdateTopBar(user);
 })();

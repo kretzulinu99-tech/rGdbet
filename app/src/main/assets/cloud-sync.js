@@ -71,9 +71,8 @@ window.cloudPullData = async function() {
  * Apelat automat la modificări (debounced).
  */
 window.cloudPushData = async function() {
-  if (!fbDb || !fbUser || _isSyncing) return false;
+  if (!fbDb || !fbUser || _isSyncing) return;
   _isSyncing = true;
-  console.log('[CloudSync] Pornire salvare finală date...');
 
   const payload = {};
   CLOUD_KEYS.forEach(key => {
@@ -94,11 +93,9 @@ window.cloudPushData = async function() {
 
   try {
     await fbDb.collection('user_data').doc(fbUser.uid).set(payload, { merge: true });
-    console.log('[CloudSync] Date salvate cu succes în Cloud.');
-    return true;
+    console.log('[CloudSync] Date salvate în Cloud.');
   } catch (err) {
     console.error('[CloudSync] Eroare la push:', err);
-    return false;
   } finally {
     _isSyncing = false;
   }

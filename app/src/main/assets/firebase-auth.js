@@ -82,6 +82,10 @@ function fbLoadSDK() {
           try {
             fbApp  = firebase.initializeApp(FIREBASE_CONFIG);
             fbAuth = firebase.auth();
+
+            // Forțăm logarea la fiecare intrare în aplicație (v10.1)
+            fbAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+
             fbDb   = firebase.firestore();
             fbReady = true;
 

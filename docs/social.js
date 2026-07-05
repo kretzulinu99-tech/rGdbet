@@ -337,17 +337,30 @@ window.profSelectAvatar = function(av) {
   profCloseAvatarPicker();
 };
 
-/* ── SOCIAL FEED & RANK (v9.2 Elite) ── */
+/* ── SOCIAL FEED & RANK (v9.3 Elite) ── */
 window.buildSocialPage = function() {
   const page = document.getElementById('page-social');
   if (!page) return;
+  const user = getCurrentUser();
+
   page.innerHTML = `
     <div class="page-top-title"><i class="fa-solid fa-users" style="color:var(--ng)"></i><span>SOCIAL FEED</span></div>
+
+    <!-- Bară acțiuni -->
     <div class="soc-action-bar">
       <button class="soc-tab active" id="soc-tab-feed" onclick="socSwitchTab('feed')"><i class="fa-solid fa-fire"></i> FEED</button>
       <button class="soc-tab" id="soc-tab-rank" onclick="socSwitchTab('rank')"><i class="fa-solid fa-trophy"></i> RANK</button>
       <button class="soc-tab" id="soc-tab-search" onclick="socSwitchTab('search')"><i class="fa-solid fa-magnifying-glass"></i> CAUTĂ</button>
     </div>
+
+    <!-- Buton postează bilet (v9.3) -->
+    ${user ? `
+    <div style="padding:10px 16px 0;">
+      <button class="soc-post-btn" onclick="socOpenPostPicker()">
+        <i class="fa-solid fa-share-from-square"></i> POSTEAZĂ BILETE ÎN COMUNITATE
+      </button>
+    </div>` : ''}
+
     <div id="soc-panel-feed" class="soc-panel active"><div id="soc-feed-list"></div></div>
     <div id="soc-panel-rank" class="soc-panel"><div id="soc-rank-list"></div></div>
     <div id="soc-panel-search" class="soc-panel">
@@ -355,6 +368,18 @@ window.buildSocialPage = function() {
         <input class="auth-input" id="soc-search-inp" type="text" placeholder="Caută utilizatori..." oninput="socSearch(this.value)" style="padding-left:15px;"/>
       </div>
       <div id="soc-search-results"></div>
+    </div>
+
+    <!-- Post Picker Modal (Multi-Ticket) -->
+    <div class="prof-avatar-modal" id="socPickModal">
+      <div class="prof-avatar-box" style="max-width:440px;">
+        <div class="prof-edit-title">ALEGE BILETELE</div>
+        <div id="socPickList" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin:15px 0;"></div>
+        <div class="prof-edit-actions">
+          <button class="prof-edit-cancel" onclick="socClosePostPicker()">ANULEAZĂ</button>
+          <button class="prof-edit-save" onclick="socConfirmPost()">POSTEAZĂ SELECȚIA</button>
+        </div>
+      </div>
     </div>
   `;
   socRenderFeed();
@@ -392,22 +417,113 @@ function socRenderLeaderboard() {
     </div>`).join('');
 }
 
+window.socConfirmPost = function() {
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const selectedCheckboxes = document.querySelectorAll('.soc-pick-check:checked');
+  if (selectedCheckboxes.length === 0) {
+    alert('Selectează minim un bilet.');
+    return;
+  }
+
+  const bets = JSON.parse(localStorage.getItem('rgb_bets') || '[]');
+  const selectedBets = Array.from(selectedCheckboxes).map(cb => {
+    const betId = parseInt(cb.value);
+    return bets.find(b => b.id === betId);
+  }).filter(b => b);
+
+  const posts = getPosts();
+  const post = {
+    id: 'post_' + Date.now() + '_' + user.username,
+    author: user.username,
+    postedAt: Date.now(),
+    tickets: selectedBets.map(b => ({
+      name: b.name,
+      odds: b.odds,
+      status: b.status,
+      events: b.events || []
+    }))
+  };
+
+  posts.unshift(post);
+  savePosts(posts);
+  socClosePostPicker();
+  socRenderFeed();
+};
+
+window.socOpenPostPicker = function() {
+  const modal = document.getElementById('socPickModal');
+  const list = document.getElementById('socPickList');
+  if (!modal || !list) return;
+
+  const bets = JSON.parse(localStorage.getItem('rgb_bets') || '[]').reverse();
+  if (bets.length === 0) {
+    list.innerHTML = `<div class="soc-empty" style="padding:10px;">Nu ai bilete plasate.</div>`;
+  } else {
+    list.innerHTML = bets.slice(0, 20).map(b => `
+      <label class="soc-pick-item" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+        <input type="checkbox" class="soc-pick-check" value="${b.id}" style="width:20px; height:20px; accent-color:var(--nb);"/>
+        <div style="flex:1;">
+          <div style="font-weight:700; font-size:13px;">${b.name}</div>
+          <div style="font-size:11px; color:var(--nb);">@${parseFloat(b.odds).toFixed(2)} • ${b.status.toUpperCase()}</div>
+        </div>
+      </label>
+    `).join('');
+  }
+  modal.classList.add('open');
+};
+
+window.socClosePostPicker = function() {
+  document.getElementById('socPickModal')?.classList.remove('open');
+};
+
 function socRenderFeed() {
   const list = document.getElementById('soc-feed-list');
   if (!list) return;
   const posts = getPosts().sort((a,b) => b.postedAt - a.postedAt);
-  if (!posts.length) { list.innerHTML = `<div class="soc-empty">Feed is empty.</div>`; return; }
-  list.innerHTML = posts.map(p => `
+  if (!posts.length) { list.innerHTML = `<div class="soc-empty">Feed-ul este gol.</div>`; return; }
+
+  list.innerHTML = posts.map(p => {
+    const authorUser = getUsers()[p.author?.toLowerCase()];
+    const tickets = p.tickets || [{ name: p.name, odds: p.totalOdds || p.odds, status: p.status, events: p.events || [] }];
+
+    return `
     <div class="soc-post-card">
       <div class="soc-post-header">
-        <div class="soc-post-avatar" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">${renderAvatarContent(getUsers()[p.author?.toLowerCase()]?.avatar)}</div>
+        <div class="soc-post-avatar" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">${renderAvatarContent(authorUser?.avatar)}</div>
         <div class="soc-post-meta">
           <div class="soc-post-author" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">@${p.author}</div>
-          <div class="soc-post-date">${new Date(p.postedAt).toLocaleTimeString()}</div>
+          <div class="soc-post-date">${new Date(p.postedAt).toLocaleDateString()} ${new Date(p.postedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         </div>
       </div>
-      <div class="soc-post-title">${p.name}</div>
-    </div>`).join('');
+
+      <div class="soc-post-tickets-wrap" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+        ${tickets.map(t => `
+          <div class="soc-ticket-mini" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <div style="font-weight:700; font-size:14px; color:#fff;">${t.name}</div>
+              <div style="font-family:'Syncopate'; font-size:12px; color:var(--nb);">@${parseFloat(t.odds).toFixed(2)}</div>
+            </div>
+            <div style="font-size:11px; font-weight:700; color:${t.status === 'win' ? 'var(--ng)' : t.status === 'loss' ? 'var(--danger)' : 'var(--gold)'}; text-transform:uppercase;">
+              ${t.status}
+            </div>
+            ${t.events && t.events.length > 0 ? `
+              <div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:3px;">
+                ${t.events.slice(0, 3).map(ev => `
+                  <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.6);">
+                    <span>${ev.name}</span>
+                    <span style="color:var(--nb);">@${parseFloat(ev.odds).toFixed(2)}</span>
+                  </div>
+                `).join('')}
+                ${t.events.length > 3 ? `<div style="font-size:10px; color:rgba(255,255,255,0.3); text-align:right;">+ încă ${t.events.length - 3}</div>` : ''}
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 window.socSearch = function(q) {

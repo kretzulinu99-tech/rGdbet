@@ -7192,3 +7192,44 @@ body.page-profile-active .top-bar {
   0% { width: 0%; }
   100% { width: 100%; }
 }
+
+/* -- ELITE HIGHLIGHTS (v10.0 Sovereign) -- */
+
+/* 1. Luminous Border Aura for Cards */
+.elite-aura {
+  position: relative;
+  z-index: 20;
+}
+.elite-aura::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(90deg, #ffcc00, #ffffff, #00c8ff, #ffcc00);
+  background-size: 300% 100%;
+  border-radius: 22px;
+  z-index: -1;
+  animation: auraRotate 3s linear infinite;
+  opacity: 0.9;
+  filter: blur(4px);
+}
+
+@keyframes auraRotate {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 150% 0%; }
+}
+
+/* 2. Platinum-Gold Nickname Gradient */
+.elite-nickname-platinum {
+  background: linear-gradient(90deg, #d4af37, #fef9c3, #ffffff, #d4af37);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: nicknameGlow 2.5s linear infinite;
+  font-weight: 900 !important;
+  display: inline-block;
+}
+
+@keyframes nicknameGlow {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}

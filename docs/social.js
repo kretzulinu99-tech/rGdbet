@@ -379,10 +379,26 @@ function socRenderLeaderboard() {
     const settled = userPosts.filter(p => p.status === 'win' || p.status === 'loss' || p.status === 'cashout');
     const wins = settled.filter(p => p.status === 'win').length;
     const wr = settled.length >= 3 ? Math.round((wins / settled.length) * 100) : 0;
-    return { username: u.username, avatar: u.avatar, wr, total: settled.length, score: (wr * 0.7) + (settled.length * 0.3) };
+    return { username: u.username, avatar: u.avatar, xp: u.xp || 0, wr, total: settled.length, score: (wr * 0.7) + (settled.length * 0.3) };
   }).filter(r => r.total >= 3).sort((a,b) => b.score - a.score);
+
   if (!rankings.length) { list.innerHTML = `<div class="soc-empty">Minimum 3 tickets needed for rank.</div>`; return; }
-  list.innerHTML = rankings.map((r, i) => `<div class="soc-user-card" onclick="viewUserProfile('${r.username}')"><div style="font-weight:700; width:20px;">${i+1}</div><div class="soc-post-avatar">${renderAvatarContent(r.avatar)}</div><div style="flex:1;"><div class="soc-post-author">@${r.username} ${typeof getVerificationBadge === 'function' ? getVerificationBadge(r.username) : ''}</div><div class="soc-post-date">${r.wr}% WR • ${r.total} bilete</div></div></div>`).join('');
+
+  list.innerHTML = rankings.map((r, i) => {
+    const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(r.xp) : { level:1 };
+    const vBadgeHtml = typeof getVerificationBadge === 'function' ? getVerificationBadge(r.username) : '';
+    const isElite = lvl.level >= 80 || vBadgeHtml.includes('fb-verified-wrap');
+
+    return `
+    <div class="soc-user-card" onclick="viewUserProfile('${r.username}')">
+      <div style="font-weight:700; width:20px;">${i+1}</div>
+      <div class="soc-post-avatar">${renderAvatarContent(r.avatar)}</div>
+      <div style="flex:1;">
+        <div class="soc-post-author ${isElite ? 'elite-nickname-platinum' : ''}">@${r.username} ${vBadgeHtml}</div>
+        <div class="soc-post-date">${r.wr}% WR • ${r.total} bilete</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 window.socConfirmPost = function() {
@@ -413,17 +429,82 @@ function socRenderFeed() {
   const list = document.getElementById('soc-feed-list'); if (!list) return;
   const posts = getPosts().sort((a,b) => b.postedAt - a.postedAt);
   if (!posts.length) { list.innerHTML = `<div class="soc-empty">Feed-ul este gol.</div>`; return; }
+
+  const allUsers = getUsers();
+
   list.innerHTML = posts.map(p => {
-    const authorUser = getUsers()[p.author?.toLowerCase()];
+    const authorUser = allUsers[p.author?.toLowerCase()];
     const tickets = p.tickets || [{ name: p.name, odds: p.totalOdds || p.odds, status: p.status, events: p.events || [] }];
-    return `<div class="soc-post-card"><div class="soc-post-header"><div class="soc-post-avatar" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">${renderAvatarContent(authorUser?.avatar)}</div><div class="soc-post-meta"><div class="soc-post-author" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">@${p.author}</div><div class="soc-post-date">${new Date(p.postedAt).toLocaleDateString()} ${new Date(p.postedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div></div></div><div class="soc-post-tickets-wrap" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">${tickets.map(t => `<div class="soc-ticket-mini" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:10px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;"><div style="font-weight:700; font-size:14px; color:#fff;">${t.name}</div><div style="font-family:'Syncopate'; font-size:12px; color:var(--nb);">@${parseFloat(t.odds).toFixed(2)}</div></div><div style="font-size:11px; font-weight:700; color:${t.status === 'win' ? 'var(--ng)' : t.status === 'loss' ? 'var(--danger)' : 'var(--gold)'}; text-transform:uppercase;">${t.status}</div>${t.events && t.events.length > 0 ? `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:3px;">${t.events.slice(0, 3).map(ev => `<div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.6);"><span>${ev.name}</span><span style="color:var(--nb);">@${parseFloat(ev.odds).toFixed(2)}</span></div>`).join('')}${t.events.length > 3 ? `<div style="font-size:10px; color:rgba(255,255,255,0.3); text-align:right;">+ încă ${t.events.length - 3}</div>` : ''}</div>` : ''}</div>`).join('')}</div></div>`;
+
+    // Verificăm statutul Elite (v10.0 Sovereign)
+    const xp = authorUser?.xp || 0;
+    const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(xp) : { level:1 };
+    const vBadgeHtml = typeof getVerificationBadge === 'function' ? getVerificationBadge(p.author) : '';
+    const isVerified = vBadgeHtml.includes('fb-verified-wrap');
+    const isElite = lvl.level >= 80 || isVerified;
+
+    return `
+    <div class="soc-post-card ${isElite ? 'elite-aura' : ''}">
+      <div class="soc-post-header">
+        <div class="soc-post-avatar" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">${renderAvatarContent(authorUser?.avatar)}</div>
+        <div class="soc-post-meta">
+          <div class="soc-post-author ${isElite ? 'elite-nickname-platinum' : ''}" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">@${p.author}</div>
+          <div class="soc-post-date">${new Date(p.postedAt).toLocaleDateString()} ${new Date(p.postedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} ${vBadgeHtml}</div>
+        </div>
+      </div>
+
+      <div class="soc-post-tickets-wrap" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+        ${tickets.map(t => `
+          <div class="soc-ticket-mini" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <div style="font-weight:700; font-size:14px; color:#fff;">${t.name}</div>
+              <div style="font-family:'Syncopate'; font-size:12px; color:var(--nb);">@${parseFloat(t.odds).toFixed(2)}</div>
+            </div>
+            <div style="font-size:11px; font-weight:700; color:${t.status === 'win' ? 'var(--ng)' : t.status === 'loss' ? 'var(--danger)' : 'var(--gold)'}; text-transform:uppercase;">
+              ${t.status}
+            </div>
+            ${t.events && t.events.length > 0 ? `
+              <div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:3px;">
+                ${t.events.slice(0, 3).map(ev => `
+                  <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.6);">
+                    <span>${ev.name}</span>
+                    <span style="color:var(--nb);">@${parseFloat(ev.odds).toFixed(2)}</span>
+                  </div>
+                `).join('')}
+                ${t.events.length > 3 ? `<div style="font-size:10px; color:rgba(255,255,255,0.3); text-align:right;">+ încă ${t.events.length - 3}</div>` : ''}
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
   }).join('');
 }
 
 window.socSearch = function(q) {
   const res = document.getElementById('soc-search-results'); if (!res || !q) { if(res) res.innerHTML = ''; return; }
-  const matches = Object.values(getUsers()).filter(u => u.username.toLowerCase().includes(q.toLowerCase()) || (u.displayName && u.displayName.toLowerCase().includes(q.toLowerCase())));
-  res.innerHTML = matches.map(u => `<div class="soc-user-card" onclick="viewUserProfile('${u.username}')"><div class="soc-post-avatar">${renderAvatarContent(u.avatar)}</div><div style="flex:1;"><div class="soc-post-author">@${u.username}</div><div class="soc-post-date">${u.displayName || 'Utilizator Elite'}</div></div><i class="fa-solid fa-chevron-right" style="opacity:0.3; font-size:10px;"></i></div>`).join('');
+  const allUsers = getUsers();
+  const matches = Object.values(allUsers).filter(u =>
+    u.username.toLowerCase().includes(q.toLowerCase()) ||
+    (u.displayName && u.displayName.toLowerCase().includes(q.toLowerCase()))
+  );
+
+  res.innerHTML = matches.map(u => {
+    const xp = u.xp || 0;
+    const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(xp) : { level:1 };
+    const vBadgeHtml = typeof getVerificationBadge === 'function' ? getVerificationBadge(u.username) : '';
+    const isElite = lvl.level >= 80 || vBadgeHtml.includes('fb-verified-wrap');
+
+    return `
+    <div class="soc-user-card" onclick="viewUserProfile('${u.username}')">
+      <div class="soc-post-avatar">${renderAvatarContent(u.avatar)}</div>
+      <div style="flex:1;">
+        <div class="soc-post-author ${isElite ? 'elite-nickname-platinum' : ''}">@${u.username} ${vBadgeHtml}</div>
+        <div class="soc-post-date">${u.displayName || 'Utilizator Elite'}</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="opacity:0.3; font-size:10px;"></i>
+    </div>`;
+  }).join('');
 };
 
 /* ── SISTEM VERIFIED TIPSTER (v9.5 Elite) ── */

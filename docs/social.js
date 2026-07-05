@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v10.0 Sovereign Edition (Enhanced Logout)
+   Versiune: v10.0 Sovereign Edition (Enhanced Logout Fix)
    Conține: Auth, Profile, Social Feed, Rank, Highlights
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
@@ -128,42 +128,37 @@ function authUpdateTopBar(user) {
 }
 
 /**
- * 🛠️ DECONECTARE SECURIZATĂ (SAVE & HARD RESET)
- * Salvează datele în Cloud, șterge sesiunea și forțează login-ul.
+ * 🛠️ DECONECTARE SECURIZATĂ (FORCE LOGOUT)
+ * Garantează delogarea și blocarea accesului la cont.
  */
 window.authLogout = async function() {
-  console.log('[Auth] Inițiere deconectare cu salvare date...');
+  console.log('[Auth] Inițiere deconectare radicală...');
 
-  // 1. SALVARE FINALĂ DATE (Cloud Sync)
+  // 1. Marcam starea de "logout activ" pentru a forța ecranul de login la refresh
+  sessionStorage.setItem('rgb_force_auth', '1');
+
+  // 2. Salvare finală în Cloud (optional)
   if (typeof window.cloudPushData === 'function') {
-    try {
-      await window.cloudPushData();
-    } catch (e) {
-      console.warn('[Auth] Salvarea finală a eșuat:', e);
-    }
+    try { await window.cloudPushData(); } catch (e) {}
   }
 
-  // 2. Deconectare Firebase (dacă există)
+  // 3. Deconectare Firebase
   if (typeof fbAuth !== 'undefined' && fbAuth) {
     try { await fbAuth.signOut(); } catch(e) {}
   }
 
-  // 3. Ștergem urmele locale ale sesiunii
+  // 4. Ștergere TOTALĂ chei locale
   localStorage.removeItem(SK.user);
   localStorage.removeItem('rgb_auth_seen');
   localStorage.removeItem('rgd_session');
   localStorage.removeItem('rgb_session');
+  localStorage.removeItem('firebase:previous_websocket_success');
 
-  // 4. Redirecționăm și afișăm login
-  authUpdateTopBar(null);
-  navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
-  authShowScreen();
-
-  // 5. HARD RESET (Garanție siguranță)
-  setTimeout(() => { location.reload(); }, 150);
+  // 5. Hard reload - va fi interceptat de guard-ul din init()
+  location.reload();
 };
 
-/* ── MODUL PROFIL MODERN (v8.5+) ── */
+/* ── MODUL PROFIL MODERN ── */
 const AVATARS = ['👤','⚽','🏆','👑','🔥','💎','🦁','🐉','🌟','🎯','💥','🏅'];
 
 window.renderAvatarContent = function(av) {
@@ -537,5 +532,13 @@ window.getVerificationBadge = function(username) {
 };
 
 (function init() {
-  const user = getCurrentUser(); if (user) authUpdateTopBar(user);
+  const user = getCurrentUser();
+
+  // Guard Logout: Dacă am ieșit recent, forțăm ecranul de login
+  if (sessionStorage.getItem('rgb_force_auth') === '1' || !user) {
+    sessionStorage.removeItem('rgb_force_auth');
+    authShowScreen();
+  }
+
+  if (user) authUpdateTopBar(user);
 })();

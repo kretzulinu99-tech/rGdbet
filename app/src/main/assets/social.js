@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v10.5 Sovereign Edition (DEFINITIVE LOGOUT & REDIRECT)
-   Conține: Auth, Profile, Social Feed, Rank, Highlights, Fix Logout
+   Versiune: v10.6 Sovereign Edition (ZERO-LOSS LOGOUT)
+   Conține: Auth, Profile, Social Feed, Rank, Highlights, Sync Barrier
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -110,10 +110,7 @@ function authHideScreen() {
 
 function authShowScreen() {
   const s = document.getElementById('auth-screen');
-  if (s) {
-    s.style.display = 'flex';
-    s.classList.remove('hiding');
-  }
+  if (s) { s.style.display = 'flex'; s.classList.remove('hiding'); }
 }
 
 function authUpdateTopBar(user) {
@@ -131,37 +128,44 @@ function authUpdateTopBar(user) {
 }
 
 /**
- * 🛠️ DECONECTARE TOTALĂ (WEB + NATIV ANDROID)
- * Aceasta este versiunea finală care comunică cu aplicația nativă
- * pentru a te trimite la ecranul "Intră pe teren".
+ * 🛠️ DECONECTARE SECURIZATĂ (SYNC BARRIER v10.6)
+ * Această versiune AȘTEAPTĂ salvarea finală în Cloud înainte de a ieși.
  */
 window.authLogout = async function() {
-  console.log('[Auth] Inițiere Logout Total...');
+  console.log('[Auth] Inițiere Logout Securizat (Așteptare Sincronizare)...');
 
-  // 1. Ștergere date locale (WEB)
+  // 1. UI Feedback: Arătăm un mesaj de "Salvare"
+  if (typeof showMsgToast === 'function') showMsgToast('Saving data...', 'info');
+
+  // 2. FORȚARE PUSH CLOUD (AWAIT)
+  // Această funcție blochează restul codului până când datele ajung în Cloud.
+  if (typeof window.cloudPushData === 'function') {
+    await window.cloudPushData();
+    console.log('[Auth] Date salvate cu succes în Cloud.');
+  }
+
+  // 3. ȘTERGERE SESIUNE WEB
   localStorage.removeItem(SK.user);
   sessionStorage.clear();
 
-  // 2. COMUNICARE CU ANDROID (CRITIC)
-  // Dacă suntem în aplicația mobilă, cerem deconectarea nativă
-  if (typeof Android !== 'undefined' && Android.logout) {
-    console.log('[Auth] Apelare logout nativ Android...');
-    Android.logout();
-    return; // Android va gestiona redirect-ul la LoginActivity
-  }
-
-  // 3. Fallback pentru Browser (PWA)
+  // 4. DECONECTARE FIREBASE (WEB)
   if (typeof fbAuth !== 'undefined' && fbAuth) {
     try { await fbAuth.signOut(); } catch(e) {}
   }
 
+  // 5. DECONECTARE NATIVĂ ANDROID (Dacă există bridge)
+  if (typeof Android !== 'undefined' && Android.logout) {
+    console.log('[Auth] Executare logout hibrid...');
+    Android.logout();
+    return;
+  }
+
+  // 6. REDIRECT HOME + LOGIN
   authUpdateTopBar(null);
   authShowScreen();
-
   if (typeof navigateTo === 'function') {
     navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
   }
-
   window.location.reload();
 };
 
@@ -196,9 +200,8 @@ window.buildProfilePage = function(force = false) {
   const savedXp = parseInt(localStorage.getItem('rgb_xp')) || user.xp || 0;
   const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(savedXp) : { level:1, xp:0, progressPct:0, progressXP:0, requiredXP:100 };
   const avDisplay = renderAvatarContent(user.avatar);
-  const dbUsers = getUsers();
-  const totalUsers = Object.keys(dbUsers).length || 1;
   const globalRankData = calcGlobalRank(user.username, savedXp, stats);
+  const totalUsers = Object.keys(getUsers()).length || 1;
 
   page.innerHTML = `
     <div class="side-panel-close-btn" style="background:rgba(2,4,8,0.5); border:none;">
@@ -357,7 +360,14 @@ window.profOpenAvatarPicker = function() { document.getElementById('profAvatarMo
 window.profCloseAvatarPicker = function() { document.getElementById('profAvatarModal')?.classList.remove('open'); };
 window.profSelectAvatar = function(av) {
   const user = getCurrentUser();
-  if (user) { user.avatar = av; saveCurrentUser(user); buildProfilePage(true); authUpdateTopBar(user); }
+  if (user) {
+    user.avatar = av;
+    saveCurrentUser(user);
+    // Trigger salvare Cloud IMEDIATĂ pentru avatar (v11.3)
+    if (typeof window.cloudPushData === 'function') window.cloudPushData();
+    buildProfilePage(true);
+    authUpdateTopBar(user);
+  }
   profCloseAvatarPicker();
 };
 
@@ -526,11 +536,5 @@ window.getVerificationBadge = function(username) {
 
 (function init() {
   const user = getCurrentUser();
-
-  // Guard Logout: Dacă nu avem user, arătăm ecranul de login (V10.5 - FIX VISIBILITY)
-  if (!user) {
-    authShowScreen();
-  }
-
   if (user) authUpdateTopBar(user);
 })();

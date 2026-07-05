@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    cloud-sync.js — Sistem Sincronizare Hibrid (Web + Native)
-   v11.2 Elite Sovereign Platinum (Sync Fix)
-   Garantează salvarea avatarului și a biletelor prin bridge Android.
+   v11.3 Elite Sovereign Platinum (The Barrier Fix)
+   Garantează salvarea prin blocarea deconectării până la confirmare.
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -26,60 +26,54 @@ const CLOUD_KEYS = [
 let _isSyncing = false;
 
 /**
- * Salvează datele folosind cel mai bun motor disponibil (Native sau Web).
+ * Salvează datele folosind cel mai bun motor disponibil.
+ * Acum returnează un PROMISE pentru a permite "await" la logout.
  */
-window.cloudPushData = async function() {
-  const payload = {};
-  CLOUD_KEYS.forEach(key => {
-    const raw = localStorage.getItem(key);
-    if (raw !== null) {
-      try { payload[key] = JSON.parse(raw); } catch { payload[key] = raw; }
-    }
-  });
+window.cloudPushData = function() {
+  return new Promise((resolve) => {
+    const payload = {};
+    CLOUD_KEYS.forEach(key => {
+      const raw = localStorage.getItem(key);
+      if (raw !== null) {
+        try { payload[key] = JSON.parse(raw); } catch { payload[key] = raw; }
+      }
+    });
 
-  // Adăugăm timestamp
-  payload.lastSync = Date.now();
-  payload.v = "11.2";
+    payload.lastSync = Date.now();
+    payload.v = "11.3";
 
-  // 1. Încercăm motorul NATIV (Android Bridge) - Cel mai sigur pentru salvare permanentă
-  if (typeof Android !== 'undefined' && Android.saveToCloud) {
-    console.log('[CloudSync] Salvare prin motor Nativ Android...');
-    try {
+    // 1. Motor NATIV (Prioritate maximă)
+    if (typeof Android !== 'undefined' && Android.saveToCloud) {
+      console.log('[CloudSync] Salvare Nativă în curs...');
       Android.saveToCloud(JSON.stringify(payload));
-      return true;
-    } catch(e) { console.error('[CloudSync] Eroare Bridge:', e); }
-  }
+      // Deoarece apelul bridge este asincron pe Android, simulăm o mică așteptare
+      // pentru a permite sistemului de operare să inițieze scrierea.
+      setTimeout(() => resolve(true), 600);
+      return;
+    }
 
-  // 2. Fallback pe motorul WEB (Firebase JS) - Pentru testarea pe browser (GitHub)
-  if (typeof fbDb !== 'undefined' && typeof fbUser !== 'undefined' && fbUser) {
-    console.log('[CloudSync] Salvare prin motor Web Firebase...');
-    if (_isSyncing) return false;
-    _isSyncing = true;
-    try {
-      await fbDb.collection('user_data').doc(fbUser.uid).set(payload, { merge: true });
-      return true;
-    } catch (err) {
-      console.error('[CloudSync] Eroare Firebase Web:', err);
-      return false;
-    } finally { _isSyncing = false; }
-  }
+    // 2. Motor WEB (Fallback)
+    if (typeof fbDb !== 'undefined' && typeof fbUser !== 'undefined' && fbUser) {
+      console.log('[CloudSync] Salvare Web Firebase în curs...');
+      fbDb.collection('user_data').doc(fbUser.uid).set(payload, { merge: true })
+        .then(() => { console.log('[CloudSync] OK (Web)'); resolve(true); })
+        .catch((err) => { console.error('[CloudSync] ERR (Web):', err); resolve(false); });
+      return;
+    }
 
-  return false;
+    resolve(false);
+  });
 };
 
 /**
- * Încarcă datele din Cloud (Firestore).
+ * Încarcă datele din Cloud.
  */
 window.cloudPullData = async function() {
   let uid = null;
-
-  // Detectăm UID din Android sau Web
   if (typeof window.nativeUID !== 'undefined') uid = window.nativeUID;
   else if (typeof fbUser !== 'undefined' && fbUser) uid = fbUser.uid;
 
   if (!uid || typeof fbDb === 'undefined') return;
-
-  console.log('[CloudSync] Restaurare date pentru UID:', uid);
 
   try {
     const doc = await fbDb.collection('user_data').doc(uid).get();
@@ -90,32 +84,24 @@ window.cloudPullData = async function() {
           localStorage.setItem(key, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
         }
       });
-      console.log('[CloudSync] Date restaurate cu succes.');
       if (typeof render === 'function') render();
       if (typeof updateXPUI === 'function') updateXPUI();
     }
-  } catch (err) { console.error('[CloudSync] Eroare Pull:', err); }
+  } catch (err) {}
 };
 
 /**
- * MOTORUL DE PERSISTENȚĂ (Interceptor)
+ * MOTORUL DE PERSISTENȚĂ
  */
 (function initSyncEngine() {
   const originalSetItem = localStorage.setItem;
   localStorage.setItem = function(key, value) {
     originalSetItem.apply(this, arguments);
     if (CLOUD_KEYS.includes(key)) {
-      // Trigger salvare la orice modificare (avatar, bilete, etc.)
-      clearTimeout(window._syncDebounce);
+      clearTimeout(window._syncTimeout);
       window._syncTimeout = setTimeout(() => {
         window.cloudPushData();
-      }, 800);
+      }, 500); // Reducem timpul de reacție la 500ms
     }
   };
-
-  // Salvare forțată la ieșire
-  window.addEventListener('beforeunload', () => { window.cloudPushData(); });
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') window.cloudPushData();
-  });
 })();

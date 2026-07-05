@@ -176,6 +176,11 @@ class MainActivity : AppCompatActivity() {
                     if (notifBtn) notifBtn.style.display = 'flex';
                     
                     if (typeof render === 'function') render();
+                    
+                    // Declanșăm descărcarea datelor din Cloud (v11.4)
+                    if (typeof window.cloudPullData === 'function') {
+                        window.cloudPullData();
+                    }
                 })();
             """.trimIndent()
             

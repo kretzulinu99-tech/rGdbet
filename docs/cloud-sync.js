@@ -84,8 +84,16 @@ window.cloudPullData = async function() {
           localStorage.setItem(key, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
         }
       });
+      console.log('[CloudSync] Date restaurate cu succes.');
+
+      // Forțăm actualizarea elementelor vizuale (v11.4)
+      const restoredUser = JSON.parse(localStorage.getItem('rgb_user') || '{}');
+      if (typeof authUpdateTopBar === 'function' && restoredUser.username) {
+        authUpdateTopBar(restoredUser);
+      }
       if (typeof render === 'function') render();
       if (typeof updateXPUI === 'function') updateXPUI();
+      if (typeof buildProfilePage === 'function') buildProfilePage(true);
     }
   } catch (err) {}
 };

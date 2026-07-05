@@ -683,6 +683,17 @@ function closeMessagesPanel() {
   navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
 }
 </script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      console.log('[PWA] Service Worker registered with scope:', reg.scope);
+    }).catch(err => {
+      console.error('[PWA] Service Worker registration failed:', err);
+    });
+  });
+}
+</script>
 <script src="age-gate.js"></script>
 <script src="gamification.js"></script>
 <script src="script.js"></script>

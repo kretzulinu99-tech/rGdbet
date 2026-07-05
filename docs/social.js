@@ -632,7 +632,12 @@ window.getVerificationBadge = function(username) {
   });
 
   if (recentProfit > 0) {
-    return `<i class="fa-solid fa-circle-check" style="color:var(--nb); font-size:11px; margin-left:4px; filter: drop-shadow(0 0 5px rgba(0, 200, 255, 0.5));" title="Verified Tipster (30D Profit: +${recentProfit.toFixed(0)})"></i>`;
+    // Insignă stil Facebook (v9.6) - Scalloped Circle + Check
+    return `
+      <span class="fb-verified-wrap" title="Verified Tipster (30D Profit: +${recentProfit.toFixed(0)})">
+        <i class="fa-solid fa-certificate fb-verified-bg"></i>
+        <i class="fa-solid fa-check fb-verified-check"></i>
+      </span>`;
   }
 
   return '';

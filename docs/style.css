@@ -7018,3 +7018,30 @@ body.page-profile-active .top-bar {
   justify-content: center;
   cursor: pointer;
 }
+
+/* -- FACEBOOK STYLE VERIFIED BADGE -- */
+.fb-verified-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 6px;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 4px rgba(0, 132, 255, 0.4));
+}
+
+.fb-verified-bg {
+  color: #1877F2; /* Facebook Blue */
+  font-size: 14px;
+  position: absolute;
+}
+
+.fb-verified-check {
+  color: #fff;
+  font-size: 7px;
+  position: relative;
+  z-index: 1;
+  font-weight: 900;
+}

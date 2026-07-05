@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
-   gamification.js — Sistem XP Elitist (v7.0)
-   Niveluri 1-120 + Bară de Progres Vizibilă
+   gamification.js — Sistem XP Profesional (v8.7 Platinum)
+   Niveluri 1-120 + Algoritm Realist de Performanță
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -8,11 +8,12 @@ const MAX_LEVEL = 120;
 
 /**
  * Calculează XP-ul necesar pentru nivelul cerut.
+ * Progresie non-liniară (quadratică ușoară) pentru 120 niveluri.
  */
 function getXPForLevel(level) {
   if (level <= 1) return 0;
-  // Formula: progresie non-liniară pentru 120 niveluri
-  return Math.floor(100 * Math.pow(level - 1, 1.9) + 500 * (level - 1));
+  // Formula: bazată pe efort și volum realist
+  return Math.floor(120 * Math.pow(level - 1, 1.85) + 400 * (level - 1));
 }
 
 /**
@@ -21,11 +22,8 @@ function getXPForLevel(level) {
 window.getUserLevelData = function(xp = 0) {
   let level = 1;
   for (let i = 1; i <= MAX_LEVEL; i++) {
-    if (xp >= getXPForLevel(i)) {
-      level = i;
-    } else {
-      break;
-    }
+    if (xp >= getXPForLevel(i)) level = i;
+    else break;
   }
 
   const currentLevelXP = getXPForLevel(level);
@@ -39,74 +37,78 @@ window.getUserLevelData = function(xp = 0) {
     xp,
     progressXP: Math.floor(progressXP),
     requiredXP: Math.floor(totalNextXP),
-    progressPct: Math.floor(progressPct),
+    progressPct: Math.min(100, Math.max(0, Math.floor(progressPct))),
     isMax: level >= MAX_LEVEL
   };
 };
 
 /**
- * Adaugă XP utilizatorului curent și salvează permanent.
+ * Adaugă sau scade XP utilizatorului curent (Ajustare Delta).
  */
-window.addXP = function(amount) {
+window.addXP = function(amount, isAdjustment = false) {
   const user = getCurrentUser();
   if (!user) return;
 
   const oldData = getUserLevelData(user.xp || 0);
   user.xp = (user.xp || 0) + Math.floor(amount);
+  if (user.xp < 0) user.xp = 0; // Prevenim rank negativ
+
   const newData = getUserLevelData(user.xp);
-
   saveCurrentUser(user);
-
-  // Sincronizăm și cu cheia individuală pentru cloud-sync
   localStorage.setItem('rgb_xp', user.xp.toString());
 
-  // Actualizăm baza de date locală de utilizatori
+  // Actualizăm baza de date locală
   const users = getUsers();
-  const key = user.username.toLowerCase();
-  if (users[key]) {
-    users[key].xp = user.xp;
+  if (users[user.username.toLowerCase()]) {
+    users[user.username.toLowerCase()].xp = user.xp;
     saveUsers(users);
   }
 
-  if (newData.level > oldData.level) {
+  // Notificăm doar la creștere reală de nivel (nu la ajustări silențioase/negative)
+  if (!isAdjustment && newData.level > oldData.level) {
     showLevelUpToast(newData.level);
   }
 
-  // Declanșăm push în cloud
   if (typeof cloudPushData === 'function') cloudPushData();
-
-  // Actualizăm UI-ul instantaneu (fără re-randare completă)
-  if (typeof updateXPUI === 'function') {
-    updateXPUI();
-  }
-
-  // Backup: Re-randăm profilul dacă funcția updateXPUI lipsește
-  else if (typeof buildProfilePage === 'function' && document.body.dataset.page === 'profile') {
-    buildProfilePage(true);
-  }
+  if (typeof updateXPUI === 'function') updateXPUI();
 };
 
 /**
- * Calculează XP primit dintr-un bilet.
+ * ALGORITM PROFESIONAL CALCUL XP (v8.7)
+ * Factori: Status, Cotă, Volum (Miză), Complexitate (Evenimente).
  */
 window.calculateTicketXP = function(bet) {
+  // 1. Experiență de Bază (Efort plasare)
   const base = 50;
-  const odds = parseFloat(bet.totalOdds || bet.odds || 1);
 
-  let bonus = 0;
+  // 2. Complexitate (Bonus pentru bilete cu multe evenimente)
+  const eventCount = (bet.events && bet.events.length) ? bet.events.length : 1;
+  const complexityBonus = (eventCount - 1) * 15;
+
+  // 3. Volum (Miză) - Influență logaritmică pentru a preveni abuzul sumelor mari
+  const stake = parseFloat(bet.stake || 0);
+  const volumeBonus = stake > 0 ? Math.floor(Math.log10(stake + 1) * 20) : 0;
+
+  // 4. Performanță (Bazată pe status și cotă)
+  const odds = parseFloat(bet.totalOdds || bet.odds || 1);
+  let performanceBonus = 0;
+
   if (bet.status === 'win') {
-    bonus = odds * 25;
+    // Victoria oferă cel mai mare bonus (Cotă x 15)
+    performanceBonus = Math.floor(odds * 15) + 30;
   } else if (bet.status === 'loss') {
-    bonus = 10;
+    // Pierderea oferă un mic bonus de consolare
+    performanceBonus = 10;
   } else if (bet.status === 'cashout') {
-    bonus = odds * 12;
+    // Cashout oferă un bonus intermediar
+    performanceBonus = Math.floor(odds * 8) + 10;
   }
 
-  return Math.floor(base + bonus);
+  return base + complexityBonus + volumeBonus + performanceBonus;
 };
 
 /**
- * Notificare spectaculoasă la trecere de nivel.
+ * Notificare SPECTACULOASĂ Level Up
  */
 function showLevelUpToast(level) {
   const toast = document.createElement('div');
@@ -119,16 +121,10 @@ function showLevelUpToast(level) {
     </div>
   `;
   document.body.appendChild(toast);
-
   setTimeout(() => toast.classList.add('visible'), 100);
 
   if (typeof confetti === 'function') {
-    confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#ffcc00', '#00e0ff', '#bd00ff']
-    });
+    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#ffcc00', '#00e0ff', '#bd00ff'] });
   }
 
   setTimeout(() => {

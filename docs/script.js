@@ -671,25 +671,31 @@ function scheduleRender() {
         render();
       }
 
-      /* ── LOGICĂ AJUSTARE XP (v8.5 Platinum) ── */
-      function applyXPDelta(bet, newStatus) {
+      /* ── LOGICĂ INTEGRIȚATE XP (v8.7 Platinum) ── */
+      /**
+       * Sincronizează XP-ul unui bilet. Calculează cât XP ar trebui să aibă
+       * și ajustează balanța utilizatorului cu diferența (Delta).
+       */
+      function syncTicketXP(bet, forceStatus = null) {
         if (typeof addXP !== 'function' || typeof calculateTicketXP !== 'function') return;
 
-        // 1. Determinăm XP-ul acordat anterior (fallback pentru bilete vechi)
-        if (bet.rewardedXP === undefined) {
-          bet.rewardedXP = calculateTicketXP(bet);
-        }
-        const oldXP = bet.rewardedXP;
+        const targetStatus = forceStatus || bet.status;
+        const tempBet = { ...bet, status: targetStatus };
 
-        // 2. Calculăm noul XP bazat pe noul status
-        const tempBet = { ...bet, status: newStatus };
-        const newXP = calculateTicketXP(tempBet);
+        // Calculăm cât ar trebui să valoreze biletul ACUM
+        const currentValue = calculateTicketXP(tempBet);
 
-        // 3. Aplicăm diferența
-        const diff = newXP - oldXP;
-        if (diff !== 0) {
-          addXP(diff, true); // Ajustare silențioasă
-          bet.rewardedXP = newXP;
+        // Cât am oferit deja? (Dacă e bilet vechi fără rewardedXP, îl calculăm pe loc)
+        if (bet.rewardedXP === undefined) bet.rewardedXP = calculateTicketXP(bet);
+        const alreadyAwarded = bet.rewardedXP;
+
+        const delta = currentValue - alreadyAwarded;
+
+        if (delta !== 0) {
+          // Ajustăm XP-ul total al contului
+          addXP(delta, true);
+          // Actualizăm "memoria" biletului
+          bet.rewardedXP = currentValue;
         }
       }
 
@@ -699,7 +705,7 @@ function scheduleRender() {
           const oldStatus = bet.status;
           if (newStatus === oldStatus) return;
 
-          applyXPDelta(bet, newStatus);
+          syncTicketXP(bet, newStatus);
           bet.status = newStatus;
 
           localStorage.setItem('rgb_bets', JSON.stringify(bets));
@@ -747,7 +753,7 @@ function scheduleRender() {
         if (amount !== null && !isNaN(amount) && amount > 0) {
           const bet = bets.find(b => b.id === id);
           if (bet) {
-            applyXPDelta(bet, 'cashout');
+            syncTicketXP(bet, 'cashout');
             bet.status = 'cashout';
             bet.cashoutAmount = parseFloat(amount);
             localStorage.setItem('rgb_bets', JSON.stringify(bets));
@@ -762,7 +768,7 @@ function scheduleRender() {
       function makeStatusPending(id) {
         const bet = bets.find(b => b.id === id);
         if(bet) {
-          applyXPDelta(bet, 'pending');
+          syncTicketXP(bet, 'pending');
           bet.status = 'pending';
           if(bet.cashoutAmount) delete bet.cashoutAmount;
           localStorage.setItem('rgb_bets', JSON.stringify(bets));

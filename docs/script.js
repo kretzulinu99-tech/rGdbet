@@ -803,8 +803,8 @@ function scheduleRender() {
         render();
       }
 
-      /* --- ELIMINARE POSIBILITATE STERGERE BILETE (v8.8 Platinum) --- */
-      /* Biletele sunt acum permanente pentru a asigura integritatea Rangului Elitist */
+      /* --- ELIMINARE POSIBILITATE STERGERE BILETE (v9.0 Elite) --- */
+      /* Biletele sunt permanente pentru integritatea Rangului și Istoricului */
 
       function setFilter(f, btn) {
         document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
@@ -1030,16 +1030,13 @@ function scheduleRender() {
           totalP.textContent = val;
           totalP.className = 'stat-val ' + (displayedProfit >= 0 ? 'pos' : 'neg');
 
-          // Scalare dinamică font (v8.9)
+          // Scalare dinamică font (v9.0)
           let fs = 28; // base
           if (val.length > 8)  fs = 22;
           if (val.length > 11) fs = 18;
           if (val.length > 14) fs = 14;
           if (val.length > 17) fs = 11;
           totalP.style.fontSize = fs + 'px';
-          totalP.style.textAlign = 'center';
-          totalP.style.width = '100%';
-          totalP.style.display = 'block';
         }
 
         const totalWr = document.getElementById('total-wr');

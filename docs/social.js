@@ -246,8 +246,17 @@ function updateProfileStatsUI() {
   const totalEl = document.getElementById('profStatTotalUI');
 
   if (profitEl) {
-    profitEl.textContent = (stats.profit >= 0 ? '+' : '') + stats.profit.toFixed(0);
+    const val = (stats.profit >= 0 ? '+' : '') + stats.profit.toFixed(0);
+    profitEl.textContent = val;
     profitEl.className = 'prof-stat-val ' + (stats.profit >= 0 ? 'pos' : 'neg');
+
+    // Scalare dinamică font (v8.9)
+    let fs = 16; // base prof
+    if (val.length > 8)  fs = 14;
+    if (val.length > 10) fs = 12;
+    if (val.length > 13) fs = 10;
+    profitEl.style.fontSize = fs + 'px';
+    profitEl.style.textAlign = 'center';
   }
   if (wrEl) wrEl.textContent = stats.wr + '%';
   if (totalEl) totalEl.textContent = stats.total;

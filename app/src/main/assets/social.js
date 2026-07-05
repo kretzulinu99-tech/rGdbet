@@ -131,32 +131,38 @@ function authUpdateTopBar(user) {
 }
 
 /**
- * 🛠️ DECONECTARE TOTALĂ (DEFINITIVE REDIRECT)
+ * 🛠️ DECONECTARE TOTALĂ (WEB + NATIV ANDROID)
+ * Aceasta este versiunea finală care comunică cu aplicația nativă
+ * pentru a te trimite la ecranul "Intră pe teren".
  */
 window.authLogout = async function() {
-  console.log('[Auth] Inițiere Logout...');
+  console.log('[Auth] Inițiere Logout Total...');
 
-  // 1. Deconectare Firebase (obligatorie)
+  // 1. Ștergere date locale (WEB)
+  localStorage.removeItem(SK.user);
+  sessionStorage.clear();
+
+  // 2. COMUNICARE CU ANDROID (CRITIC)
+  // Dacă suntem în aplicația mobilă, cerem deconectarea nativă
+  if (typeof Android !== 'undefined' && Android.logout) {
+    console.log('[Auth] Apelare logout nativ Android...');
+    Android.logout();
+    return; // Android va gestiona redirect-ul la LoginActivity
+  }
+
+  // 3. Fallback pentru Browser (PWA)
   if (typeof fbAuth !== 'undefined' && fbAuth) {
     try { await fbAuth.signOut(); } catch(e) {}
   }
 
-  // 2. Ștergere locală a sesiunii (FĂRĂ clear total pentru a păstra DB-ul utilizatorilor locali)
-  localStorage.removeItem(SK.user);
-  sessionStorage.clear();
-
-  // 3. Resetarea stării UI și navigarea la Home
   authUpdateTopBar(null);
+  authShowScreen();
 
   if (typeof navigateTo === 'function') {
     navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
   }
 
-  // 4. Afișarea imediată a ecranului de Auth
-  authShowScreen();
-
-  // 5. Opțional: reload pentru un stat curat, dar marcăm logout-ul
-  // window.location.reload();
+  window.location.reload();
 };
 
 /* ── MODUL PROFIL MODERN ── */

@@ -6983,3 +6983,38 @@ body.page-profile-active .top-bar {
   letter-spacing: 2px;
   margin-top: 4px;
 }
+
+/* -- PROFILE VIEWER OVERLAY -- */
+.pv-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--bg);
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+.pv-overlay.pv-visible {
+  transform: translateX(0);
+}
+
+.pv-container {
+  min-height: 100vh;
+  padding-bottom: 40px;
+  background: linear-gradient(180deg, rgba(0,200,255,0.05) 0%, transparent 40%);
+}
+
+.pv-back {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}

@@ -337,11 +337,26 @@ window.profSelectAvatar = function(av) {
   profCloseAvatarPicker();
 };
 
-/* ── SOCIAL FEED & RANK (simplified) ── */
+/* ── SOCIAL FEED & RANK (v9.2 Elite) ── */
 window.buildSocialPage = function() {
   const page = document.getElementById('page-social');
   if (!page) return;
-  page.innerHTML = `<div class="page-top-title"><i class="fa-solid fa-users" style="color:var(--ng)"></i><span>SOCIAL FEED</span></div><div class="soc-action-bar"><button class="soc-tab active" id="soc-tab-feed" onclick="socSwitchTab('feed')"><i class="fa-solid fa-fire"></i> FEED</button><button class="soc-tab" id="soc-tab-rank" onclick="socSwitchTab('rank')"><i class="fa-solid fa-trophy"></i> RANK</button></div><div id="soc-panel-feed" class="soc-panel active"><div id="soc-feed-list"></div></div><div id="soc-panel-rank" class="soc-panel"><div id="soc-rank-list"></div></div>`;
+  page.innerHTML = `
+    <div class="page-top-title"><i class="fa-solid fa-users" style="color:var(--ng)"></i><span>SOCIAL FEED</span></div>
+    <div class="soc-action-bar">
+      <button class="soc-tab active" id="soc-tab-feed" onclick="socSwitchTab('feed')"><i class="fa-solid fa-fire"></i> FEED</button>
+      <button class="soc-tab" id="soc-tab-rank" onclick="socSwitchTab('rank')"><i class="fa-solid fa-trophy"></i> RANK</button>
+      <button class="soc-tab" id="soc-tab-search" onclick="socSwitchTab('search')"><i class="fa-solid fa-magnifying-glass"></i> CAUTĂ</button>
+    </div>
+    <div id="soc-panel-feed" class="soc-panel active"><div id="soc-feed-list"></div></div>
+    <div id="soc-panel-rank" class="soc-panel"><div id="soc-rank-list"></div></div>
+    <div id="soc-panel-search" class="soc-panel">
+      <div class="soc-search-wrap">
+        <input class="auth-input" id="soc-search-inp" type="text" placeholder="Caută utilizatori..." oninput="socSearch(this.value)" style="padding-left:15px;"/>
+      </div>
+      <div id="soc-search-results"></div>
+    </div>
+  `;
   socRenderFeed();
 };
 
@@ -366,7 +381,15 @@ function socRenderLeaderboard() {
     return { username: u.username, avatar: u.avatar, wr, total: settled.length, score: (wr * 0.7) + (settled.length * 0.3) };
   }).filter(r => r.total >= 3).sort((a,b) => b.score - a.score);
   if (!rankings.length) { list.innerHTML = `<div class="soc-empty">Minimum 3 tickets needed for rank.</div>`; return; }
-  list.innerHTML = rankings.map((r, i) => `<div class="soc-user-card"><div style="font-weight:700; width:20px;">${i+1}</div><div class="soc-post-avatar">${renderAvatarContent(r.avatar)}</div><div style="flex:1;"><div class="soc-post-author">@${r.username} ${typeof getVerificationBadge === 'function' ? getVerificationBadge(r.username) : ''}</div><div class="soc-post-date">${r.wr}% WR • ${r.total} tickets</div></div></div>`).join('');
+  list.innerHTML = rankings.map((r, i) => `
+    <div class="soc-user-card" onclick="viewUserProfile('${r.username}')">
+      <div style="font-weight:700; width:20px;">${i+1}</div>
+      <div class="soc-post-avatar">${renderAvatarContent(r.avatar)}</div>
+      <div style="flex:1;">
+        <div class="soc-post-author">@${r.username} ${typeof getVerificationBadge === 'function' ? getVerificationBadge(r.username) : ''}</div>
+        <div class="soc-post-date">${r.wr}% WR • ${r.total} bilete</div>
+      </div>
+    </div>`).join('');
 }
 
 function socRenderFeed() {
@@ -374,14 +397,35 @@ function socRenderFeed() {
   if (!list) return;
   const posts = getPosts().sort((a,b) => b.postedAt - a.postedAt);
   if (!posts.length) { list.innerHTML = `<div class="soc-empty">Feed is empty.</div>`; return; }
-  list.innerHTML = posts.map(p => `<div class="soc-post-card"><div class="soc-post-header"><div class="soc-post-avatar">${renderAvatarContent(getUsers()[p.author?.toLowerCase()]?.avatar)}</div><div class="soc-post-meta"><div class="soc-post-author">@${p.author}</div><div class="soc-post-date">${new Date(p.postedAt).toLocaleTimeString()}</div></div></div><div class="soc-post-title">${p.name}</div></div>`).join('');
+  list.innerHTML = posts.map(p => `
+    <div class="soc-post-card">
+      <div class="soc-post-header">
+        <div class="soc-post-avatar" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">${renderAvatarContent(getUsers()[p.author?.toLowerCase()]?.avatar)}</div>
+        <div class="soc-post-meta">
+          <div class="soc-post-author" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">@${p.author}</div>
+          <div class="soc-post-date">${new Date(p.postedAt).toLocaleTimeString()}</div>
+        </div>
+      </div>
+      <div class="soc-post-title">${p.name}</div>
+    </div>`).join('');
 }
 
 window.socSearch = function(q) {
   const res = document.getElementById('soc-search-results');
-  if (!res || !q) return;
-  const matches = Object.values(getUsers()).filter(u => u.username.toLowerCase().includes(q.toLowerCase()));
-  res.innerHTML = matches.map(u => `<div class="soc-user-card"><div class="soc-post-avatar">${renderAvatarContent(u.avatar)}</div><div>@${u.username}</div></div>`).join('');
+  if (!res || !q) { if(res) res.innerHTML = ''; return; }
+  const matches = Object.values(getUsers()).filter(u =>
+    u.username.toLowerCase().includes(q.toLowerCase()) ||
+    (u.displayName && u.displayName.toLowerCase().includes(q.toLowerCase()))
+  );
+  res.innerHTML = matches.map(u => `
+    <div class="soc-user-card" onclick="viewUserProfile('${u.username}')">
+      <div class="soc-post-avatar">${renderAvatarContent(u.avatar)}</div>
+      <div style="flex:1;">
+        <div class="soc-post-author">@${u.username}</div>
+        <div class="soc-post-date">${u.displayName || 'Utilizator Elite'}</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="opacity:0.3; font-size:10px;"></i>
+    </div>`).join('');
 };
 
 /* ── PRIVACY & VERIFICATION (legacy) ── */

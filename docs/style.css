@@ -7258,3 +7258,48 @@ body.page-profile-active .top-bar {
 .top-avatar, .prof-avatar-modern, .soc-post-avatar {
   line-height: 1;
 }
+
+/* -- AVATAR SCALING & CONTAINER LOCK (v11.6) -- */
+.top-avatar {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  border-radius: 50% !important;
+  position: relative !important;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.prof-avatar-modern {
+  width: 100px !important;
+  height: 100px !important;
+  min-width: 100px !important;
+  min-height: 100px !important;
+  position: relative !important;
+  /* Pastram forma blob doar daca nu avem imagine */
+}
+
+/* Force CLIP on all containers */
+.top-avatar, .prof-avatar-modern, .soc-post-avatar, .msg-av, .pv-avatar {
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Force image to FIT the container, NEVER overflow */
+.top-avatar img, 
+.prof-avatar-modern img, 
+.soc-post-avatar img, 
+.msg-av img, 
+.pv-avatar img {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: inherit !important;
+}

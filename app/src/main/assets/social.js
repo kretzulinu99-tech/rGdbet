@@ -128,10 +128,23 @@ function authUpdateTopBar(user) {
 }
 
 window.authLogout = function() {
+  // Ștergem datele de sesiune locale
   localStorage.removeItem(SK.user);
+  localStorage.removeItem('rgb_auth_seen');
+
+  // Resetăm starea vizuală a barei de sus
   authUpdateTopBar(null);
-  authShowScreen();
+
+  // Redirecționăm la Home și forțăm afișarea ecranului de Auth
   navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
+  authShowScreen();
+
+  // Re-construim pagina de profil pentru a arăta starea "delogat"
+  const page = document.getElementById('page-profile');
+  if (page) {
+    page._built = false;
+    buildProfilePage(true);
+  }
 };
 
 /* ── MODUL PROFIL MODERN (v8.5+) ── */
@@ -216,15 +229,6 @@ window.buildProfilePage = function(force = false) {
     <div class="prof-section-card">
       <div class="prof-section-title">SECURITY & DATA</div>
       <div class="prof-row" onclick="exportAccountData()"><div class="prof-row-left"><div class="prof-row-icon green"><i class="fa-solid fa-cloud-arrow-up"></i></div><div class="prof-row-text"><span class="prof-row-label">Cloud Backup</span></div></div></div>
-
-      <!-- DEVELOPER TESTING BUTTON (v10.0 Sovereign) -->
-      <div class="prof-row" onclick="devGrantMaxXP()" style="border-color:var(--gold); background:rgba(255,204,0,0.05);">
-        <div class="prof-row-left">
-          <div class="prof-row-icon gold"><i class="fa-solid fa-code"></i></div>
-          <div class="prof-row-text"><span class="prof-row-label" style="color:var(--gold);">ELITE DEV MODE</span><span class="prof-row-sub">Deblochează Nivelul 120 (Test)</span></div>
-        </div>
-      </div>
-
       <div class="prof-row" onclick="authLogout()"><div class="prof-row-left"><div class="prof-row-icon red"><i class="fa-solid fa-power-off"></i></div><div class="prof-row-text"><span class="prof-row-label">Log Out</span></div></div></div>
     </div>
 
@@ -372,10 +376,17 @@ window.socToggleFollow = function(targetUsername, btn) {
   const targetKey = targetUsername.toLowerCase();
   if (!follows[myKey]) follows[myKey] = [];
   const idx = follows[myKey].indexOf(targetKey);
-  if (idx >= 0) { follows[myKey].splice(idx, 1); if(btn) btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Urmărește'; }
-  else {
-    follows[myKey].push(targetKey); if(btn) btn.innerHTML = '<i class="fa-solid fa-user-check"></i> Urmărești';
-    if (typeof window.notifyFollow === 'function') window.notifyFollow(user.username);
+  if (idx >= 0) {
+    follows[myKey].splice(idx, 1);
+    if(btn) btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Urmărește';
+  } else {
+    follows[myKey].push(targetKey);
+    if(btn) btn.innerHTML = '<i class="fa-solid fa-user-check"></i> Urmărești';
+
+    // Notificare Push (v9.7)
+    if (typeof window.notifyFollow === 'function') {
+      window.notifyFollow(user.username);
+    }
   }
   saveFollows(follows);
 };
@@ -539,31 +550,6 @@ window.getVerificationBadge = function(username) {
 function privacyIcon(p) { return '🌐'; }
 function privacyLabel(p) { return 'Public'; }
 function privacyDesc(p) { return ''; }
-
-/**
- * Funcție Developer: Acordă XP maxim pentru testarea Rank 120 (v10.0 Sovereign)
- */
-window.devGrantMaxXP = function() {
-  const user = getCurrentUser();
-  if (!user) return;
-
-  if (confirm("Activezi modul Elite Developer? Contul va fi promovat la Nivelul Maxim (120) pentru a testa efectele Platinum.")) {
-    // 1.000.000 XP asigură depășirea pragului de Lvl 120
-    if (typeof addXP === 'function') {
-      const currentXP = user.xp || 0;
-      addXP(1000000 - currentXP);
-
-      // Re-construim pagina pentru a vedea efectele Elite Aura și Nickname Platinum
-      buildProfilePage(true);
-
-      if (typeof showMsgToast === 'function') {
-        showMsgToast('ACCESS GRANTED: Level 120 Unlocked!', 'success');
-      } else {
-        alert('ACCESS GRANTED: Level 120 Unlocked!');
-      }
-    }
-  }
-};
 
 (function init() {
   const user = getCurrentUser(); if (user) authUpdateTopBar(user);

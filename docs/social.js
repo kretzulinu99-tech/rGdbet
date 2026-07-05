@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v10.3 Sovereign Edition (TOTAL ACCOUNT SWITCH FIX)
-   Conține: Auth, Profile, Social Feed, Rank, Highlights, Deep Purge
+   Versiune: v10.4 Sovereign Edition (FATAL FIX: AUTH VISIBILITY)
+   Conține: Auth, Profile, Social Feed, Rank, Highlights, Fix Logout
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -23,12 +23,9 @@ function getUsers()       { try { return JSON.parse(localStorage.getItem(SK.user
 window.getUsers = getUsers;
 function saveUsers(u)     { localStorage.setItem(SK.users, JSON.stringify(u)); }
 window.saveUsers = saveUsers;
-function getCurrentUser() { try { return JSON.parse(sessionStorage.getItem(SK.user) || 'null') || JSON.parse(localStorage.getItem(SK.user) || 'null'); } catch { return null; } }
+function getCurrentUser() { try { return JSON.parse(localStorage.getItem(SK.user) || 'null'); } catch { return null; } }
 window.getCurrentUser = getCurrentUser;
-function saveCurrentUser(u){
-  sessionStorage.setItem(SK.user, JSON.stringify(u));
-  localStorage.setItem(SK.user, JSON.stringify(u));
-}
+function saveCurrentUser(u){ localStorage.setItem(SK.user, JSON.stringify(u)); }
 window.saveCurrentUser = saveCurrentUser;
 function getPosts()       { try { return JSON.parse(localStorage.getItem(SK.posts) || '[]'); } catch { return []; } }
 window.getPosts = getPosts;
@@ -114,7 +111,7 @@ function authHideScreen() {
 function authShowScreen() {
   const s = document.getElementById('auth-screen');
   if (s) {
-    s.style.setProperty('display', 'flex', 'important');
+    s.style.display = 'flex';
     s.classList.remove('hiding');
   }
 }
@@ -134,41 +131,23 @@ function authUpdateTopBar(user) {
 }
 
 /**
- * 🛠️ DECONECTARE SECURIZATĂ (LOGOUT & FORCE ACCOUNT SWITCH)
- * Aceasta este versiunea care forțează Firebase să uite userul curent.
+ * 🛠️ DECONECTARE TOTALĂ (LOGOUT & SWITCH FIX)
+ * Am eliminat blocajul CSS și am forțat curățarea localStorage.
  */
 window.authLogout = async function() {
-  console.log('[Auth] DECONECTARE PROFUNDĂ: Schimbare cont detectată.');
+  console.log('[Auth] Inițiere Logout...');
 
-  // 1. SALVARE CLOUD (dacă este posibil)
-  if (typeof window.cloudPushData === 'function') {
-    try { await window.cloudPushData(); } catch (e) {}
-  }
-
-  // 2. DECONECTARE FIREBASE OBLIGATORIE
-  // Această parte este critică pentru a opri auto-login-ul social
+  // 1. Deconectare Firebase (obligatorie)
   if (typeof fbAuth !== 'undefined' && fbAuth) {
-    try {
-      await fbAuth.signOut();
-      console.log('[Auth] Firebase SignOut complet.');
-    } catch(e) { console.error('Eroare Firebase SignOut:', e); }
+    try { await fbAuth.signOut(); } catch(e) {}
   }
 
-  // 3. CURĂȚARE TOTALĂ MEMORIE BROWSER
-  // Ștergem absolut toate urmele sesiunii
+  // 2. Ștergere TOTALĂ (Resetare fabrică pe acest browser)
+  localStorage.clear();
   sessionStorage.clear();
-  localStorage.removeItem(SK.user);
-  localStorage.removeItem('rgb_auth_seen');
-  localStorage.removeItem('rgb_bets'); // Opțional: curățăm biletele locale pentru noul user
-  localStorage.removeItem('rgb_xp');
 
-  // 4. BLOCARE UI
-  authUpdateTopBar(null);
-  authShowScreen();
-
-  // 5. HARD REFRESH CU PARAMETRU DE SIGURANȚĂ
-  // Forțăm browserul să curețe starea internă a scripturilor
-  window.location.href = window.location.origin + window.location.pathname + "?force_login=1&t=" + Date.now();
+  // 3. Forțare redirect & refresh
+  window.location.href = window.location.origin + window.location.pathname + "?auth_reset=1";
 };
 
 /* ── MODUL PROFIL MODERN ── */
@@ -202,7 +181,8 @@ window.buildProfilePage = function(force = false) {
   const savedXp = parseInt(localStorage.getItem('rgb_xp')) || user.xp || 0;
   const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(savedXp) : { level:1, xp:0, progressPct:0, progressXP:0, requiredXP:100 };
   const avDisplay = renderAvatarContent(user.avatar);
-  const totalUsers = Object.keys(getUsers()).length;
+  const dbUsers = getUsers();
+  const totalUsers = Object.keys(dbUsers).length || 1;
   const globalRankData = calcGlobalRank(user.username, savedXp, stats);
 
   page.innerHTML = `
@@ -254,14 +234,7 @@ window.buildProfilePage = function(force = false) {
     <div class="prof-section-card">
       <div class="prof-section-title">SECURITY & DATA</div>
       <div class="prof-row" onclick="exportAccountData()"><div class="prof-row-left"><div class="prof-row-icon green"><i class="fa-solid fa-cloud-arrow-up"></i></div><div class="prof-row-text"><span class="prof-row-label">Cloud Backup</span></div></div></div>
-
-      <!-- LOGOUT BUTON (Către Login Screen) -->
-      <div class="prof-row" onclick="authLogout()">
-        <div class="prof-row-left">
-          <div class="prof-row-icon red"><i class="fa-solid fa-power-off"></i></div>
-          <div class="prof-row-text"><span class="prof-row-label">Log Out / Schimbă Contul</span><span class="prof-row-sub">Închide sesiunea actuală</span></div>
-        </div>
-      </div>
+      <div class="prof-row" onclick="authLogout()"><div class="prof-row-left"><div class="prof-row-icon red"><i class="fa-solid fa-power-off"></i></div><div class="prof-row-text"><span class="prof-row-label" style="color:var(--danger)">Log Out / Schimbă Contul</span></div></div></div>
     </div>
 
     <!-- MODALS -->
@@ -373,7 +346,7 @@ window.profSelectAvatar = function(av) {
   profCloseAvatarPicker();
 };
 
-/* ── SOCIAL FEED & RANK ── */
+/* ── SOCIAL FEED & RANK (v9.7) ── */
 window.buildSocialPage = function() {
   const page = document.getElementById('page-social'); if (!page) return;
   const user = getCurrentUser();
@@ -515,13 +488,6 @@ window.socSearch = function(q) {
   }).join('');
 };
 
-window.devGrantMaxXP = function() {
-  const user = getCurrentUser(); if (!user) return;
-  if (confirm("Activezi modul Elite Developer? Contul va fi promovat la Nivelul Maxim (120).")) {
-    if (typeof addXP === 'function') { addXP(1000000 - (user.xp || 0)); buildProfilePage(true); }
-  }
-};
-
 /* ── SISTEM VERIFIED TIPSTER (v9.5 Elite) ── */
 window.getVerificationBadge = function(username) {
   if (!username) return '';
@@ -546,14 +512,9 @@ window.getVerificationBadge = function(username) {
 (function init() {
   const user = getCurrentUser();
 
-  // Guard switch account: Dacă avem parametrul force_login, arătăm direct ecranul de login
-  const params = new URLSearchParams(window.location.search);
-  if (params.has('force_login') || !user) {
+  // Guard Logout: Dacă nu avem user, arătăm ecranul de login (V10.4 - FIX VISIBILITY)
+  if (!user) {
     authShowScreen();
-    // Curățăm URL-ul pentru o experiență impecabilă
-    if (params.has('force_login')) {
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
   }
 
   if (user) authUpdateTopBar(user);

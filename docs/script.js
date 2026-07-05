@@ -803,16 +803,8 @@ function scheduleRender() {
         render();
       }
 
-      function deleteBet(id) {
-        const bet = bets.find(b => b.id === id);
-        if (bet) {
-          const xpToRemove = bet.rewardedXP || (typeof calculateTicketXP === 'function' ? calculateTicketXP(bet) : 0);
-          if (typeof addXP === 'function') addXP(-xpToRemove, true);
-        }
-        bets = bets.filter(b => b.id !== id);
-        localStorage.setItem('rgb_bets', JSON.stringify(bets));
-        render();
-      }
+      /* --- ELIMINARE POSIBILITATE STERGERE BILETE (v8.8 Platinum) --- */
+      /* Biletele sunt acum permanente pentru a asigura integritatea Rangului Elitist */
 
       function setFilter(f, btn) {
         document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
@@ -1417,7 +1409,6 @@ function scheduleRender() {
                 </div>
                 <div style="display:flex; align-items:center;">
                   ${editButtonHtml}
-                  <button class="del-btn" onclick="deleteBet(${b.id})"><i class="fa-solid fa-trash"></i></button>
                 </div>
               </div>
               <div class="event-sub-list">${eventsHtml}</div>

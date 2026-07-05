@@ -118,13 +118,16 @@ class MainActivity : AppCompatActivity() {
         if (currentUser is AuthState.SignedIn) {
             val email = currentUser.email ?: ""
             val username = currentUser.displayName ?: email.substringBefore("@")
+            val uid = currentUser.uid
             
             val js = """
                 (function() {
+                    window.nativeUID = "$uid";
                     const existingUser = JSON.parse(localStorage.getItem('rgb_user') || '{}');
                     const user = {
                         username: "$username",
                         email: "$email",
+                        uid: "$uid",
                         passwordHash: "firebase_auth",
                         createdAt: "${System.currentTimeMillis()}",
                         avatar: existingUser.avatar || "👤",
@@ -247,6 +250,29 @@ class MainActivity : AppCompatActivity() {
     /** Interfață pentru a fi apelată din JavaScript (WebView) */
     inner class WebAppInterface(private val mContext: Context) {
         
+        @JavascriptInterface
+        fun saveToCloud(json: String) {
+            val app = mContext.applicationContext as RgdbetApplication
+            val currentUser = app.authManager.authState.value
+            
+            if (currentUser is AuthState.SignedIn) {
+                try {
+                    val payload = JSONObject(json)
+                    val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                    db.collection("user_data").document(currentUser.uid)
+                        .set(payload, com.google.firebase.firestore.SetOptions.merge())
+                        .addOnSuccessListener {
+                            // Trimitem confirmarea înapoi în JS
+                            (mContext as MainActivity).runOnUiThread {
+                                mContext.binding.webView.evaluateJavascript("console.log('[NativeSync] Salvare reușită');", null)
+                            }
+                        }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
         @JavascriptInterface
         fun logout() {
             val app = mContext.applicationContext as RgdbetApplication

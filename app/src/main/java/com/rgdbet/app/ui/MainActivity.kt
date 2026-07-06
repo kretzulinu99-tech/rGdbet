@@ -173,6 +173,9 @@ class MainActivity : AppCompatActivity() {
                     const nameEl = document.getElementById('topUsername');
                     if (nameEl) nameEl.textContent = "$username".toUpperCase().substring(0, 12);
 
+                    const topAv = document.getElementById('topAvatar');
+                    if (topAv) topAv.innerHTML = typeof renderAvatarContent === 'function' ? renderAvatarContent(user.avatar) : "👤";
+
                     const notifBtn = document.getElementById('topNotifBtn');
                     if (notifBtn) notifBtn.style.display = 'flex';
                     

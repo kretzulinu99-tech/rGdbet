@@ -7303,3 +7303,30 @@ body.page-profile-active .top-bar {
   object-fit: cover !important;
   border-radius: inherit !important;
 }
+
+/* -- SOCIAL FEED AVATAR LOCK (v11.9 Elite) -- */
+.soc-post-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(0, 200, 255, 0.2);
+  position: relative !important;
+}
+
+.soc-post-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  border-radius: 50% !important;
+}

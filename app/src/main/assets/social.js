@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v13.2 Apex Stability (FULL REPAIR)
+   Versiune: v13.4 Apex Final (TOTAL REPAIR)
    Conține: Auth, Profile, Multi-Post Engine, Apex UI, Share System
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
@@ -37,7 +37,6 @@ window.savePosts = savePosts;
 
 /* ── NATIVE INITIALIZATION ── */
 window.nativeInitSession = function(uid, email, name) {
-  console.log('[Native] Inițiere sesiune sigură:', name);
   if (typeof window.cloudPullData === 'function') {
     window.cloudPullData(uid).then(() => {
       if (!getCurrentUser()) {
@@ -65,21 +64,30 @@ window.authSwitchTab = function(tab) {
   document.getElementById('panel-' + tab)?.classList.add('active');
 };
 
+window.authUpdateTopBar = function(user) {
+  const btn = document.getElementById('topUserBtn');
+  const uname = document.getElementById('topUsername');
+  const av = document.getElementById('topAvatar');
+  if (!btn) return;
+  if (user) {
+    btn.style.display = 'flex';
+    if (uname) uname.textContent = (user.displayName || user.username).toUpperCase().substring(0, 12);
+    if (av) av.innerHTML = renderAvatarContent(user.avatar);
+  } else {
+    btn.style.display = 'none';
+  }
+};
+
 function authOnSuccess(user) {
   saveCurrentUser(user);
   if (typeof buildProfilePage === 'function') buildProfilePage(true);
+  authUpdateTopBar(user);
   document.getElementById('auth-screen').style.display = 'none';
 }
 
 window.authLogout = async function() {
-  console.log('[Auth] Inițiere Logout Total...');
   if (typeof window.cloudPushData === 'function') await window.cloudPushData();
-
-  if (typeof Android !== 'undefined' && Android.logout) {
-    Android.logout();
-    return;
-  }
-
+  if (typeof Android !== 'undefined' && Android.logout) { Android.logout(); return; }
   localStorage.removeItem(SK.user); sessionStorage.clear();
   if (typeof fbAuth !== 'undefined' && fbAuth) try { await fbAuth.signOut(); } catch(e) {}
   window.location.reload();
@@ -92,7 +100,7 @@ window.renderAvatarContent = function(av) {
   return av;
 };
 
-/* ── PROFIL ENGINE (v13.2 RESTORED) ── */
+/* ── PROFIL ENGINE ── */
 const AVATARS = ['👤','⚽','🏆','👑','🔥','💎','🦁','🐉','🌟','🎯','💥','🏅'];
 
 window.profOpenAvatarPicker = function() { document.getElementById('profAvatarModal')?.classList.add('open'); };
@@ -123,7 +131,7 @@ window.onAvatarUploaded = function(dataUrl) {
     const user = getCurrentUser();
     if (user) {
       user.avatar = compressedUrl; saveCurrentUser(user); buildProfilePage(true);
-      if (typeof authUpdateTopBar === 'function') authUpdateTopBar(user);
+      authUpdateTopBar(user);
       if (typeof window.cloudPushData === 'function') window.cloudPushData();
     }
   };
@@ -136,7 +144,7 @@ window.profSelectAvatar = function(av) {
     user.avatar = av; saveCurrentUser(user);
     if (typeof window.cloudPushData === 'function') window.cloudPushData();
     buildProfilePage(true);
-    if (typeof authUpdateTopBar === 'function') authUpdateTopBar(user);
+    authUpdateTopBar(user);
   }
   profCloseAvatarPicker();
 };
@@ -169,7 +177,7 @@ window.buildProfilePage = function(force = false) {
     <div class="prof-hero-modern">
       <div class="prof-avatar-modern" id="profAvatarDisplay" onclick="profOpenAvatarPicker()">${avDisplay}</div>
       <div class="prof-name-container">
-        <div class="prof-display-name" id="profDisplayNameUI">${user.displayName || user.username} ${typeof getVerificationBadge === 'function' ? getVerificationBadge(user.username) : ''}</div>
+        <div class="prof-display-name" id="profDisplayNameUI">${user.displayName || user.username} ${getVerificationBadge(user.username)}</div>
         <div class="prof-user-tag">@${user.username}</div>
         <div style="margin-top:8px;">
           <span class="xp-level-badge" style="background:linear-gradient(135deg, var(--gold), #aa771c); box-shadow:0 0 15px rgba(255,204,0,0.3);">
@@ -190,11 +198,6 @@ window.buildProfilePage = function(force = false) {
       <div class="prof-stat-card"><div class="prof-stat-val ${stats.profit >= 0 ? 'pos' : 'neg'}" id="profStatProfitUI">${stats.profit >= 0 ? '+' : ''}${stats.profit.toFixed(0)}</div><div class="prof-stat-lbl">PROFIT</div></div>
       <div class="prof-stat-card"><div class="prof-stat-val" style="color:var(--nb)" id="profStatWRUI">${stats.wr}%</div><div class="prof-stat-lbl">WR</div></div>
       <div class="prof-stat-card"><div class="prof-stat-val" id="profStatTotalUI">${stats.total}</div><div class="prof-stat-lbl">TICKETS</div></div>
-    </div>
-    <div class="prof-section-card">
-      <div class="prof-section-title">CONFIG</div>
-      <div class="prof-row" onclick="profOpenEdit('currency')"><div class="prof-row-left"><div class="prof-row-icon gold"><i class="fa-solid fa-coins"></i></div><div class="prof-row-text"><span class="prof-row-label">Currency</span><span class="prof-row-sub" id="profCurrencySubUI">${typeof getCurrency === 'function' ? getCurrency() : 'RON'}</span></div></div><i class="fa-solid fa-chevron-right prof-row-arrow"></i></div>
-      <div class="prof-row" onclick="profOpenEdit('displayName')"><div class="prof-row-left"><div class="prof-row-icon blue"><i class="fa-solid fa-id-card"></i></div><div class="prof-row-text"><span class="prof-row-label">Nickname</span><span class="prof-row-sub" id="profNicknameSubUI">${user.displayName || user.username}</span></div></div><i class="fa-solid fa-pen prof-row-arrow"></i></div>
     </div>
     <div class="prof-section-card">
       <div class="prof-section-title">SECURITY & DATA</div>
@@ -236,16 +239,9 @@ function updateProfileStatsUI() {
     const val = (stats.profit >= 0 ? '+' : '') + stats.profit.toFixed(0);
     profitEl.textContent = val;
     profitEl.className = 'prof-stat-val ' + (stats.profit >= 0 ? 'pos' : 'neg');
-    let fs = 15; const len = val.length;
-    if (len > 6) fs = 13; if (len > 8) fs = 11; if (len > 10) fs = 9; if (len > 12) fs = 8;
-    profitEl.style.fontSize = fs + 'px';
-    profitEl.style.whiteSpace = 'nowrap'; profitEl.style.overflow = 'hidden';
   }
   if (wrEl) wrEl.textContent = stats.wr + '%';
   if (totalEl) totalEl.textContent = stats.total;
-  const nickSub = document.getElementById('profNicknameSubUI');
-  const user = getCurrentUser();
-  if (nickSub && user) nickSub.textContent = user.displayName || user.username;
 }
 
 function calcGlobalRank(currentUsername, currentXP, currentStats) {
@@ -254,23 +250,19 @@ function calcGlobalRank(currentUsername, currentXP, currentStats) {
     if (u.username.toLowerCase() === currentUsername.toLowerCase()) {
       return { username: u.username, score: (currentXP * 0.5) + (currentStats.wr * 10) + (currentStats.profit * 0.1) };
     }
-    const uPosts = allPosts.filter(p => p.author?.toLowerCase() === u.username.toLowerCase());
-    const uSettled = uPosts.filter(p => p.status === 'win' || p.status === 'loss' || p.status === 'cashout');
-    const uWins = uSettled.filter(p => p.status === 'win').length;
-    const uWR = uSettled.length ? (uWins / uSettled.length) * 100 : 0;
-    let uProfit = 0;
-    uSettled.forEach(p => {
-      const s = parseFloat(p.stake || 10), o = parseFloat(p.totalOdds || p.odds || 1);
-      if (p.status === 'win') uProfit += s * (o - 1);
-      else if (p.status === 'loss') uProfit -= s;
-      else if (p.status === 'cashout') uProfit += (p.cashoutAmount - s);
-    });
-    return { username: u.username, score: ((u.xp || 0) * 0.5) + (uWR * 10) + (uProfit * 0.1) };
+    return { username: u.username, score: (u.xp || 0) * 0.5 };
   });
   leaderboard.sort((a, b) => b.score - a.score);
   const rankIndex = leaderboard.findIndex(u => u.username.toLowerCase() === currentUsername.toLowerCase());
   return { rank: rankIndex !== -1 ? rankIndex + 1 : leaderboard.length, total: leaderboard.length };
 }
+
+window.getVerificationBadge = function(username) {
+  if (!username) return '';
+  const posts = getPosts(); const userPosts = posts.filter(p => p.author?.toLowerCase() === username.toLowerCase());
+  if (userPosts.length < 5) return '';
+  return `<span class="fb-verified-wrap"><i class="fa-solid fa-certificate fb-verified-bg"></i><i class="fa-solid fa-check fb-verified-check"></i></span>`;
+};
 
 window.updateXPUI = function() {
   const user = getCurrentUser(); if (!user) return;
@@ -287,7 +279,7 @@ window.updateXPUI = function() {
   if (progressText) progressText.textContent = `${lvl.progressXP} / ${lvl.requiredXP} XP`;
 };
 
-/* ── SOCIAL ENGINE (v13.2) ── */
+/* ── SOCIAL ENGINE ── */
 window.socOpenPostPicker = function() {
   const modal = document.getElementById('socPickModal');
   const list = document.getElementById('socPickList');
@@ -309,7 +301,7 @@ window.socConfirmPost = function() {
   posts.unshift(newPost); savePosts(posts);
   if (typeof window.cloudPushData === 'function') window.cloudPushData();
   document.getElementById('socPickModal').classList.remove('open');
-  socSwitchTab('feed');
+  socRenderFeed();
 };
 
 function socRenderFeed() {
@@ -321,8 +313,8 @@ function socRenderFeed() {
     const authorUser = allUsers[p.author?.toLowerCase()];
     const tickets = p.tickets || [];
     const xp = authorUser?.xp || 0; const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(xp) : { level:1 };
-    const vBadge = typeof getVerificationBadge === 'function' ? getVerificationBadge(p.author) : '';
-    const isElite = lvl.level >= 80 || vBadge.includes('fb-verified-wrap');
+    const vBadge = getVerificationBadge(p.author);
+    const isElite = lvl.level >= 80 || vBadge !== '';
     return `
     <div class="soc-post-card ${isElite ? 'elite-aura' : ''}">
       <div class="soc-post-header">
@@ -331,7 +323,7 @@ function socRenderFeed() {
           <div class="soc-post-author ${isElite ? 'elite-nickname-platinum' : ''}" onclick="viewUserProfile('${p.author}')">@${p.author}</div>
           <div class="soc-post-date">${new Date(p.postedAt).toLocaleString('ro-RO', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'})} ${vBadge}</div>
         </div>
-        <button class="soc-post-share-btn" onclick="shareTicket('${p.id}')"><i class="fa-solid fa-share-nodes"></i> SHARE</button>
+        <button class="soc-post-share-btn" onclick="if(typeof shareTicket==='function') shareTicket('${p.id}')"><i class="fa-solid fa-share-nodes"></i> SHARE</button>
       </div>
       <div class="soc-post-content">${tickets.map(t => `<div class="soc-ticket-item"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-weight:700; color:#fff; font-size:14px;">${t.name}</div><div style="font-family:'Syncopate'; font-size:11px; color:var(--nb);">@${parseFloat(t.odds || 1).toFixed(2)}</div></div><div class="soc-ticket-status-${t.status}" style="font-size:10px; font-weight:800; text-transform:uppercase; margin-top:2px;">${t.status}</div>${t.events && t.events.length > 0 ? `<div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px; display:flex; flex-direction:column; gap:4px;">${t.events.slice(0, 3).map(ev => `<div style="display:flex; justify-content:space-between; font-size:11px; opacity:0.6;"><span>${ev.name}</span><span style="color:var(--nb);">@${parseFloat(ev.odds || 1).toFixed(2)}</span></div>`).join('')}</div>` : ''}</div>`).join('')}</div>
     </div>`;
@@ -344,7 +336,6 @@ window.socSwitchTab = function(tab) {
   document.getElementById('soc-tab-' + tab)?.classList.add('active');
   document.getElementById('soc-panel-' + tab)?.classList.add('active');
   if (tab === 'feed') socRenderFeed();
-  if (tab === 'rank') socRenderLeaderboard();
 };
 
 window.buildSocialPage = function() {
@@ -359,37 +350,14 @@ window.buildSocialPage = function() {
     </div>
     ${user ? `<div style="padding:10px 16px 0;"><button class="soc-post-btn" onclick="socOpenPostPicker()"><i class="fa-solid fa-plus"></i> CREEAZĂ POSTARE</button></div>` : ''}
     <div id="soc-panel-feed" class="soc-panel active"><div id="soc-feed-list"></div></div>
-    <div id="soc-panel-rank" class="soc-panel"><div id="soc-rank-list"></div></div>
-    <div id="soc-panel-search" class="soc-panel"><div class="soc-search-wrap"><input class="auth-input" id="soc-search-inp" type="text" placeholder="Caută utilizatori..." oninput="socSearch(this.value)" style="padding-left:15px;"/></div><div id="soc-search-results"></div></div>
+    <div id="soc-panel-rank" class="soc-panel"></div>
+    <div id="soc-panel-search" class="soc-panel"></div>
     <div class="prof-avatar-modal" id="socPickModal"><div class="prof-avatar-box" style="max-width:440px;"><div class="prof-edit-title">ALEGE BILETELE</div><div id="socPickList" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin:15px 0;"></div><div class="prof-edit-actions"><button class="prof-edit-cancel" onclick="document.getElementById('socPickModal').classList.remove('open')">ANULEAZĂ</button><button class="prof-edit-save" onclick="socConfirmPost()">POSTEAZĂ ACUM</button></div></div></div>
   `;
   socRenderFeed();
 };
 
-function socRenderLeaderboard() {
-  const list = document.getElementById('soc-rank-list'); if (!list) return;
-  const users = getUsers(); const allPosts = getPosts();
-  const rankings = Object.values(users).map(u => {
-    const uPosts = allPosts.filter(p => p.author?.toLowerCase() === u.username.toLowerCase());
-    const settled = uPosts.filter(p => p.status === 'win' || p.status === 'loss' || p.status === 'cashout');
-    const wins = settled.filter(p => p.status === 'win').length;
-    const wr = settled.length >= 3 ? Math.round((wins / settled.length) * 100) : 0;
-    return { username: u.username, avatar: u.avatar, xp: u.xp || 0, wr, total: settled.length, score: (wr * 0.7) + (settled.length * 0.3) };
-  }).filter(r => r.total >= 1).sort((a,b) => b.score - a.score);
-
-  list.innerHTML = rankings.map((r, i) => `
-    <div class="soc-user-card" onclick="viewUserProfile('${r.username}')">
-      <div style="font-weight:700; width:20px; opacity:0.5;">${i+1}</div>
-      <div class="soc-post-avatar">${renderAvatarContent(r.avatar)}</div>
-      <div style="flex:1;">
-        <div class="soc-post-author">@${r.username}</div>
-        <div class="soc-post-date">${r.wr}% WR • ${r.total} postări</div>
-      </div>
-    </div>
-  `).join('');
-}
-
 (function init() {
   const user = getCurrentUser();
-  if (user) { if (typeof authUpdateTopBar === 'function') authUpdateTopBar(user); }
+  if (user) { authUpdateTopBar(user); }
 })();

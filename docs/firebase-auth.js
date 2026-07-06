@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    firebase-auth.js
-   Login cu Google + Facebook via Firebase Authentication
-   Share bilete via link public generat în Firestore
+   Sistem Distribuire Hibridă (Bilete + Postări Sociale)
+   v13.1 Elite Apex Edition
 ═══════════════════════════════════════════════════════════════ */
 
 'use strict';
@@ -21,7 +21,7 @@ function fbLoadSDK() {
   return new Promise((resolve, reject) => {
     if (fbReady) { resolve(); return; }
     if (FIREBASE_CONFIG.apiKey === 'INLOCUIESTE_CU_API_KEY') {
-      fbShowSetupGuide(); reject(new Error('config_missing')); return;
+      console.warn('[Firebase] Config lipsă.'); reject(new Error('config_missing')); return;
     }
     const scripts = [
       'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
@@ -40,96 +40,86 @@ function fbLoadSDK() {
             fbAuth = firebase.auth();
             fbDb = firebase.firestore();
             fbReady = true;
-            fbAuth.onAuthStateChanged(fbHandleAuthState);
+            fbAuth.onAuthStateChanged(user => { fbUser = user; });
             resolve();
           } catch(e) { reject(e); }
         }
       };
-      sc.onerror = () => reject(new Error('sdk_load_failed'));
       document.head.appendChild(sc);
     });
   });
 }
 
-function fbHandleAuthState(user) {
-  if (user) { fbUser = user; if (typeof cloudPullData === 'function') window.cloudPullData(); }
-  else fbUser = null;
-}
-
-window.authLogout = async function () {
-  if (fbAuth && fbUser) { try { await fbAuth.signOut(); } catch {} fbUser = null; }
-  if (typeof sessionStorage !== 'undefined') sessionStorage.clear();
-  localStorage.removeItem('rgb_user');
-  if (typeof Android !== 'undefined' && Android.logout) Android.logout();
-  else window.location.reload();
-};
-
-/* ── SHARE SYSTEM (v12.0 Elite) ── */
+/**
+ * 🛠️ SHARE POLYMORPHIC (v13.1)
+ * Suportă atât Bilete locale cât și Postări Sociale.
+ */
 window.shareTicket = async function (id) {
-  const shareModal = document.getElementById('share-modal');
-  const shareUrl = document.getElementById('share-url-input');
-  const shareStatus = document.getElementById('share-status');
-  if (shareModal) shareModal.classList.add('open');
-  if (shareStatus) shareStatus.textContent = '⏳ Se generează linkul...';
+  const modal = document.getElementById('share-modal');
+  const shareUrlInp = document.getElementById('share-url-input');
+  const status = document.getElementById('share-status');
 
-  // Determinăm dacă ID-ul este bilet local sau postare socială
+  if (modal) modal.classList.add('open');
+  if (status) status.textContent = '⏳ Se generează linkul Apex...';
+
   let dataToShare = null;
-  const isSocialPost = String(id).startsWith('post_');
+  const isPost = String(id).startsWith('post_');
 
-  if (isSocialPost) {
+  // Identificăm sursa datelor
+  if (isPost) {
     const posts = typeof getPosts === 'function' ? getPosts() : [];
     dataToShare = posts.find(p => p.id === id);
   } else {
-    const raw = localStorage.getItem('rgb_bets');
-    const bets = raw ? JSON.parse(raw) : [];
-    dataToShare = bets.find(b => b.id === id);
+    const bets = JSON.parse(localStorage.getItem('rgb_bets') || '[]');
+    dataToShare = bets.find(b => b.id === parseInt(id));
   }
 
   if (!dataToShare) {
-    if (shareStatus) shareStatus.textContent = '❌ Eroare: Date negăsite.';
+    if (status) status.textContent = '❌ Eroare: Datele nu au fost găsite.';
     return;
   }
 
-  // Fallback Link local dacă Firebase nu e configurat
+  // Fallback Link Demo
   if (FIREBASE_CONFIG.apiKey === 'INLOCUIESTE_CU_API_KEY') {
-    const mockUrl = `${window.location.href.split('?')[0]}?share=${id}`;
-    if (shareUrl) shareUrl.value = mockUrl;
-    if (shareStatus) shareStatus.textContent = '⚠️ Mod demonstrativ (Firebase neconectat)';
-    fbShowShareButtons(mockUrl, dataToShare);
+    const demoUrl = `${window.location.href.split('?')[0]}?share=${id}`;
+    if (shareUrlInp) shareUrlInp.value = demoUrl;
+    if (status) status.textContent = '⚠️ Mod Demo (Firebase neconfigurat)';
+    fbShowShareButtons(demoUrl, dataToShare);
     return;
   }
 
   try {
     await fbLoadSDK();
-    if (!fbUser) { fbShowPreShareAuth(id); return; }
+    if (!fbUser) {
+      if (status) status.textContent = '🔐 Te rugăm să te autentifici.';
+      return;
+    }
 
-    const docId = isSocialPost ? id : `${fbUser.uid}_${id}`;
-    const docRef = fbDb.collection('shared_items').doc(docId);
+    const docId = isPost ? id : `ticket_${fbUser.uid}_${id}`;
+    await fbDb.collection('shared_items').doc(docId).set({
+      type: isPost ? 'post' : 'ticket',
+      payload: dataToShare,
+      author: fbUser.displayName || fbUser.email,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-    const payload = {
-      type: isSocialPost ? 'post' : 'ticket',
-      data: dataToShare,
-      sharedBy: fbUser.displayName || fbUser.email,
-      sharedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      uid: fbUser.uid
-    };
+    const finalUrl = `${window.location.origin}${window.location.pathname}?share=${docId}`;
+    if (shareUrlInp) shareUrlInp.value = finalUrl;
+    if (status) status.textContent = '✅ Link Apex generat cu succes!';
+    fbShowShareButtons(finalUrl, dataToShare);
 
-    await docRef.set(payload);
-    const publicUrl = `${window.location.href.split('?')[0]}?share=${docId}`;
-    if (shareUrl) shareUrl.value = publicUrl;
-    if (shareStatus) shareStatus.textContent = '✅ Link generat cu succes!';
-    fbShowShareButtons(publicUrl, dataToShare);
   } catch (err) {
-    if (shareStatus) shareStatus.textContent = '❌ Eroare: ' + err.message;
+    if (status) status.textContent = '❌ Eroare Cloud: ' + err.message;
   }
 };
 
 function fbShowShareButtons(url, item) {
   const container = document.getElementById('share-social-btns');
   if (!container) return;
+
   const encoded = encodeURIComponent(url);
-  const title = item.name || (item.tickets ? `Postare @${item.author}` : 'Bilet rGdbet');
-  const text = encodeURIComponent(`🎫 Verifică ${title} pe rGdbet!`);
+  const title = item.tickets ? `Postarea @${item.author}` : (item.name || 'Bilet');
+  const text = encodeURIComponent(`🎫 Verifică ${title} pe rGdbet Apex!`);
 
   container.innerHTML = `
     <a class="share-social-btn share-whatsapp" href="https://wa.me/?text=${text}%20${encoded}" target="_blank"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
@@ -150,11 +140,4 @@ window.fbCopyShareUrl = function () {
 
 window.openShareModal = function(id) { window.shareTicket(id); };
 window.closeShareModal = function() { document.getElementById('share-modal')?.classList.remove('open'); };
-
-function fbShowSetupGuide() {
-  console.warn('[rGdbet] Firebase Config Missing. Please update FIREBASE_CONFIG in firebase-auth.js');
-}
-
-function fbShowPreShareAuth(id) {
-  alert('Te rugăm să te autentifici pentru a genera link-uri de share.');
-}
+function fbShowSetupGuide() { console.warn('[Firebase] Configurație lipsă în firebase-auth.js'); }

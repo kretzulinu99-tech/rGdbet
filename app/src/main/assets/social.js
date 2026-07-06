@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v13.4 Apex Final (TOTAL REPAIR)
+   Versiune: v14.3 Apex Apex Sovereign (ELITE SHARE FIX)
    Conține: Auth, Profile, Multi-Post Engine, Apex UI, Share System
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
@@ -37,6 +37,7 @@ window.savePosts = savePosts;
 
 /* ── NATIVE INITIALIZATION ── */
 window.nativeInitSession = function(uid, email, name) {
+  console.log('[Native] Apex Session Init:', name);
   if (typeof window.cloudPullData === 'function') {
     window.cloudPullData(uid).then(() => {
       if (!getCurrentUser()) {
@@ -259,7 +260,8 @@ function calcGlobalRank(currentUsername, currentXP, currentStats) {
 
 window.getVerificationBadge = function(username) {
   if (!username) return '';
-  const posts = getPosts(); const userPosts = posts.filter(p => p.author?.toLowerCase() === username.toLowerCase());
+  const posts = getPosts();
+  const userPosts = posts.filter(p => p.author?.toLowerCase() === username.toLowerCase());
   if (userPosts.length < 5) return '';
   return `<span class="fb-verified-wrap"><i class="fa-solid fa-certificate fb-verified-bg"></i><i class="fa-solid fa-check fb-verified-check"></i></span>`;
 };
@@ -312,20 +314,41 @@ function socRenderFeed() {
   list.innerHTML = posts.map(p => {
     const authorUser = allUsers[p.author?.toLowerCase()];
     const tickets = p.tickets || [];
-    const xp = authorUser?.xp || 0; const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(xp) : { level:1 };
+    const xp = authorUser?.xp || 0;
+    const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(xp) : { level:1 };
     const vBadge = getVerificationBadge(p.author);
     const isElite = lvl.level >= 80 || vBadge !== '';
+
     return `
     <div class="soc-post-card ${isElite ? 'elite-aura' : ''}">
-      <div class="soc-post-header">
+      <div class="soc-post-header" style="position:relative; z-index:30;">
         <div class="soc-post-avatar" onclick="viewUserProfile('${p.author}')">${renderAvatarContent(authorUser?.avatar)}</div>
         <div class="soc-post-meta">
           <div class="soc-post-author ${isElite ? 'elite-nickname-platinum' : ''}" onclick="viewUserProfile('${p.author}')">@${p.author}</div>
           <div class="soc-post-date">${new Date(p.postedAt).toLocaleString('ro-RO', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'})} ${vBadge}</div>
         </div>
-        <button class="soc-post-share-btn" onclick="if(typeof shareTicket==='function') shareTicket('${p.id}')"><i class="fa-solid fa-share-nodes"></i> SHARE</button>
+        <button class="soc-post-share-btn" onclick="if(window.shareTicket) window.shareTicket('${p.id}'); else alert('Modulul de share se încarcă...');">
+          <i class="fa-solid fa-share-nodes"></i> SHARE
+        </button>
       </div>
-      <div class="soc-post-content">${tickets.map(t => `<div class="soc-ticket-item"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-weight:700; color:#fff; font-size:14px;">${t.name}</div><div style="font-family:'Syncopate'; font-size:11px; color:var(--nb);">@${parseFloat(t.odds || 1).toFixed(2)}</div></div><div class="soc-ticket-status-${t.status}" style="font-size:10px; font-weight:800; text-transform:uppercase; margin-top:2px;">${t.status}</div>${t.events && t.events.length > 0 ? `<div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px; display:flex; flex-direction:column; gap:4px;">${t.events.slice(0, 3).map(ev => `<div style="display:flex; justify-content:space-between; font-size:11px; opacity:0.6;"><span>${ev.name}</span><span style="color:var(--nb);">@${parseFloat(ev.odds || 1).toFixed(2)}</span></div>`).join('')}</div>` : ''}</div>`).join('')}</div>
+      <div class="soc-post-content">${tickets.map(t => `
+        <div class="soc-ticket-item">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-weight:700; color:#fff; font-size:14px;">${t.name}</div>
+            <div style="font-family:'Syncopate'; font-size:11px; color:var(--nb);">@${parseFloat(t.odds || 1).toFixed(2)}</div>
+          </div>
+          <div class="soc-ticket-status-${t.status}" style="font-size:10px; font-weight:800; text-transform:uppercase; margin-top:2px;">${t.status}</div>
+          ${t.events && t.events.length > 0 ? `
+            <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px; display:flex; flex-direction:column; gap:4px;">
+              ${t.events.slice(0, 3).map(ev => `
+                <div style="display:flex; justify-content:space-between; font-size:11px; opacity:0.6;">
+                  <span>${ev.name}</span>
+                  <span style="color:var(--nb);">@${parseFloat(ev.odds || 1).toFixed(2)}</span>
+                </div>
+              `).join('')}
+            </div>` : ''}
+        </div>`).join('')}
+      </div>
     </div>`;
   }).join('');
 }

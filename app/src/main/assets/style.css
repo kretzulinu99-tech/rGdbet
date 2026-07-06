@@ -7352,3 +7352,103 @@ body.page-profile-active .top-bar {
   color: #000;
   box-shadow: 0 0 15px var(--nb);
 }
+
+/* -- SOCIAL APEX REDESIGN (v13.0) -- */
+
+.soc-post-card {
+  background: rgba(13, 17, 23, 0.7) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  margin-bottom: 20px !important;
+  padding: 16px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important;
+}
+
+.soc-post-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 14px !important;
+}
+
+.soc-post-meta {
+  flex: 1 !important;
+}
+
+.soc-post-author {
+  font-family: 'Syncopate', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  color: #fff !important;
+}
+
+.soc-post-date {
+  font-size: 10px !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  margin-top: 2px !important;
+}
+
+/* HIGH VISIBILITY SHARE BUTTON */
+.soc-post-share-btn {
+  background: linear-gradient(135deg, var(--nb), var(--ng)) !important;
+  color: #000 !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 8px 14px !important;
+  font-family: 'Syncopate', sans-serif !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  box-shadow: 0 4px 15px rgba(0, 200, 255, 0.3) !important;
+}
+
+.soc-post-share-btn:hover {
+  transform: scale(1.05) translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 200, 255, 0.5) !important;
+}
+
+.soc-post-share-btn i {
+  font-size: 12px !important;
+}
+
+.soc-ticket-item {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 14px !important;
+  padding: 12px !important;
+  margin-top: 10px !important;
+}
+
+.soc-ticket-status-win { color: var(--ng) !important; }
+.soc-ticket-status-loss { color: var(--danger) !important; }
+.soc-ticket-status-pending { color: var(--gold) !important; }
+
+/* MODAL TICKETS PICKER */
+.soc-pick-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.soc-pick-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.soc-pick-check {
+  width: 22px !important;
+  height: 22px !important;
+  accent-color: var(--nb) !important;
+  cursor: pointer;
+}

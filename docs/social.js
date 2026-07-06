@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v10.8 Sovereign Edition (SYNC OVERWRITE FIX)
-   Conține: Auth, Profile, Social Feed, Rank, Highlights, Sync Barrier
+   Versiune: v12.0 Elite Sovereign (SOCIAL SHARE UPDATE)
+   Conține: Auth, Profile, Social Feed, Rank, Highlights, Share System
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -42,30 +42,17 @@ window.saveFollows = saveFollows;
 /* ── NATIVE INITIALIZATION (v11.8) ── */
 window.nativeInitSession = function(uid, email, name) {
   console.log('[Native] Inițiere sesiune sigură pentru:', name);
-
-  // 1. BLOCĂM SALVAREA AUTOMATĂ (Pentru a nu suprascrie avatarul din Cloud cu cel default)
   if (typeof window.cloudPullData === 'function') {
-    // Restaurăm datele din Cloud PRIMA DATĂ
     window.cloudPullData(uid).then(() => {
-      // Dacă după pull tot nu avem user, creăm unul de bază
       if (!getCurrentUser()) {
         const newUser = {
-          username: name,
-          email: email,
-          uid: uid,
-          passwordHash: "firebase_auth",
-          createdAt: Date.now(),
-          avatar: "👤",
-          theme: "neon"
+          username: name, email, uid, passwordHash: "firebase_auth",
+          createdAt: Date.now(), avatar: "👤", theme: "neon"
         };
         saveCurrentUser(newUser);
       }
-
-      // Curățăm UI-ul de ecrane de blocare
-      const auth = document.getElementById('auth-screen');
-      if (auth) auth.style.display = 'none';
-      const age = document.getElementById('age-gate');
-      if (age) age.style.display = 'none';
+      const auth = document.getElementById('auth-screen'); if (auth) auth.style.display = 'none';
+      const age = document.getElementById('age-gate'); if (age) age.style.display = 'none';
     });
   }
 };
@@ -80,13 +67,9 @@ window.authUpdateBtn = function(tab) {
 };
 
 window.authPwStrength = function(pw) {
-  const fill = document.getElementById('pw-strength-fill');
-  if (!fill) return;
-  let score = 0;
-  if (pw.length >= 6)  score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  const pct   = (score / 3) * 100;
+  const fill = document.getElementById('pw-strength-fill'); if (!fill) return;
+  let score = 0; if (pw.length >= 6) score++; if (/[A-Z]/.test(pw)) score++; if (/[0-9]/.test(pw)) score++;
+  const pct = (score / 3) * 100;
   fill.style.width = pct + '%';
   fill.style.background = score <= 1 ? '#ff3366' : score <= 2 ? '#ffcc00' : '#00ff88';
 };
@@ -123,30 +106,19 @@ window.authRegister = function() {
     passwordHash: hashStr(pass), avatar: '👤',
     privacy: 'public', joinedAt: new Date().toISOString(), xp: 0
   };
-  users[username.toLowerCase()] = newUser;
-  saveUsers(users);
-  authOnSuccess(newUser);
+  users[username.toLowerCase()] = newUser; saveUsers(users); authOnSuccess(newUser);
 };
 
 window.authSkip = function() { authHideScreen(); };
-
-function authOnSuccess(user) {
-  saveCurrentUser(user);
-  authHideScreen();
-  authUpdateTopBar(user);
-  buildProfilePage(true);
-}
-
+function authOnSuccess(user) { saveCurrentUser(user); authHideScreen(); authUpdateTopBar(user); buildProfilePage(true); }
 function authHideScreen() {
   const s = document.getElementById('auth-screen');
   if (s) { s.classList.add('hiding'); setTimeout(() => { s.style.display = 'none'; s.classList.remove('hiding'); }, 400); }
 }
-
 function authShowScreen() {
   const s = document.getElementById('auth-screen');
   if (s) { s.style.display = 'flex'; s.classList.remove('hiding'); }
 }
-
 function authUpdateTopBar(user) {
   const btn = document.getElementById('topUserBtn');
   const uname = document.getElementById('topUsername');
@@ -156,9 +128,7 @@ function authUpdateTopBar(user) {
     btn.style.display = 'flex';
     if (uname) uname.textContent = (user.displayName || user.username).toUpperCase();
     if (av) av.innerHTML = renderAvatarContent(user.avatar);
-  } else {
-    btn.style.display = 'none';
-  }
+  } else btn.style.display = 'none';
 }
 
 /**
@@ -166,28 +136,12 @@ function authUpdateTopBar(user) {
  */
 window.authLogout = async function() {
   console.log('[Auth] Inițiere Logout Securizat...');
-
-  if (typeof window.cloudPushData === 'function') {
-    await window.cloudPushData();
-  }
-
-  localStorage.removeItem(SK.user);
-  sessionStorage.clear();
-
-  if (typeof fbAuth !== 'undefined' && fbAuth) {
-    try { await fbAuth.signOut(); } catch(e) {}
-  }
-
-  if (typeof Android !== 'undefined' && Android.logout) {
-    Android.logout();
-    return;
-  }
-
-  authUpdateTopBar(null);
-  authShowScreen();
-  if (typeof navigateTo === 'function') {
-    navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
-  }
+  if (typeof window.cloudPushData === 'function') await window.cloudPushData();
+  localStorage.removeItem(SK.user); sessionStorage.clear();
+  if (typeof fbAuth !== 'undefined' && fbAuth) { try { await fbAuth.signOut(); } catch(e) {} }
+  if (typeof Android !== 'undefined' && Android.logout) { Android.logout(); return; }
+  authUpdateTopBar(null); authShowScreen();
+  if (typeof navigateTo === 'function') navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
   window.location.reload();
 };
 
@@ -201,25 +155,18 @@ window.renderAvatarContent = function(av) {
 };
 
 window.onAvatarUploaded = function(dataUrl) {
-  const img = new Image();
-  img.src = dataUrl;
+  const img = new Image(); img.src = dataUrl;
   img.onload = () => {
-    const canvas = document.createElement('canvas');
-    const MAX_SIZE = 400;
-    let width = img.width;
-    let height = img.height;
+    const canvas = document.createElement('canvas'); const MAX_SIZE = 400;
+    let width = img.width, height = img.height;
     if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } }
     else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
     canvas.width = width; canvas.height = height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, width, height);
+    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
     const compressedUrl = canvas.toDataURL('image/jpeg', 0.7);
     const user = getCurrentUser();
     if (user) {
-      user.avatar = compressedUrl;
-      saveCurrentUser(user);
-      buildProfilePage(true);
-      authUpdateTopBar(user);
+      user.avatar = compressedUrl; saveCurrentUser(user); buildProfilePage(true); authUpdateTopBar(user);
       if (typeof window.cloudPushData === 'function') window.cloudPushData();
     }
   };
@@ -239,13 +186,11 @@ window.profUploadPhoto = function() {
 };
 
 window.buildProfilePage = function(force = false) {
-  const page = document.getElementById('page-profile');
-  if (!page) return;
+  const page = document.getElementById('page-profile'); if (!page) return;
   const user = getCurrentUser();
   if (!user) {
     page.innerHTML = `<div class="prof-login-prompt"><div class="prof-login-icon">👤</div><div class="prof-login-title">LOGIN REQUIRED</div><button class="prof-action-btn" onclick="authShowScreen()">INTRĂ ÎN CONT</button></div>`;
-    page._built = false;
-    return;
+    page._built = false; return;
   }
   if (page._built && !force) { updateXPUI(); updateProfileStatsUI(); return; }
   page._built = true;
@@ -507,9 +452,34 @@ function socRenderFeed() {
     const xp = authorUser?.xp || 0; const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(xp) : { level:1 };
     const vBadgeHtml = typeof getVerificationBadge === 'function' ? getVerificationBadge(p.author) : '';
     const isElite = lvl.level >= 80 || vBadgeHtml.includes('fb-verified-wrap');
-    return `<div class="soc-post-card ${isElite ? 'elite-aura' : ''}"><div class="soc-post-header"><div class="soc-post-avatar" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">${renderAvatarContent(authorUser?.avatar)}</div><div class="soc-post-meta"><div class="soc-post-author ${isElite ? 'elite-nickname-platinum' : ''}" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">@${p.author}</div><div class="soc-post-date">${new Date(p.postedAt).toLocaleDateString()} ${new Date(p.postedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} ${vBadgeHtml}</div></div></div><div class="soc-post-tickets-wrap" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">${tickets.map(t => `<div class="soc-ticket-mini" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:10px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;"><div style="font-weight:700; font-size:14px; color:#fff;">${t.name}</div><div style="font-family:'Syncopate'; font-size:12px; color:var(--nb);">@${parseFloat(t.odds).toFixed(2)}</div></div><div style="font-size:11px; font-weight:700; color:${t.status === 'win' ? 'var(--ng)' : t.status === 'loss' ? 'var(--danger)' : 'var(--gold)'}; text-transform:uppercase;">${t.status}</div>${t.events && t.events.length > 0 ? `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:3px;">${t.events.slice(0, 3).map(ev => `<div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.6);"><span>${ev.name}</span><span style="color:var(--nb);">@${parseFloat(ev.odds).toFixed(2)}</span></div>`).join('')}${t.events.length > 3 ? `<div style="font-size:10px; color:rgba(255,255,255,0.3); text-align:right;">+ încă ${t.events.length - 3}</div>` : ''}</div>` : ''}</div>`).join('')}</div></div>`;
+    return `<div class="soc-post-card ${isElite ? 'elite-aura' : ''}"><div class="soc-post-header"><div class="soc-post-avatar" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">${renderAvatarContent(authorUser?.avatar)}</div><div class="soc-post-meta"><div class="soc-post-author ${isElite ? 'elite-nickname-platinum' : ''}" onclick="viewUserProfile('${p.author}')" style="cursor:pointer;">@${p.author}</div><div class="soc-post-date">${new Date(p.postedAt).toLocaleDateString()} ${new Date(p.postedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} ${vBadgeHtml}</div></div><button class="soc-share-btn-icon" onclick="socSharePost('${p.id}')" title="Distribuie Bilet"><i class="fa-solid fa-share-nodes"></i></button></div><div class="soc-post-tickets-wrap" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">${tickets.map(t => `<div class="soc-ticket-mini" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:10px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;"><div style="font-weight:700; font-size:14px; color:#fff;">${t.name}</div><div style="font-family:'Syncopate'; font-size:12px; color:var(--nb);">@${parseFloat(t.odds).toFixed(2)}</div></div><div style="font-size:11px; font-weight:700; color:${t.status === 'win' ? 'var(--ng)' : t.status === 'loss' ? 'var(--danger)' : 'var(--gold)'}; text-transform:uppercase;">${t.status}</div>${t.events && t.events.length > 0 ? `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:3px;">${t.events.slice(0, 3).map(ev => `<div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.6);"><span>${ev.name}</span><span style="color:var(--nb);">@${parseFloat(ev.odds).toFixed(2)}</span></div>`).join('')}${t.events.length > 3 ? `<div style="font-size:10px; color:rgba(255,255,255,0.3); text-align:right;">+ încă ${t.events.length - 3}</div>` : ''}</div>` : ''}</div>`).join('')}</div></div>`;
   }).join('');
 }
+
+/**
+ * 🛠️ SOCIAL SHARE SYSTEM (v12.0 Elite)
+ * Permite distribuirea postărilor către Facebook, WhatsApp, etc.
+ */
+window.socSharePost = function(postId) {
+  const posts = getPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+
+  const author = post.author || 'utilizator rGdbet';
+  const ticketCount = post.tickets ? post.tickets.length : 1;
+  const shareText = `🎫 Verifică biletul postat de @${author} pe rGdbet! (${ticketCount} selecții)`;
+
+  if (typeof Android !== 'undefined' && Android.vibrate) Android.vibrate(50);
+
+  if (typeof openShareModal === 'function') {
+    // În v12.0, openShareModal din firebase-auth.js poate accepta și un ID de postare
+    openShareModal(postId);
+  } else if (navigator.share) {
+    navigator.share({ title: 'rGdbet — Social Betting', text: shareText, url: window.location.href }).catch(console.error);
+  } else {
+    alert('Share text: ' + shareText);
+  }
+};
 
 window.socSearch = function(q) {
   const res = document.getElementById('soc-search-results'); if (!res || !q) { if(res) res.innerHTML = ''; return; }

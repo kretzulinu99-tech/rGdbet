@@ -1076,7 +1076,7 @@
         -webkit-backdrop-filter: blur(15px) !important;
         position: relative !important;
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-        overflow: hidden !important;
+        overflow: visible !important; /* Permitem Share să iasă puțin */
       }
 
       .bet-item::before {
@@ -5317,15 +5317,32 @@ body.page-profile-active .top-bar {
 .share-soc-btn:hover { transform: translateY(-2px); filter: brightness(1.2); }
 
 /* Share btn pe bet-item cards */
-.bet-share-btn {
-  position: absolute; top: 10px; right: 10px;
-  width: 30px; height: 30px; border-radius: 8px;
-  background: rgba(0,200,255,.1); border: 1px solid rgba(0,200,255,.25);
-  color: var(--nb, #00c8ff); font-size: 12px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all .2s ease; z-index: 1;
-}
-.bet-share-btn:hover { background: rgba(0,200,255,.22); }
+  /* PREMIUM SHARE PILL (v18.1) */
+  .bet-share-btn {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--nb), var(--ng)) !important;
+    color: #000 !important;
+    border: none !important;
+    padding: 6px 16px !important;
+    border-radius: 30px !important;
+    font-family: 'Syncopate', sans-serif !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+    box-shadow: 0 5px 15px rgba(0, 200, 255, 0.4) !important;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    z-index: 100 !important;
+  }
+
+  .bet-share-btn:hover {
+    transform: translateY(-2px) scale(1.05) !important;
+    box-shadow: 0 8px 20px rgba(0, 255, 136, 0.6) !important;
+  }
 .bet-item { position: relative; }
 
 /* ═══════════════════════════════════════════════════════════════

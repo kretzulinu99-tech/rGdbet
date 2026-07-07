@@ -1396,7 +1396,7 @@ function scheduleRender() {
           container.innerHTML += `
             <div class="bet-item scroll-animate ${statusClass} bet-status-${b.status}">
               <button class="bet-share-btn" onclick="if(window.shareTicket) shareTicket('${b.id}'); else alert('Loading...');">
-                <i class="fa-solid fa-share-nodes"></i>
+                <i class="fa-solid fa-share-nodes"></i> SHARE
               </button>
 
               <div class="bet-header-row">

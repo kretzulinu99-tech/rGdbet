@@ -198,7 +198,7 @@
     </div>
     <a href="https://revolut.me" target="_blank" class="btn-donate" id="donateBtn">⚡ <span data-i18n="donate">REVOLUT DONATE</span></a>
     <div class="stats-grid">
-      <div class="stat-card"><span class="stat-val pos" id="total-p">+0.00</span><span class="stat-label" data-i18n="net_profit">Net Profit</span></div>
+      <div class="stat-card" onclick="animateProfitRoll()"><span class="stat-val pos" id="total-p">+0.00</span><span class="stat-label" data-i18n="net_profit">Net Profit</span></div>
       <div class="stat-card">
         <select id="portfolioSelect" onchange="handlePortfolioChange(this.value)" class="portfolio-select"></select>
         <input type="number" class="editable-input" id="budget-input" value="1000" oninput="handleDeposit(this.value)"/>

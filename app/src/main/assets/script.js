@@ -992,6 +992,42 @@ function scheduleRender() {
       }
 
       /* ═══ ACTUALIZAREA STATISTICILOR (NUMAR BILETE) ═══ */
+      /* ── ANIMATE PROFIT ROLL (SLOT MACHINE EFFECT v21.1) ── */
+      let _isRolling = false;
+      function animateProfitRoll() {
+        if (_isRolling) return;
+        const totalP = document.getElementById('total-p');
+        if (!totalP) return;
+
+        _isRolling = true;
+        totalP.classList.add('rolling-fx');
+
+        // Salvăm valoarea finală corectă (deja afișată de render)
+        const finalValue = totalP.textContent;
+        const isPos = finalValue.startsWith('+');
+
+        let count = 0;
+        const maxTicks = 15;
+        const interval = setInterval(() => {
+          // Generăm cifre aleatorii în formatul biletului (+123.45)
+          const randomVal = (Math.random() * 1000).toFixed(2);
+          totalP.textContent = (isPos ? '+' : '-') + randomVal;
+
+          count++;
+          if (count >= maxTicks) {
+            clearInterval(interval);
+            totalP.textContent = finalValue; // Revenim la valoarea reală
+            totalP.classList.remove('rolling-fx');
+            _isRolling = false;
+
+            // Efect de tip "Win" dacă e profit pozitiv
+            if (isPos && window.Android && typeof Android.vibrate === 'function') {
+              Android.vibrate(50);
+            }
+          }
+        }, 40);
+      }
+
       function renderStatsOnly() {
         let p = portfolios.find(x => x.id === currentPortfolioId);
         let initialBudget = p ? p.budget : 1000;

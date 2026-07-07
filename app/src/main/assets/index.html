@@ -287,11 +287,11 @@
         <div class="sport-pill" data-sport-pill="basketball" onclick="setSport('basketball',this)">🏀 Basketball</div>
         <div class="sport-pill" data-sport-pill="other" onclick="setSport('other',this)">🎮 Other</div>
       </div>
-      <div class="row">
-        <input type="text"   id="event-name" placeholder="Meci / Selecție"/>
-        <input type="number" id="event-odds" step="0.01" placeholder="Cotă" style="width:110px;"/>
-        <button class="icon-btn" onclick="addEventToTicket()" style="height:39px;border-color:var(--nb);color:var(--nb);"><i class="fa-solid fa-plus"></i></button>
-      </div>
+        <div class="row">
+          <input type="text"   id="event-name" placeholder="Echipe (ex: FCSB - CFR)"/>
+          <input type="number" id="event-odds" step="0.01" placeholder="Cotă" style="width:110px;"/>
+          <button class="icon-btn" onclick="addEventToTicket()" style="height:39px;border-color:var(--nb);color:var(--nb);"><i class="fa-solid fa-plus"></i></button>
+        </div>
       <div class="sec-title" style="margin-top:12px;">EVENIMENTE PE BILET</div>
       <div class="events-list" id="ticketEventsList"></div>
       <select id="bet-type" class="portfolio-select">
@@ -308,7 +308,7 @@
         <button class="star-btn" onclick="setConfidence(5)">⭐</button>
       </div>
       <input type="date" id="ticket-date"/>
-      <input type="text"   id="match"  placeholder="Nume bilet (opțional)"/>
+      <input type="text"   id="match"  placeholder="Pronostic (ex: 1 solist)"/>
       <input type="number" id="stake"  placeholder="Miză (RON)" oninput="updateRiskMeter()"/>
       <div class="kelly-box" id="kellyBox" style="display:none;">
         <div class="kelly-prob-row">

@@ -1401,7 +1401,7 @@ function scheduleRender() {
                 <div class="bet-title-wrap">
                   <div class="bet-match">
                     <i class="fa-solid ${statusIcon} ${iconClass}"></i>
-                    ${b.events && b.events.length > 0 ? b.events[0].name : 'Echipe'}
+                    <span class="bet-teams-text">${b.events && b.events.length > 0 ? b.events[0].name : 'Echipe'}</span>
                   </div>
                   <div class="bet-meta">
                     <span class="meta-pill"><i class="fa-solid fa-trophy"></i> ${t('sport_' + b.sport)}</span>
@@ -1411,7 +1411,7 @@ function scheduleRender() {
                     </span>
                   </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:10px;">
+                <div class="bet-controls-group">
                   <span class="header-odds">@${b.odds.toFixed(2)}</span>
                   ${editButtonHtml}
                 </div>

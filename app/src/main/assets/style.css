@@ -1104,9 +1104,13 @@
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 12px;
+        gap: 12px;
       }
 
-      .bet-title-wrap { flex: 1; }
+      .bet-title-wrap {
+        flex: 1;
+        min-width: 0; /* Permite containerului să se micșoreze pentru text lung */
+      }
 
       .bet-match {
         font-family: 'Rajdhani', sans-serif !important;
@@ -1118,6 +1122,21 @@
         display: flex !important;
         align-items: center !important;
         gap: 8px !important;
+        min-width: 0; /* Crucial pentru ellipsis */
+      }
+
+      .bet-teams-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+      }
+
+      .bet-controls-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0; /* Împiedică butoanele să dispară */
       }
 
       .bet-match i {

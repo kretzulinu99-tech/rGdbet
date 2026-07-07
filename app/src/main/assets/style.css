@@ -7211,7 +7211,7 @@ body.page-profile-active .top-bar {
   animation: auraRotate 3s linear infinite;
   opacity: 0.9;
   filter: blur(4px);
-  pointer-events: none; /* CRITIC: Nu blochează click-urile pe bilet */
+  pointer-events: none; /* PREVENT OVERLAP BLOCKING */
 }
 
 @keyframes auraRotate {
@@ -7408,8 +7408,30 @@ body.page-profile-active .top-bar {
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
   box-shadow: 0 4px 15px rgba(0, 200, 255, 0.3) !important;
   position: relative !important;
-  z-index: 50 !important; /* CRITIC: Stă deasupra aurei elite */
+  z-index: 50 !important;
   pointer-events: auto !important;
+}
+
+.soc-post-del-btn {
+  background: rgba(255, 68, 68, 0.1) !important;
+  color: #ff4444 !important;
+  border: 1px solid rgba(255, 68, 68, 0.2) !important;
+  border-radius: 8px !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  position: relative !important;
+  z-index: 60 !important;
+}
+
+.soc-post-del-btn:hover {
+  background: #ff4444 !important;
+  color: #fff !important;
+  transform: scale(1.1) !important;
 }
 
 .soc-post-share-btn:hover {

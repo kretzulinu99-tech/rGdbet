@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    social.js — Modulul Social Betting Network
-   Versiune: v14.3 Apex Apex Sovereign (ELITE SHARE FIX)
-   Conține: Auth, Profile, Multi-Post Engine, Apex UI, Share System
+   Versiune: v15.1 Apex Elite Sovereign (FULL SOCIAL CONTROL)
+   Conține: Auth, Profile, Multi-Post Engine, Delete System, Bottom Share
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -65,24 +65,9 @@ window.authSwitchTab = function(tab) {
   document.getElementById('panel-' + tab)?.classList.add('active');
 };
 
-window.authUpdateTopBar = function(user) {
-  const btn = document.getElementById('topUserBtn');
-  const uname = document.getElementById('topUsername');
-  const av = document.getElementById('topAvatar');
-  if (!btn) return;
-  if (user) {
-    btn.style.display = 'flex';
-    if (uname) uname.textContent = (user.displayName || user.username).toUpperCase().substring(0, 12);
-    if (av) av.innerHTML = renderAvatarContent(user.avatar);
-  } else {
-    btn.style.display = 'none';
-  }
-};
-
 function authOnSuccess(user) {
   saveCurrentUser(user);
   if (typeof buildProfilePage === 'function') buildProfilePage(true);
-  authUpdateTopBar(user);
   document.getElementById('auth-screen').style.display = 'none';
 }
 
@@ -132,7 +117,7 @@ window.onAvatarUploaded = function(dataUrl) {
     const user = getCurrentUser();
     if (user) {
       user.avatar = compressedUrl; saveCurrentUser(user); buildProfilePage(true);
-      authUpdateTopBar(user);
+      if (typeof authUpdateTopBar === 'function') authUpdateTopBar(user);
       if (typeof window.cloudPushData === 'function') window.cloudPushData();
     }
   };
@@ -145,7 +130,7 @@ window.profSelectAvatar = function(av) {
     user.avatar = av; saveCurrentUser(user);
     if (typeof window.cloudPushData === 'function') window.cloudPushData();
     buildProfilePage(true);
-    authUpdateTopBar(user);
+    if (typeof authUpdateTopBar === 'function') authUpdateTopBar(user);
   }
   profCloseAvatarPicker();
 };
@@ -178,7 +163,7 @@ window.buildProfilePage = function(force = false) {
     <div class="prof-hero-modern">
       <div class="prof-avatar-modern" id="profAvatarDisplay" onclick="profOpenAvatarPicker()">${avDisplay}</div>
       <div class="prof-name-container">
-        <div class="prof-display-name" id="profDisplayNameUI">${user.displayName || user.username} ${getVerificationBadge(user.username)}</div>
+        <div class="prof-display-name" id="profDisplayNameUI">${user.displayName || user.username} ${typeof getVerificationBadge === 'function' ? getVerificationBadge(user.username) : ''}</div>
         <div class="prof-user-tag">@${user.username}</div>
         <div style="margin-top:8px;">
           <span class="xp-level-badge" style="background:linear-gradient(135deg, var(--gold), #aa771c); box-shadow:0 0 15px rgba(255,204,0,0.3);">
@@ -258,14 +243,6 @@ function calcGlobalRank(currentUsername, currentXP, currentStats) {
   return { rank: rankIndex !== -1 ? rankIndex + 1 : leaderboard.length, total: leaderboard.length };
 }
 
-window.getVerificationBadge = function(username) {
-  if (!username) return '';
-  const posts = getPosts();
-  const userPosts = posts.filter(p => p.author?.toLowerCase() === username.toLowerCase());
-  if (userPosts.length < 5) return '';
-  return `<span class="fb-verified-wrap"><i class="fa-solid fa-certificate fb-verified-bg"></i><i class="fa-solid fa-check fb-verified-check"></i></span>`;
-};
-
 window.updateXPUI = function() {
   const user = getCurrentUser(); if (!user) return;
   const savedXp = parseInt(localStorage.getItem('rgb_xp')) || user.xp || 0;
@@ -306,48 +283,46 @@ window.socConfirmPost = function() {
   socRenderFeed();
 };
 
+window.socDeletePost = function(id) {
+  if (!confirm('Vrei să ștergi această postare din Feed?')) return;
+  let posts = getPosts();
+  posts = posts.filter(p => p.id !== id);
+  savePosts(posts);
+  if (typeof window.cloudPushData === 'function') window.cloudPushData();
+  socRenderFeed();
+};
+
 function socRenderFeed() {
   const list = document.getElementById('soc-feed-list'); if (!list) return;
   const posts = getPosts().sort((a,b) => b.postedAt - a.postedAt);
   if (!posts.length) { list.innerHTML = `<div class="soc-empty" style="padding:40px; text-align:center; opacity:0.4;">Momentan nu există postări. Fii primul care postează!</div>`; return; }
   const allUsers = getUsers();
+  const user = getCurrentUser();
+
   list.innerHTML = posts.map(p => {
     const authorUser = allUsers[p.author?.toLowerCase()];
     const tickets = p.tickets || [];
     const xp = authorUser?.xp || 0;
     const lvl = typeof getUserLevelData === 'function' ? getUserLevelData(xp) : { level:1 };
-    const vBadge = getVerificationBadge(p.author);
-    const isElite = lvl.level >= 80 || vBadge !== '';
+    const vBadge = typeof getVerificationBadge === 'function' ? getVerificationBadge(p.author) : '';
+    const isElite = lvl.level >= 80 || vBadge.includes('fb-verified-wrap');
+    const isOwner = user && user.username === p.author;
 
     return `
     <div class="soc-post-card ${isElite ? 'elite-aura' : ''}">
-      <div class="soc-post-header" style="position:relative; z-index:30;">
+      <div class="soc-post-header">
         <div class="soc-post-avatar" onclick="viewUserProfile('${p.author}')">${renderAvatarContent(authorUser?.avatar)}</div>
         <div class="soc-post-meta">
           <div class="soc-post-author ${isElite ? 'elite-nickname-platinum' : ''}" onclick="viewUserProfile('${p.author}')">@${p.author}</div>
           <div class="soc-post-date">${new Date(p.postedAt).toLocaleString('ro-RO', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'})} ${vBadge}</div>
         </div>
-        <button class="soc-post-share-btn" onclick="if(window.shareTicket) window.shareTicket('${p.id}'); else alert('Modulul de share se încarcă...');">
-          <i class="fa-solid fa-share-nodes"></i> SHARE
-        </button>
+        ${isOwner ? `<button class="soc-post-del-btn" onclick="socDeletePost('${p.id}')"><i class="fa-solid fa-trash-can"></i></button>` : ''}
       </div>
-      <div class="soc-post-content">${tickets.map(t => `
-        <div class="soc-ticket-item">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-weight:700; color:#fff; font-size:14px;">${t.name}</div>
-            <div style="font-family:'Syncopate'; font-size:11px; color:var(--nb);">@${parseFloat(t.odds || 1).toFixed(2)}</div>
-          </div>
-          <div class="soc-ticket-status-${t.status}" style="font-size:10px; font-weight:800; text-transform:uppercase; margin-top:2px;">${t.status}</div>
-          ${t.events && t.events.length > 0 ? `
-            <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px; display:flex; flex-direction:column; gap:4px;">
-              ${t.events.slice(0, 3).map(ev => `
-                <div style="display:flex; justify-content:space-between; font-size:11px; opacity:0.6;">
-                  <span>${ev.name}</span>
-                  <span style="color:var(--nb);">@${parseFloat(ev.odds || 1).toFixed(2)}</span>
-                </div>
-              `).join('')}
-            </div>` : ''}
-        </div>`).join('')}
+      <div class="soc-post-content">${tickets.map(t => `<div class="soc-ticket-item"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-weight:700; color:#fff; font-size:14px;">${t.name}</div><div style="font-family:'Syncopate'; font-size:11px; color:var(--nb);">@${parseFloat(t.odds || 1).toFixed(2)}</div></div><div class="soc-ticket-status-${t.status}" style="font-size:10px; font-weight:800; text-transform:uppercase; margin-top:2px;">${t.status}</div>${t.events && t.events.length > 0 ? `<div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px; display:flex; flex-direction:column; gap:4px;">${t.events.slice(0, 3).map(ev => `<div style="display:flex; justify-content:space-between; font-size:11px; opacity:0.6;"><span>${ev.name}</span><span style="color:var(--nb);">@${parseFloat(ev.odds || 1).toFixed(2)}</span></div>`).join('')}</div>` : ''}</div>`).join('')}</div>
+      <div style="margin-top:15px; display:flex; justify-content:flex-end;">
+        <button class="soc-post-share-btn" onclick="if(window.shareTicket) shareTicket('${p.id}'); else alert('Modulul Cloud se încarcă...');">
+          <i class="fa-solid fa-share-nodes"></i> SHARE BILET
+        </button>
       </div>
     </div>`;
   }).join('');
@@ -382,5 +357,5 @@ window.buildSocialPage = function() {
 
 (function init() {
   const user = getCurrentUser();
-  if (user) { authUpdateTopBar(user); }
+  if (user) { if (typeof authUpdateTopBar === 'function') authUpdateTopBar(user); }
 })();

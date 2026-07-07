@@ -1120,6 +1120,16 @@
         gap: 8px !important;
       }
 
+      .bet-match i {
+        font-size: 16px;
+        filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
+      }
+
+      .icon-status-win { color: var(--ng) !important; filter: drop-shadow(0 0 8px var(--ng)) !important; }
+      .icon-status-loss { color: var(--danger) !important; filter: drop-shadow(0 0 8px var(--danger)) !important; }
+      .icon-status-cashout { color: var(--gold) !important; filter: drop-shadow(0 0 8px var(--gold)) !important; }
+      .icon-status-pending { color: var(--nb) !important; }
+
       .header-odds {
         background: rgba(0, 200, 255, 0.1);
         color: var(--nb);

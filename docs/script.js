@@ -1383,9 +1383,10 @@ function scheduleRender() {
           }
 
           let statusIcon = 'fa-receipt';
-          if(b.status === 'win') statusIcon = 'fa-circle-check';
-          if(b.status === 'loss') statusIcon = 'fa-circle-xmark';
-          if(b.status === 'cashout') statusIcon = 'fa-hand-holding-dollar';
+          let iconClass = 'icon-status-pending';
+          if(b.status === 'win') { statusIcon = 'fa-circle-check'; iconClass = 'icon-status-win'; }
+          if(b.status === 'loss') { statusIcon = 'fa-circle-xmark'; iconClass = 'icon-status-loss'; }
+          if(b.status === 'cashout') { statusIcon = 'fa-hand-holding-dollar'; iconClass = 'icon-status-cashout'; }
 
           let dateStr = '-';
           if (b.date) {
@@ -1398,7 +1399,7 @@ function scheduleRender() {
               <div class="bet-header-row">
                 <div class="bet-title-wrap">
                   <div class="bet-match">
-                    <i class="fa-solid fa-futbol"></i>
+                    <i class="fa-solid ${statusIcon} ${iconClass}"></i>
                     ${b.events && b.events.length > 0 ? b.events[0].name : 'Echipe'}
                     <span class="header-odds">@${b.odds.toFixed(2)}</span>
                   </div>

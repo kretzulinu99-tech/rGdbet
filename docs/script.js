@@ -1379,7 +1379,8 @@ function scheduleRender() {
           } else if (b.status === 'loss') {
             payoutHtml = `<div class="footer-cell-val" style="color:var(--danger)">0.00 ${getCurrency()}</div>`;
           } else {
-            payoutHtml = `<div class="footer-cell-val ${b.status === 'win' ? 'val-highlight' : ''}">${possiblePayout} ${getCurrency()}</div>`;
+            // Verde pentru pending și win
+            payoutHtml = `<div class="footer-cell-val val-highlight">${possiblePayout} ${getCurrency()}</div>`;
           }
 
           let statusIcon = 'fa-receipt';

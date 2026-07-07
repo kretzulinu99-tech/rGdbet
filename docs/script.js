@@ -1394,37 +1394,34 @@ function scheduleRender() {
           }
 
           container.innerHTML += `
-            <div class="bet-item scroll-animate ${statusClass} bet-status-${b.status}">
-              <button class="bet-share-btn" onclick="if(window.shareTicket) shareTicket('${b.id}'); else alert('Loading...');">
-                <i class="fa-solid fa-share-nodes"></i> SHARE
-              </button>
-
+            <div class="bet-item scroll-animate ${statusClass} bet-status-${b.status}" style="margin-bottom:25px;">
               <div class="bet-header-row">
                 <div class="bet-title-wrap">
                   <div class="bet-match">
-                    <i class="fa-solid ${statusIcon}"></i>
-                    ${b.name}
+                    <i class="fa-solid fa-futbol"></i>
+                    ${b.events && b.events.length > 0 ? b.events[0].name : 'Echipe'}
                     <span class="header-odds">@${b.odds.toFixed(2)}</span>
                   </div>
                   <div class="bet-meta">
                     <span class="meta-pill"><i class="fa-solid fa-trophy"></i> ${t('sport_' + b.sport)}</span>
                     <span class="meta-pill"><i class="fa-regular fa-calendar"></i> ${dateStr}</span>
                     <span class="win-prob-badge">
-                      <i class="fa-solid fa-chart-line"></i> ${winProb}% ${currentLang === 'ro' ? 'Șansă Reușită' : 'Win Prob.'}
+                      <i class="fa-solid ${statusIcon}"></i> ${winProb}% ${currentLang === 'ro' ? 'Reușită' : 'Win Prob.'}
                     </span>
                   </div>
                 </div>
                 ${editButtonHtml}
               </div>
 
-              <div class="event-sub-list">
-                ${eventsHtml}
+              <div class="prediction-box">
+                <div class="prediction-label">${currentLang === 'ro' ? 'Pronostic' : 'Prediction'}</div>
+                <div class="prediction-text">${b.name}</div>
               </div>
 
               <div class="bet-footer-grid">
                 <div class="footer-cell">
                   <div class="footer-cell-label">${t('miza')}</div>
-                  <div class="footer-cell-val">${b.stake} ${getCurrency()}</div>
+                  <div class="footer-cell-val" style="font-size:16px; font-weight:800;">${b.stake} ${getCurrency()}</div>
                 </div>
                 <div class="footer-cell" style="text-align:right;">
                   <div class="footer-cell-label">${b.status === 'cashout' ? t('cashout_txt') : t('payout')}</div>
@@ -1435,6 +1432,10 @@ function scheduleRender() {
               ${b.photo ? `<div class="bet-photo-container" style="margin-top:15px;"><img src="${b.photo}" class="bet-thumb" onclick="viewFullImage('${b.photo}')" style="width:100%; border-radius:10px;"></div>` : ''}
 
               ${statusControls}
+
+              <button class="bet-share-btn" onclick="if(window.shareTicket) shareTicket('${b.id}'); else alert('Loading...');">
+                <i class="fa-solid fa-share-nodes"></i> SHARE
+              </button>
             </div>
           `;
         });

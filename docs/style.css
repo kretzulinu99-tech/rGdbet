@@ -1109,10 +1109,10 @@
       .bet-title-wrap { flex: 1; }
 
       .bet-match {
-        font-family: 'Syncopate', sans-serif !important;
-        font-size: 15px !important;
+        font-family: 'Rajdhani', sans-serif !important;
+        font-size: 16px !important;
         font-weight: 700 !important;
-        color: #fff !important;
+        color: var(--nb) !important;
         letter-spacing: 0.5px !important;
         margin-bottom: 4px !important;
         display: flex !important;
@@ -1214,10 +1214,30 @@
         margin-bottom: 4px;
       }
 
-      .footer-cell-val {
-        font-size: 16px;
+      .prediction-box {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+      }
+
+      .prediction-label {
+        font-size: 9px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+      }
+
+      .prediction-text {
+        font-family: 'Syncopate', sans-serif;
+        font-size: 14px;
         font-weight: 800;
         color: #fff;
+        letter-spacing: 0.5px;
       }
 
       .val-highlight { color: var(--ng); }
@@ -5317,15 +5337,16 @@ body.page-profile-active .top-bar {
 .share-soc-btn:hover { transform: translateY(-2px); filter: brightness(1.2); }
 
 /* Share btn pe bet-item cards */
-  /* PREMIUM SHARE PILL (v18.1) */
+  /* CENTERED BOTTOM SHARE (v19.1) */
   .bet-share-btn {
     position: absolute;
-    top: -10px;
-    right: 20px;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%) !important;
     background: linear-gradient(135deg, var(--nb), var(--ng)) !important;
     color: #000 !important;
     border: none !important;
-    padding: 6px 16px !important;
+    padding: 6px 20px !important;
     border-radius: 30px !important;
     font-family: 'Syncopate', sans-serif !important;
     font-size: 9px !important;
@@ -5340,7 +5361,7 @@ body.page-profile-active .top-bar {
   }
 
   .bet-share-btn:hover {
-    transform: translateY(-2px) scale(1.05) !important;
+    transform: translateX(-50%) translateY(-2px) scale(1.05) !important;
     box-shadow: 0 8px 20px rgba(0, 255, 136, 0.6) !important;
   }
 .bet-item { position: relative; }

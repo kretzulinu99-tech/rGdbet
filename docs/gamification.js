@@ -66,7 +66,11 @@ window.addXP = function(amount, isAdjustment = false) {
 
   // Notificăm doar la creștere reală de nivel (nu la ajustări silențioase/negative)
   if (!isAdjustment && newData.level > oldData.level) {
-    showLevelUpToast(newData.level);
+    if (typeof showRPGLevelUp === 'function') {
+        showRPGLevelUp(newData.level);
+    } else {
+        showLevelUpToast(newData.level);
+    }
   }
 
   if (typeof cloudPushData === 'function') cloudPushData();

@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
-   cloud-sync.js — Sistem Sincronizare Hibrid (Sync Lock)
-   v11.8 Elite Sovereign Platinum (The Overwrite Fix)
-   Previne suprascrierea avatarului din Cloud la login.
+   cloud-sync.js — Sistem Sincronizare Hibrid (Storage Sync)
+   v11.5 Elite Sovereign Platinum (The Persistence Fix)
+   Garantează restaurarea avatarului în ambele straturi de memorie.
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
@@ -20,22 +20,25 @@ const CLOUD_KEYS = [
   'rgb_social_feed',
   'rgb_gamb_test',
   'rgb_xp',
-  'rgb_currency'
+  'rgb_currency',
+  'rgb_global_persistent_avatar'
 ];
-
-let _syncBlocked = false;
 
 /**
  * Salvează datele folosind cel mai bun motor disponibil.
  */
 window.cloudPushData = function() {
-  if (_syncBlocked) {
-    console.log('[CloudSync] Salvare blocată (Sistem în restaurare)');
-    return Promise.resolve(false);
-  }
-
   return new Promise((resolve) => {
     const payload = {};
+
+    // Asigurăm că avem avatarul în payload chiar dacă nu e în LocalStorage direct
+    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    if (user && user.username && user.avatar && user.avatar !== '👤') {
+      const pKey = 'rgd_persistent_avatar_' + user.username.toLowerCase();
+      localStorage.setItem(pKey, user.avatar);
+      if (!CLOUD_KEYS.includes(pKey)) CLOUD_KEYS.push(pKey);
+    }
+
     CLOUD_KEYS.forEach(key => {
       const raw = localStorage.getItem(key);
       if (raw !== null) {
@@ -44,20 +47,24 @@ window.cloudPushData = function() {
     });
 
     payload.lastSync = Date.now();
-    payload.v = "11.8";
+    payload.v = "11.5";
 
+    // 1. Motor NATIV (Android Bridge)
     if (typeof Android !== 'undefined' && Android.saveToCloud) {
+      console.log('[CloudSync] Trimitere date profil către Android...');
       Android.saveToCloud(JSON.stringify(payload));
-      setTimeout(() => resolve(true), 600);
+      setTimeout(() => resolve(true), 800); // Barrieră de 800ms pentru siguranță
       return;
     }
 
+    // 2. Motor WEB (Firebase JS)
     if (typeof fbDb !== 'undefined' && typeof fbUser !== 'undefined' && fbUser) {
       fbDb.collection('user_data').doc(fbUser.uid).set(payload, { merge: true })
         .then(() => resolve(true))
         .catch(() => resolve(false));
       return;
     }
+
     resolve(false);
   });
 };
@@ -65,49 +72,59 @@ window.cloudPushData = function() {
 /**
  * Încarcă datele din Cloud și forțează sincronizarea MEMORIEI.
  */
-window.cloudPullData = async function(customUID = null) {
-  let uid = customUID;
-  if (!uid) {
-    if (typeof window.nativeUID !== 'undefined') uid = window.nativeUID;
-    else if (typeof fbUser !== 'undefined' && fbUser) uid = fbUser.uid;
-  }
+window.cloudPullData = async function() {
+  let uid = null;
+  if (typeof window.nativeUID !== 'undefined') uid = window.nativeUID;
+  else if (typeof fbUser !== 'undefined' && fbUser) uid = fbUser.uid;
 
   if (!uid || typeof fbDb === 'undefined') return;
 
-  console.log('[CloudSync] Restaurare date pentru UID:', uid);
-  _syncBlocked = true; // BLOCĂM orice scriere în timpul pull-ului
+  console.log('[CloudSync] Restaurare date cont pentru UID:', uid);
 
   try {
     const doc = await fbDb.collection('user_data').doc(uid).get();
     if (doc.exists) {
       const data = doc.data();
+
       CLOUD_KEYS.forEach(key => {
         if (data[key] !== undefined) {
           const val = typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]);
+
+          // CRITIC: Actualizăm LocalStorage
           localStorage.setItem(key, val);
+
+          // SPECIAL: Dacă cheia este 'rgb_user', forțăm și SessionStorage (Unde stă avatarul activ)
           if (key === 'rgb_user' && typeof window.saveCurrentUser === 'function') {
-            window.saveCurrentUser(JSON.parse(val));
+            try {
+              const restoredUser = JSON.parse(val);
+
+              // RESTAURARE AVATAR PERSISTENT (v16.21 FIX)
+              const userKey = 'rgd_persistent_avatar_' + (restoredUser.username || '').toLowerCase();
+              const persistentAvatar = localStorage.getItem(userKey) || localStorage.getItem('rgb_global_persistent_avatar');
+              if (persistentAvatar && (!restoredUser.avatar || restoredUser.avatar === '👤')) {
+                restoredUser.avatar = persistentAvatar;
+              }
+
+              window.saveCurrentUser(restoredUser);
+              console.log('[CloudSync] Avatar restaurat:', restoredUser.avatar ? 'DETECTOR ACTIV' : 'DEFAULT');
+            } catch(e) {}
           }
         }
       });
-      console.log('[CloudSync] Date restaurate cu succes.');
-    } else {
-      console.log('[CloudSync] Nu există date în Cloud pentru acest UID.');
-    }
-  } catch (err) {
-    console.error('[CloudSync] Eroare Pull:', err);
-  } finally {
-    // Deblocăm salvarea după ce Pull-ul este complet
-    setTimeout(() => {
-      _syncBlocked = false;
-      // Refresh UI final
+
+      console.log('[CloudSync] Sincronizare memorie completă.');
+
+      // Notificăm interfața să se actualizeze IMEDIAT
       if (typeof buildProfilePage === 'function') buildProfilePage(true);
       if (typeof authUpdateTopBar === 'function') {
         const u = JSON.parse(localStorage.getItem('rgb_user') || '{}');
         if (u.username) authUpdateTopBar(u);
       }
       if (typeof render === 'function') render();
-    }, 1000);
+      if (typeof updateXPUI === 'function') updateXPUI();
+    }
+  } catch (err) {
+    console.error('[CloudSync] Eroare la pull date:', err);
   }
 };
 
@@ -118,11 +135,11 @@ window.cloudPullData = async function(customUID = null) {
   const originalSetItem = localStorage.setItem;
   localStorage.setItem = function(key, value) {
     originalSetItem.apply(this, arguments);
-    if (!_syncBlocked && CLOUD_KEYS.includes(key)) {
+    if (CLOUD_KEYS.includes(key)) {
       clearTimeout(window._syncTimeout);
       window._syncTimeout = setTimeout(() => {
         window.cloudPushData();
-      }, 800);
+      }, 500);
     }
   };
 })();

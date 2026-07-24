@@ -6017,11 +6017,17 @@ function scheduleRender() {
           else icon.className = 'fa-solid fa-moon';
         }
 
+        const today = new Date().toISOString().split('T')[0];
+
         const dateInput = document.getElementById('ticket-date');
         if (dateInput) {
-          const today = new Date().toISOString().split('T')[0];
           dateInput.value = today;
         }
+
+        const calcStart = document.getElementById('calc-start');
+        const calcEnd = document.getElementById('calc-end');
+        if (calcStart) calcStart.value = today;
+        if (calcEnd) calcEnd.value = today;
 
         document.getElementById('langSelect').value = currentLang;
         

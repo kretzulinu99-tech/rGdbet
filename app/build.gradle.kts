@@ -13,7 +13,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "rGdbet.com"
+        applicationId = "com.rgdbet.app"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -24,9 +24,13 @@ android {
 
     buildTypes {
         release {
-            optimization {
-                enable = false
-            }
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("debug") // Temporar pana la semnarea reala
         }
     }
     compileOptions {
@@ -62,6 +66,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.billing.ktx)
     implementation(libs.firebase.storage)
     implementation(libs.google.material)
     implementation(libs.google.mlkit.text.recognition)

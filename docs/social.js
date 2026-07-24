@@ -65,10 +65,92 @@ window.authSwitchTab = function(tab) {
   document.getElementById('panel-' + tab)?.classList.add('active');
 };
 
-function authOnSuccess(user) {
+window.authShowScreen = function() {
+  const screen = document.getElementById('auth-screen');
+  if (screen) {
+    screen.style.display = 'flex';
+    screen.classList.remove('hiding');
+  }
+};
+
+window.authSkip = function() {
+  const screen = document.getElementById('auth-screen');
+  if (screen) {
+    screen.classList.add('hiding');
+    setTimeout(() => { screen.style.display = 'none'; }, 400);
+  }
+};
+
+window.authLogin = function() {
+  const userInp = document.getElementById('login-user');
+  const passInp = document.getElementById('login-pass');
+  const username = (userInp?.value || '').trim();
+
+  if (username.length < 3) {
+    alert("Introdu un username valid!");
+    return;
+  }
+
+  const users = getUsers();
+  let user = users[username.toLowerCase()];
+
+  if (!user) {
+    // În regim demo sau local, creăm userul pe loc dacă nu există
+    user = {
+      username: username,
+      email: username + "@rgdbet.local",
+      createdAt: Date.now(),
+      avatar: "👤",
+      xp: 0,
+      theme: "neon"
+    };
+    users[username.toLowerCase()] = user;
+    saveUsers(users);
+  }
+
   saveCurrentUser(user);
+  authOnSuccess(user);
+};
+
+window.authRegister = function() {
+  const username = (document.getElementById('reg-username')?.value || '').trim();
+  const email = (document.getElementById('reg-email')?.value || '').trim();
+
+  if (username.length < 3) {
+    alert("Username prea scurt!");
+    return;
+  }
+
+  const users = getUsers();
+  if (users[username.toLowerCase()]) {
+    alert("Utilizatorul există deja!");
+    return;
+  }
+
+  const newUser = {
+    username: username,
+    email: email || (username + "@rgdbet.local"),
+    createdAt: Date.now(),
+    avatar: "👤",
+    xp: 0,
+    theme: "neon"
+  };
+
+  users[username.toLowerCase()] = newUser;
+  saveUsers(users);
+  saveCurrentUser(newUser);
+  authOnSuccess(newUser);
+};
+
+function authOnSuccess(user) {
+  const screen = document.getElementById('auth-screen');
+  if (screen) {
+    screen.classList.add('hiding');
+    setTimeout(() => { screen.style.display = 'none'; }, 400);
+  }
   if (typeof buildProfilePage === 'function') buildProfilePage(true);
-  document.getElementById('auth-screen').style.display = 'none';
+  // Re-render stats with the new user context
+  if (typeof render === 'function') render();
 }
 
 window.authLogout = async function() {
@@ -284,7 +366,7 @@ window.socConfirmPost = function() {
 };
 
 window.socDeletePost = function(id) {
-  if (!confirm('Vrei să ștergi această postare din Feed?')) return;
+  if (!confirm(currentLang === 'ro' ? 'Ești sigur că vrei să ștergi această postare?' : 'Are you sure you want to delete this post?')) return;
   let posts = getPosts();
   posts = posts.filter(p => p.id !== id);
   savePosts(posts);
@@ -298,6 +380,7 @@ function socRenderFeed() {
   if (!posts.length) { list.innerHTML = `<div class="soc-empty" style="padding:40px; text-align:center; opacity:0.4;">Momentan nu există postări. Fii primul care postează!</div>`; return; }
   const allUsers = getUsers();
   const user = getCurrentUser();
+  const curr = typeof getCurrency === 'function' ? getCurrency() : 'RON';
 
   list.innerHTML = posts.map(p => {
     const authorUser = allUsers[p.author?.toLowerCase()];
@@ -308,6 +391,82 @@ function socRenderFeed() {
     const isElite = lvl.level >= 80 || vBadge.includes('fb-verified-wrap');
     const isOwner = user && user.username === p.author;
 
+    const ticketsHtml = tickets.map(t => {
+      const statusLabel = t.status === 'win' ? (currentLang === 'ro' ? 'CÂȘTIGĂTOR' : 'WINNER') :
+                         t.status === 'loss' ? (currentLang === 'ro' ? 'PIERDUT' : 'LOST') :
+                         t.status === 'cashout' ? (currentLang === 'ro' ? 'CASHOUT' : 'CASHOUT') :
+                         (currentLang === 'ro' ? 'ÎN AȘTEPTARE' : 'PENDING');
+
+      const stampClass = t.status === 'win' ? 'stamp-win' :
+                        t.status === 'loss' ? 'stamp-loss' :
+                        t.status === 'cashout' ? 'stamp-win' : 'stamp-pending';
+
+      let eventsHtml = '';
+      if (t.events && t.events.length > 0) {
+        const grouped = {};
+        t.events.forEach(ev => {
+          const matchName = ev.match || ev.name || "Meci";
+          if (!grouped[matchName]) grouped[matchName] = [];
+          grouped[matchName].push(ev);
+        });
+
+        Object.keys(grouped).forEach(matchName => {
+          const matchEvents = grouped[matchName];
+          const leagueName = matchEvents[0].league || "";
+          eventsHtml += `
+            <div class="soc-event-row">
+              ${leagueName ? `<div style="font-size:9px; color:#888; text-transform:uppercase; font-weight:700; margin-bottom:2px; letter-spacing:0.5px;">${leagueName}</div>` : ''}
+              <span class="soc-ev-match" style="color:#000;">⚽ ${matchName}</span>
+              ${matchEvents.map(ev => `
+                <div class="soc-ev-market-line">
+                  <span class="soc-ev-market" style="color:#555;">${ev.market || (currentLang === 'ro' ? 'Pronostic' : 'Market')}</span>
+                  <span class="soc-ev-odds" style="color:#000;">@${(ev.odds || 0).toFixed(2)}</span>
+                </div>
+              `).join('')}
+            </div>`;
+        });
+      }
+
+      const dateStr = p.postedAt ? new Date(p.postedAt).toLocaleDateString(currentLang === 'ro' ? 'ro-RO' : 'en-GB', { day: '2-digit', month: 'short' }) : '-';
+      const payoutVal = t.status === 'cashout' ? (t.cashoutAmount || 0).toFixed(2) : (t.status === 'loss' ? '0.00' : (t.stake * t.odds).toFixed(2));
+      const payoutColor = t.status === 'win' || t.status === 'pending' ? '#2e7d32' : t.status === 'loss' ? '#d32f2f' : '#b8860b';
+
+      return `
+        <div class="soc-ticket-realistic" style="margin-bottom:15px; background:#fff !important; color:#000 !important; border-top: 6px solid var(--nb) !important; padding: 22px !important; border-radius: 20px !important;">
+          <div class="soc-ticket-header">
+            <span class="soc-ticket-brand" style="font-family:'Rajdhani', sans-serif; font-weight:900; font-size:22px; letter-spacing:2px; color:#000;">rGdbet</span>
+            <span class="soc-ticket-stamp ${stampClass}">${statusLabel}</span>
+          </div>
+          <div class="soc-ticket-body">${eventsHtml}</div>
+          <div class="soc-ticket-footer" style="border-top: 1px dashed #000; padding-top:15px; margin-top:15px;">
+            <div class="soc-total-odds-box">
+              <div class="soc-total-lbl">COTĂ TOTALĂ</div>
+              <div class="soc-total-val" style="color:#000;">@${(t.odds || 0).toFixed(2)}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="soc-total-lbl">${(currentLang === 'ro' ? 'Miză' : 'Stake').toUpperCase()}</div>
+              <div style="font-weight:900; font-size:18px; color:#000;">${t.stake || '-'} ${curr}</div>
+            </div>
+          </div>
+          <div class="soc-ticket-footer" style="border:none; margin-top:5px; padding-top:0;">
+             <div class="soc-total-odds-box">
+                <div class="soc-total-lbl">${currentLang === 'ro' ? 'CÂȘTIG POSIBIL' : 'POTENTIAL PAYOUT'}</div>
+                <div style="font-weight:900; font-size:20px; color:${payoutColor};">
+                  ${payoutVal} ${curr}
+                </div>
+             </div>
+             <div style="text-align:right;">
+                <div class="soc-total-lbl">DATA</div>
+                <div style="font-weight:700; font-size:12px; color:#666;">${dateStr}</div>
+             </div>
+          </div>
+          <div class="soc-barcode-area">
+            <div class="soc-barcode"></div>
+            <div class="soc-ticket-id">REF-${p.id.split('_')[1] || p.id}</div>
+          </div>
+        </div>`;
+    }).join('');
+
     return `
     <div class="soc-post-card ${isElite ? 'elite-aura' : ''}">
       <div class="soc-post-header">
@@ -316,9 +475,9 @@ function socRenderFeed() {
           <div class="soc-post-author ${isElite ? 'elite-nickname-platinum' : ''}" onclick="viewUserProfile('${p.author}')">@${p.author}</div>
           <div class="soc-post-date">${new Date(p.postedAt).toLocaleString('ro-RO', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'})} ${vBadge}</div>
         </div>
-        ${isOwner ? `<button class="soc-post-del-btn" onclick="socDeletePost('${p.id}')"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+        ${isOwner ? `<button class="soc-post-del-btn" onclick="socDeletePost('${p.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:16px;"><i class="fa-solid fa-trash-can"></i></button>` : ''}
       </div>
-      <div class="soc-post-content">${tickets.map(t => `<div class="soc-ticket-item"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-weight:700; color:#fff; font-size:14px;">${t.name}</div><div style="font-family:'Syncopate'; font-size:11px; color:var(--nb);">@${parseFloat(t.odds || 1).toFixed(2)}</div></div><div class="soc-ticket-status-${t.status}" style="font-size:10px; font-weight:800; text-transform:uppercase; margin-top:2px;">${t.status}</div>${t.events && t.events.length > 0 ? `<div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px; display:flex; flex-direction:column; gap:4px;">${t.events.slice(0, 3).map(ev => `<div style="display:flex; justify-content:space-between; font-size:11px; opacity:0.6;"><span>${ev.name}</span><span style="color:var(--nb);">@${parseFloat(ev.odds || 1).toFixed(2)}</span></div>`).join('')}</div>` : ''}</div>`).join('')}</div>
+      <div class="soc-post-content">${ticketsHtml}</div>
       <div style="margin-top:15px; display:flex; justify-content:flex-end;">
         <button class="soc-post-share-btn" onclick="if(window.shareTicket) shareTicket('${p.id}'); else alert('Modulul Cloud se încarcă...');">
           <i class="fa-solid fa-share-nodes"></i> SHARE BILET

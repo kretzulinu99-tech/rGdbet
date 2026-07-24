@@ -146,6 +146,15 @@ window.authLogin = function() {
 ───────────────────────────────────────────── */
 function authStartSession(user) {
   const sess = { username: user.username, email: user.email, loginAt: new Date().toISOString() };
+
+  // RESTAURARE AVATAR PERSISTENT INAINTE DE SALVARE
+  const persistentKey = 'rgd_persistent_avatar_' + user.username.toLowerCase();
+  const globalKey = 'rgb_global_persistent_avatar';
+  const savedAvatar = localStorage.getItem(persistentKey) || localStorage.getItem(globalKey);
+  if (savedAvatar && (!user.avatar || user.avatar === '👤' || user.avatar === 'default')) {
+    user.avatar = savedAvatar;
+  }
+
   authSaveSession(sess);
   localStorage.setItem('rgb_session', JSON.stringify(sess));
   localStorage.setItem('rgb_user', JSON.stringify(user));
@@ -245,191 +254,9 @@ function authUpdateNavLabel(username) {
    10. CONSTRUIRE PAGINA PROFIL
 ───────────────────────────────────────────── */
 function buildProfileUI(user) {
-  const container = document.getElementById('page-profil');
-  if (!container) return;
-
-  // Helper pentru afișare avatar (Emoji sau Imagine)
-  const renderAvatarContent = (av, username) => {
-    if (!av || av === 'default' || av === '👤') return (username || '??').substring(0, 2).toUpperCase();
-    if (av.startsWith('data:') || av.startsWith('http')) {
-      return `<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
-    }
-    return av;
-  };
-
-  const initials = renderAvatarContent(user.avatar, user.username);
-  const joinDate  = new Date(user.createdAt).toLocaleDateString('ro-RO', { year:'numeric', month:'long', day:'numeric' });
-
-  // Statistici din localStorage (calculate din biletele salvate)
-  const stats = authComputeStats(user.username);
-
-  container.innerHTML = `
-    <div class="page-top-title">
-      <i class="fa-solid fa-circle-user" style="color:var(--nb);"></i>
-      <span>PROFIL</span>
-    </div>
-
-    <!-- ── HERO: Avatar + nume ── -->
-    <div class="profile-hero">
-      <div class="profile-avatar-wrap">
-        <div class="profile-avatar" id="prof-avatar" onclick="authOpenEditModal('avatar')">
-          ${initials}
-        </div>
-        <div class="profile-avatar-edit" onclick="authOpenEditModal('avatar')">
-          <i class="fa-solid fa-pen"></i>
-        </div>
-      </div>
-      <div class="profile-username">${user.username}</div>
-      <div class="profile-email">${user.email}</div>
-      <div class="profile-badge">
-        <i class="fa-solid fa-crown"></i> MEMBER
-      </div>
-      <div class="profile-joined">Membru din ${joinDate}</div>
-    </div>
-
-    <!-- ── STATISTICI RAPIDE ── -->
-    <div class="profile-stats-row">
-      <div class="profile-stat-card">
-        <span class="profile-stat-val" id="prof-stat-tickets">${stats.total}</span>
-        <div class="profile-stat-lbl">Bilete</div>
-      </div>
-      <div class="profile-stat-card">
-        <span class="profile-stat-val" style="color:var(--ng)" id="prof-stat-wr">${stats.wr}%</span>
-        <div class="profile-stat-lbl">Win Rate</div>
-      </div>
-      <div class="profile-stat-card">
-        <span class="profile-stat-val" style="color:${stats.profit >= 0 ? 'var(--ng)' : 'var(--danger)'}" id="prof-stat-profit">
-          ${stats.profit >= 0 ? '+' : ''}${stats.profit}
-        </span>
-        <div class="profile-stat-lbl">Profit</div>
-      </div>
-    </div>
-
-    <!-- ── SETARI CONT ── -->
-    <div class="profile-section">
-      <div class="profile-section-title">SETĂRI CONT</div>
-
-      <div class="profile-row" onclick="authOpenEditModal('username')">
-        <div class="profile-row-left">
-          <div class="profile-row-icon blue"><i class="fa-solid fa-user"></i></div>
-          <div class="profile-row-text">
-            <span class="profile-row-label">Schimbă Username</span>
-            <span class="profile-row-sub">${user.username}</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right profile-row-arrow"></i>
-      </div>
-
-      <div class="profile-row" onclick="authOpenEditModal('email')">
-        <div class="profile-row-left">
-          <div class="profile-row-icon blue"><i class="fa-solid fa-envelope"></i></div>
-          <div class="profile-row-text">
-            <span class="profile-row-label">Schimbă Email</span>
-            <span class="profile-row-sub">${user.email}</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right profile-row-arrow"></i>
-      </div>
-
-      <div class="profile-row" onclick="authOpenEditModal('password')">
-        <div class="profile-row-left">
-          <div class="profile-row-icon purple"><i class="fa-solid fa-lock"></i></div>
-          <div class="profile-row-text">
-            <span class="profile-row-label">Schimbă Parola</span>
-            <span class="profile-row-sub">••••••••</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right profile-row-arrow"></i>
-      </div>
-    </div>
-
-    <!-- ── PREFERINTE ── -->
-    <div class="profile-section">
-      <div class="profile-section-title">PREFERINȚE</div>
-
-      <div class="profile-row" onclick="navigateTo('home', document.querySelector('.nav-btn[data-page=home]'))">
-        <div class="profile-row-left">
-          <div class="profile-row-icon gold"><i class="fa-solid fa-palette"></i></div>
-          <div class="profile-row-text">
-            <span class="profile-row-label">Temă & Aspect</span>
-            <span class="profile-row-sub">Schimbă din pagina principală</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right profile-row-arrow"></i>
-      </div>
-
-      <div class="profile-row" onclick="navigateTo('home', document.querySelector('.nav-btn[data-page=home]'))">
-        <div class="profile-row-left">
-          <div class="profile-row-icon green"><i class="fa-solid fa-globe"></i></div>
-          <div class="profile-row-text">
-            <span class="profile-row-label">Limbă</span>
-            <span class="profile-row-sub">Schimbă din pagina principală</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right profile-row-arrow"></i>
-      </div>
-    </div>
-
-    <!-- ── DATE & SECURITATE ── -->
-    <div class="profile-section">
-      <div class="profile-section-title">DATE & SECURITATE</div>
-
-      <div class="profile-row" onclick="authExportData()">
-        <div class="profile-row-left">
-          <div class="profile-row-icon green"><i class="fa-solid fa-file-export"></i></div>
-          <div class="profile-row-text">
-            <span class="profile-row-label">Exportă Datele</span>
-            <span class="profile-row-sub">Descarcă biletele în format JSON</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right profile-row-arrow"></i>
-      </div>
-
-      <div class="profile-row" onclick="authConfirmDeleteAccount()" style="border-color:rgba(255,51,102,.2);">
-        <div class="profile-row-left">
-          <div class="profile-row-icon red"><i class="fa-solid fa-trash-can"></i></div>
-          <div class="profile-row-text">
-            <span class="profile-row-label" style="color:var(--danger);">Șterge Contul</span>
-            <span class="profile-row-sub">Acțiune ireversibilă</span>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right profile-row-arrow" style="color:var(--danger);"></i>
-      </div>
-    </div>
-
-    <!-- ── DESPRE APLICATIE ── -->
-    <div class="profile-section">
-      <div class="profile-section-title">DESPRE</div>
-      <div class="profile-row" style="cursor:default;">
-        <div class="profile-row-left">
-          <div class="profile-row-icon gold"><i class="fa-solid fa-crown"></i></div>
-          <div class="profile-row-text">
-            <span class="profile-row-label">rGdbet</span>
-            <span class="profile-row-sub">Sports Analytics Platform v1.0</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── BUTON DECONECTARE ── -->
-    <button class="profile-logout-btn" onclick="authLogout()">
-      <i class="fa-solid fa-right-from-bracket"></i>
-      DECONECTARE
-    </button>
-
-    <!-- ── MODAL EDITARE ── -->
-    <div class="profile-edit-modal" id="profile-edit-modal">
-      <div class="profile-edit-box">
-        <div class="profile-edit-title" id="edit-modal-title">EDITARE</div>
-        <div class="auth-error" id="edit-error" style="margin-bottom:12px;"></div>
-        <div id="edit-modal-body"></div>
-        <div style="display:flex;gap:8px;margin-top:16px;">
-          <button class="auth-btn" style="background:rgba(255,255,255,.08);color:var(--text2);box-shadow:none;flex:1;" onclick="authCloseEditModal()">ANULEAZĂ</button>
-          <button class="auth-btn" style="flex:2;" id="edit-save-btn" onclick="authSaveEdit()">SALVEAZĂ</button>
-        </div>
-      </div>
-    </div>
-  `;
+  if (typeof buildProfilePage === 'function') {
+    buildProfilePage(true);
+  }
 }
 
 /* ─────────────────────────────────────────────

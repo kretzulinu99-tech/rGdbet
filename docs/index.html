@@ -196,7 +196,7 @@
       <a href="https://facebook.com"  target="_blank" class="social-icon"><i class="fa-brands fa-facebook"></i></a>
       <a href="https://tiktok.com"    target="_blank" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
     </div>
-    <a href="https://revolut.me" target="_blank" class="btn-donate" id="donateBtn">⚡ <span data-i18n="donate">REVOLUT DONATE</span></a>
+    <a href="javascript:void(0)" class="btn-donate" id="donateBtn" onclick="openUpgradeAction()">⚡ <span data-i18n="donate">FĂ-ȚI UPGRADE!</span></a>
     <div class="stats-grid">
       <div class="stat-card" onclick="animateProfitRoll()"><span class="stat-val pos" id="total-p">+0.00</span><span class="stat-label" data-i18n="net_profit">Net Profit</span></div>
       <div class="stat-card">
@@ -204,7 +204,7 @@
         <input type="number" class="editable-input" id="budget-input" value="1000" oninput="handleDeposit(this.value)"/>
         <span class="stat-label" data-i18n="start_bal">Starting Balance</span>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" onclick="animateWinRateRoll()">
         <span class="stat-val" id="total-wr">0%</span>
         <span class="stat-label" data-i18n="win_rate">Win Rate</span>
         <div class="sub-stat-container"><span class="sub-stat-val" id="total-tickets">0</span><span class="sub-stat-label" data-i18n="total_tickets">Total Tickets</span></div>
@@ -276,84 +276,114 @@
     </div>
   </div><!-- /home -->
 
-  <!-- BILETE -->
+  <!-- BILETE (ULTRA-PREMIUM BET BUILDER v25.0) -->
   <div id="page-addbet" class="spa-page">
-    <div class="page-top-title"><i class="fa-solid fa-ticket" style="color:var(--nb);"></i><span>BILETELE MELE</span></div>
-    <div class="form-card">
-      <div class="sec-title">📋 ADAUGĂ BILET NOU</div>
+    <div class="page-top-title"><i class="fa-solid fa-trophy" style="color:var(--nb);"></i><span>MARKET EXPLORER</span></div>
+
+    <!-- Area Adăugare Selecție (Sportsbook Style) -->
+    <div class="form-card" id="add-ticket-card">
+      <div class="sec-title">📡 SELECȚIE EVENIMENT</div>
       <div class="sport-pills">
         <div class="sport-pill sel" data-sport-pill="football" onclick="setSport('football',this)">⚽ Football</div>
         <div class="sport-pill" data-sport-pill="tennis" onclick="setSport('tennis',this)">🎾 Tennis</div>
         <div class="sport-pill" data-sport-pill="basketball" onclick="setSport('basketball',this)">🏀 Basketball</div>
         <div class="sport-pill" data-sport-pill="other" onclick="setSport('other',this)">🎮 Other</div>
       </div>
-        <div class="row">
-          <input type="text"   id="event-name" placeholder="Echipe (ex: FCSB - CFR)"/>
-          <input type="number" id="event-odds" step="0.01" placeholder="Cotă" style="width:110px;"/>
-          <button class="icon-btn" onclick="addEventToTicket()" style="height:39px;border-color:var(--nb);color:var(--nb);"><i class="fa-solid fa-plus"></i></button>
-        </div>
-      <div class="sec-title" style="margin-top:12px;">EVENIMENTE PE BILET</div>
-      <div class="events-list" id="ticketEventsList"></div>
-      <select id="bet-type" class="portfolio-select">
-        <option value="solist">Solist (1X2)</option><option value="cornere">Cornere</option>
-        <option value="cartonase">Cartonașe</option><option value="goluri">Goluri</option>
-        <option value="goluri-1p">Goluri Prima Repriză</option><option value="handicap">Handicap</option>
-        <option value="asiatic">Handicap Asiatic</option><option value="altele">Altele</option>
-      </select>
-      <div class="odds-bar" id="totalOddsBar"><span style="color:var(--text2)">Total Cotă:</span><strong id="totalOddsVal">1.00</strong></div>
-      <div class="sec-title">NIVEL ÎNCREDERE</div>
+      <div class="row">
+        <input type="text" id="event-league" placeholder="Ligă (ex: La Liga)" style="width: 100%;"/>
+      </div>
+      <div class="row">
+        <input type="text" id="event-name" placeholder="Meci (ex: Real Madrid - Barcelona)" style="width: 100%;"/>
+      </div>
+      <div class="row">
+        <input type="text" id="event-market" placeholder="Pariu (ex: Gol în ambele reprize)"/>
+        <input type="number" id="event-odds" step="0.01" placeholder="Cotă" style="width:100px;"/>
+        <button class="icon-btn-plus" onclick="addSelectionToSlip()">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+
+      <div class="sec-title" style="margin-top:15px;">NIVEL ÎNCREDERE</div>
       <div class="stars-row">
-        <button class="star-btn active" onclick="setConfidence(1)">⭐</button><button class="star-btn" onclick="setConfidence(2)">⭐</button>
-        <button class="star-btn" onclick="setConfidence(3)">⭐</button><button class="star-btn" onclick="setConfidence(4)">⭐</button>
+        <button class="star-btn active" onclick="setConfidence(1)">⭐</button>
+        <button class="star-btn" onclick="setConfidence(2)">⭐</button>
+        <button class="star-btn" onclick="setConfidence(3)">⭐</button>
+        <button class="star-btn" onclick="setConfidence(4)">⭐</button>
         <button class="star-btn" onclick="setConfidence(5)">⭐</button>
       </div>
-      <input type="date" id="ticket-date"/>
-      <input type="text"   id="match"  placeholder="Pronostic (ex: 1 solist)"/>
-      <input type="number" id="stake"  placeholder="Miză (RON)" oninput="updateRiskMeter()"/>
-      <div class="kelly-box" id="kellyBox" style="display:none;">
+
+      <div class="kelly-box" id="kellyBox" style="margin-top:15px;">
         <div class="kelly-prob-row">
-          <span class="kelly-prob-label"><i class="fa-solid fa-percent"></i> Probabilitate estimată de succes</span>
+          <span class="kelly-prob-label"><i class="fa-solid fa-percent"></i> Probabilitate succes</span>
           <span class="kelly-prob-val" id="kellyProbVal">55%</span>
         </div>
         <input type="range" id="kellyProbSlider" class="kelly-slider" min="1" max="99" value="55" step="1" oninput="onKellyProbChange(this.value)"/>
-        <div class="kelly-reco" id="kellyReco">
-          <i class="fa-solid fa-sparkles"></i>
-          <span id="kellyRecoText">rGdbet recomandă o miză de <strong id="kellyRecoPct">0%</strong> din Banca Curentă</span>
-        </div>
       </div>
-      <div class="photo-upload-zone">
-        <button class="icon-btn" onclick="document.getElementById('ticket-photo').click()" style="width:auto;padding:0 12px;gap:6px;">
-          <i class="fa-solid fa-camera"></i><span style="font-size:13px;font-weight:600;">ADAUGĂ FOTO</span>
-        </button>
-        <input type="file" id="ticket-photo" accept="image/*" style="display:none;" onchange="handlePhotoSelect(this)"/>
-        <span id="photo-status" style="font-size:12px;color:var(--text2);">Niciun fișier</span>
-      </div>
-      <div class="risk-container">
-        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;">
-          <span>RISC BILET</span><span id="riskValue" style="color:var(--text2);">RISC SCĂZUT</span>
-        </div>
-        <div class="risk-bar-bg"><div class="risk-bar-fill" id="riskFill"></div></div>
-      </div>
-      <button class="main-btn" onclick="requestPlaceTicket()">📥 ADAUGĂ BILET</button>
     </div>
-    <div class="streak-bar" id="streakBar" style="margin-bottom:10px;"></div>
-    <div class="filter-bar">
-      <button class="filter-btn active" data-filter="all"     onclick="setFilter('all',this)">TOATE</button>
-      <button class="filter-btn f-pending" data-filter="pending" onclick="setFilter('pending',this)">ÎN AȘTEPTARE</button>
+      </div>
+    </div>
+
+    <!-- Floating Slip Bar (Hidden initially) -->
+    <div class="floating-slip-bar" id="floatingSlipBar" onclick="toggleFullSlip(true)">
+      <div class="slip-count-badge" id="slipCountBadge">0</div>
+      <div class="slip-bar-text">CUPON PARIERE</div>
+      <div class="slip-bar-odds" id="slipBarOdds">@1.00</div>
+    </div>
+
+    <!-- Full Slip Overlay (Bottom Sheet) -->
+    <div class="full-slip-overlay" id="fullSlipOverlay">
+      <div class="slip-content-sheet">
+        <div class="slip-header-premium">
+          <span class="slip-title-premium">BILETUL TĂU</span>
+          <button class="close-slip-btn" onclick="toggleFullSlip(false)"><i class="fa-solid fa-chevron-down"></i></button>
+        </div>
+
+        <div id="betSlipContainer">
+          <div class="empty-slip-msg">
+            <i class="fa-solid fa-receipt"></i>
+            <p>Nu aveți selecții active.</p>
+          </div>
+        </div>
+
+        <div id="slip-footer-premium" style="display:none; margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
+          <div class="slip-summary-row">
+            <div class="summary-item">
+              <span class="summary-lbl">COTĂ TOTALĂ</span>
+              <span class="summary-val highlight-glow" id="slip-total-odds">1.00</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-lbl">MIZĂ (RON)</span>
+              <input type="number" id="slip-stake" class="editable-input" style="width:100%; font-size:22px; color:var(--nb);" placeholder="0.00" oninput="updatePayoutPreview()"/>
+            </div>
+          </div>
+
+          <div class="payout-glow-box">
+            <span class="summary-lbl">CÂȘTIG POTENȚIAL</span>
+            <div class="payout-val" id="payoutPreview">0.00 RON</div>
+          </div>
+
+          <button class="place-bet-btn-premium" style="margin-top:20px;" onclick="confirmPlacePremiumTicket()">
+            <span>PLASEAZĂ BILETUL</span>
+            <i class="fa-solid fa-bolt-lightning"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-bar" style="margin-top:20px;">
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">ISTORIC</button>
+      <button class="filter-btn f-pending" data-filter="pending" onclick="setFilter('pending',this)">ACTIVE</button>
       <button class="filter-btn f-win"    data-filter="win"   onclick="setFilter('win',this)">WIN</button>
-      <button class="filter-btn f-loss"   data-filter="loss"  onclick="setFilter('loss',this)">LOSS</button>
-    </div>
-    <div class="filter-bar" style="margin-top:-4px;">
-      <button class="filter-btn active" data-sport="all"        onclick="setSportFilter('all',this)">🏆 TOATE</button>
-      <button class="filter-btn" data-sport="football"  onclick="setSportFilter('football',this)">⚽</button>
-      <button class="filter-btn" data-sport="tennis"    onclick="setSportFilter('tennis',this)">🎾</button>
+      <button class="filter-btn" data-sport="football" onclick="setSportFilter('football',this)">⚽</button>
+      <button class="filter-btn" data-sport="tennis"   onclick="setSportFilter('tennis',this)">🎾</button>
       <button class="filter-btn" data-sport="basketball" onclick="setSportFilter('basketball',this)">🏀</button>
       <button class="filter-btn" data-sport="other"     onclick="setSportFilter('other',this)">🎮</button>
     </div>
-    <div class="sec-title" style="margin-left:16px;">ACTIV &amp; ISTORIC</div>
+
+    <div class="sec-title" style="margin-left:16px; margin-top:25px;">ACTIV &amp; ISTORIC</div>
     <div id="betsContainer"></div>
     <div id="paginationContainer" class="pagination-container"></div>
-  </div><!-- /bilete -->
+  </div><!-- /page-addbet -->
 
   <!-- LAB -->
   <div id="page-lab" class="spa-page"><!-- buildLabUI() --></div>

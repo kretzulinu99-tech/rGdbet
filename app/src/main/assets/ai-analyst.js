@@ -245,7 +245,7 @@ function buildSystemPrompt() {
 
 🔢 MODEL PROBABILISTIC
 • Victorie [Gazdă]: X%
-• Egal: X%  
+• Egal: X%
 • Victorie [Oaspete]: X%
 
 ⚽ PREDICȚIE GOLURI
@@ -368,7 +368,16 @@ async function callAI(userMessage, isFollowUp = false) {
 
   // ── Payload Gemini ───────────────────────────────────────────────────
   // Gemini 2.0 Flash cu Google Search grounding pentru date live
-  const GEMINI_KEY = 'AIzaSyAb8RN6KuZ5XBxdjy7V1Sr1jto1YSj51efFRIN4Y5BvWWPuUWSQ';
+  let GEMINI_KEY = 'AIzaSyCxhvk4QcFsdP9yZdJzjvQ6uAUo1Qv7rXc'; // Fallback key
+
+  // Încercăm să luăm cheia din bridge-ul nativ pentru securitate
+  if (window.Android && typeof window.Android.getAiKey === 'function') {
+    try {
+      const nativeKey = window.Android.getAiKey();
+      if (nativeKey) GEMINI_KEY = nativeKey;
+    } catch(e) { console.error("Native key error:", e); }
+  }
+
   const GEMINI_URL =
     'https://generativelanguage.googleapis.com/v1beta/models/' +
     'gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
@@ -378,11 +387,11 @@ async function callAI(userMessage, isFollowUp = false) {
       parts: [{ text: systemText }],
     },
     contents: geminiHistory,
-    tools: [{ google_search: {} }],           // Google Search grounding — date live
+    tools: [{ googleSearch: {} }],           // Google Search grounding — date live
     generationConfig: {
-      temperature:     0.7,
+      temperature:     1.0,
       maxOutputTokens: 2048,
-      topP:            0.9,
+      topP:            0.95,
     },
   };
 

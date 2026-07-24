@@ -1,10 +1,10 @@
 /* --- TRANSLATION DICTIONARY --- */
       const translations = {
         en: {
-          resp: "PLAY RESPONSIBLY", donate: "REVOLUT DONATE", net_profit: "Net Profit", start_bal: "Starting Balance", win_rate: "Win Rate", recent_form: "Recent Form", target_goal: "Target Goal (RON)", realized: "realized", cashout_reset: "CASHOUT (RESET)", filter_all: "ALL", filter_pending: "PENDING", filter_win: "WIN", filter_loss: "LOSS", sport_all: "ALL SPORTS", sport_foot: "FOOTBALL", sport_ten: "TENNIS", sport_basket: "BASKETBALL", sport_other: "OTHER", sport_foot_short: "Football", sport_ten_short: "Tennis", sport_basket_short: "Basketball", sport_other_short: "Other", place_new: "PLACE NEW TICKET", match_name: "Match / Selection", odds: "Odds", events_on: "EVENTS ON TICKET", total_odds: "Total Odds:", conf_meter: "CONFIDENCE METER", ticket_name: "Ticket name (optional)", stake: "Stake (RON)", add_photo: "ADD TICKET PHOTO", no_file: "No file selected", photo_added: "Photo added!", risk_meter: "RISK METER", risk_low: "LOW RISK", risk_med: "MEDIUM RISK", risk_high: "HIGH RISK! CAUTION", add_ticket: "ADD TICKET", perf_last5: "PERFORMANCE (LAST 5)", active_hist: "ACTIVE & HISTORY TICKETS", no_tickets: "NO TICKETS FOUND", miza: "Stake:", payout: "Payout:", cashout_txt: "Cashout:", btn_win: "WIN", btn_cashout: "CASHOUT", btn_loss: "LOSS", err_odds: "Valid name and odds > 1 required!", err_stake: "Enter valid stake!", err_event: "Add at least one event!", prompt_cashout: "Enter cashout amount (RON):", alert_bal: "rGdbet: Add balance!", sport_football: "FOOTBALL", sport_tennis: "TENNIS", sport_basketball: "BASKETBALL", sport_other: "OTHER", income_calc: "INCOME CALCULATOR", calc_btn: "CALCULATE", calc_result_label: "Period Profit:", calendar_title: "PROFIT CALENDAR", create_port: "+ Create Portfolio...", prompt_name: "New portfolio name:", prompt_bank: "Initial bank (RON):", main_bank: "Main Bank", total_budget: "Total Budget", total_tickets: "Total Tickets", sport_stats_title: "SPORT DISTRIBUTION", win_streak: "Win Streak", bh_title: "BANKROLL HEALTH & ANALYTICS", bh_roi: "ROI (RETURN ON INV.)", bh_yield: "YIELD", bh_staked: "TOTAL STAKED", bh_drawdown: "MAX DRAWDOWN"
+          resp: "PLAY RESPONSIBLY", donate: "UPGRADE ELITE", net_profit: "Net Profit", start_bal: "Starting Balance", win_rate: "Win Rate", recent_form: "Recent Form", target_goal: "Target Goal (RON)", realized: "realized", cashout_reset: "CASHOUT (RESET)", filter_all: "ALL", filter_pending: "PENDING", filter_win: "WIN", filter_loss: "LOSS", sport_all: "ALL SPORTS", sport_foot: "FOOTBALL", sport_ten: "TENNIS", sport_basket: "BASKETBALL", sport_other: "OTHER", sport_foot_short: "Football", sport_ten_short: "Tennis", sport_basket_short: "Basketball", sport_other_short: "Other", place_new: "PLACE NEW TICKET", match_name: "Match / Selection", odds: "Odds", events_on: "EVENTS ON TICKET", total_odds: "Total Odds:", conf_meter: "CONFIDENCE METER", ticket_name: "Ticket name (optional)", stake: "Stake (RON)", add_photo: "ADD TICKET PHOTO", no_file: "No file selected", photo_added: "Photo added!", risk_meter: "RISK METER", risk_low: "LOW RISK", risk_med: "MEDIUM RISK", risk_high: "HIGH RISK! CAUTION", add_ticket: "ADD TICKET", perf_last5: "PERFORMANCE (LAST 5)", active_hist: "ACTIVE & HISTORY TICKETS", no_tickets: "NO TICKETS FOUND", miza: "Stake:", payout: "Payout:", cashout_txt: "Cashout:", btn_win: "WIN", btn_cashout: "CASHOUT", btn_loss: "LOSS", err_odds: "Valid name and odds > 1 required!", err_stake: "Enter valid stake!", err_event: "Add at least one event!", prompt_cashout: "Enter cashout amount (RON):", alert_bal: "rGdbet: Add balance!", sport_football: "FOOTBALL", sport_tennis: "TENNIS", sport_basketball: "BASKETBALL", sport_other: "OTHER", income_calc: "INCOME CALCULATOR", calc_btn: "CALCULATE", calc_result_label: "Period Profit:", calendar_title: "PROFIT CALENDAR", create_port: "+ Create Portfolio...", prompt_name: "New portfolio name:", prompt_bank: "Initial bank (RON):", main_bank: "Main Bank", total_budget: "Total Budget", total_tickets: "Total Tickets", sport_stats_title: "SPORT DISTRIBUTION", win_streak: "Win Streak", bh_title: "BANKROLL HEALTH & ANALYTICS", bh_roi: "ROI (RETURN ON INV.)", bh_yield: "YIELD", bh_staked: "TOTAL STAKED", bh_drawdown: "MAX DRAWDOWN"
         },
         ro: {
-          resp: "PARIAZĂ RESPONSABIL", donate: "DONEAZĂ REVOLUT", net_profit: "Profit Net", start_bal: "Balanță Start", win_rate: "Rată Câștig", recent_form: "Formă Recentă", target_goal: "Obiectiv (RON)", realized: "realizat", cashout_reset: "CASHOUT (RESETARE)", filter_all: "TOATE", filter_pending: "ÎN AȘTEPTARE", filter_win: "CÂȘTIG", filter_loss: "PIERDUT", sport_all: "TOATE SPORTURILE", sport_foot: "FOTBAL", sport_ten: "TENIS", sport_basket: "BASCHET", sport_other: "ALTELE", sport_foot_short: "Fotbal", sport_ten_short: "Tenis", sport_basket_short: "Baschet", sport_other_short: "Altele", place_new: "PLASEAZĂ BILET NOU", match_name: "Nume Meci / Selecție", odds: "Cotă", events_on: "Categorie", total_odds: "Cotă Totală:", conf_meter: "NIVEL DE ÎNCREDERE", ticket_name: "Nume bilet (opțional)", stake: "Miză (RON)", add_photo: "ADAUGĂ POZĂ", no_file: "Niciun fișier selectat", photo_added: "Poză adăugată!", risk_meter: "NIVEL DE RISC", risk_low: "RISC SCĂZUT", risk_med: "RISC MEDIU", risk_high: "RISC RIDICAT! ATENȚIE", add_ticket: "ADAUGĂ BILET", perf_last5: "PERFORMANȚĂ (ULTIMELE 5)", active_hist: "BILETE ACTIVE & ISTORIC", no_tickets: "NICIUN BILET GĂSIT", miza: "Miză:", payout: "Câștig:", cashout_txt: "Cashout:", btn_win: "CÂȘTIG", btn_cashout: "CASHOUT", btn_loss: "PIERDUT", err_odds: "Introduceți nume și cotă > 1!", err_stake: "Introduceți o miză validă!", err_event: "Adăugați minim un EVENIMENT!", prompt_cashout: "Suma de cashout (RON):", alert_bal: "rGdbet: Adaugă balanță!", sport_football: "FOTBAL", sport_tennis: "TENIS", sport_basketball: "BASCHET", sport_other: "ALTELE", income_calc: "CALCULATOR VENIT", calc_btn: "CALCULEAZĂ", calc_result_label: "Profit Perioadă:", calendar_title: "CALENDAR PROFIT", create_port: "+ Creare Portofoliu...", prompt_name: "Nume portofoliu nou:", prompt_bank: "Bancă inițială (RON):", main_bank: "Banca Principală", total_budget: "Buget Total", total_tickets: "Total Bilete", sport_stats_title: "DISTRIBUȚIE SPORTURI", win_streak: "Serie Victorie", bh_title: "BANKROLL HEALTH & ANALYTICS", bh_roi: "ROI (RETURN ON INV.)", bh_yield: "YIELD (RANDAMENT)", bh_staked: "TOTAL MIZAT", bh_drawdown: "MAX DRAWDOWN"
+          resp: "PARIAZĂ RESPONSABIL", donate: "FĂ-ȚI UPGRADE!", net_profit: "Profit Net", start_bal: "Balanță Start", win_rate: "Rată Câștig", recent_form: "Formă Recentă", target_goal: "Obiectiv (RON)", realized: "realizat", cashout_reset: "CASHOUT (RESETARE)", filter_all: "TOATE", filter_pending: "ÎN AȘTEPTARE", filter_win: "CÂȘTIG", filter_loss: "PIERDUT", sport_all: "TOATE SPORTURILE", sport_foot: "FOTBAL", sport_ten: "TENIS", sport_basket: "BASCHET", sport_other: "ALTELE", sport_foot_short: "Fotbal", sport_ten_short: "Tenis", sport_basket_short: "Baschet", sport_other_short: "Altele", place_new: "PLASEAZĂ BILET NOU", match_name: "Nume Meci / Selecție", odds: "Cotă", events_on: "Categorie", total_odds: "Cotă Totală:", conf_meter: "NIVEL DE ÎNCREDERE", ticket_name: "Nume bilet (opțional)", stake: "Miză (RON)", add_photo: "ADAUGĂ POZĂ", no_file: "Niciun fișier selectat", photo_added: "Poză adăugată!", risk_meter: "NIVEL DE RISC", risk_low: "RISC SCĂZUT", risk_med: "RISC MEDIU", risk_high: "RISC RIDICAT! ATENȚIE", add_ticket: "ADAUGĂ BILET", perf_last5: "PERFORMANȚĂ (ULTIMELE 5)", active_hist: "BILETE ACTIVE & ISTORIC", no_tickets: "NICIUN BILET GĂSIT", miza: "Miză:", payout: "Câștig:", cashout_txt: "Cashout:", btn_win: "CÂȘTIG", btn_cashout: "CASHOUT", btn_loss: "PIERDUT", err_odds: "Introduceți nume și cotă > 1!", err_stake: "Introduceți o miză validă!", err_event: "Adăugați minim un EVENIMENT!", prompt_cashout: "Suma de cashout (RON):", alert_bal: "rGdbet: Adaugă balanță!", sport_football: "FOTBAL", sport_tennis: "TENIS", sport_basketball: "BASCHET", sport_other: "ALTELE", income_calc: "CALCULATOR VENIT", calc_btn: "CALCULEAZĂ", calc_result_label: "Profit Perioadă:", calendar_title: "CALENDAR PROFIT", create_port: "+ Creare Portofoliu...", prompt_name: "Nume portofoliu nou:", prompt_bank: "Bancă inițială (RON):", main_bank: "Banca Principală", total_budget: "Buget Total", total_tickets: "Total Bilete", sport_stats_title: "DISTRIBUȚIE SPORTURI", win_streak: "Serie Victorie", bh_title: "BANKROLL HEALTH & ANALYTICS", bh_roi: "ROI (RETURN ON INV.)", bh_yield: "YIELD (RANDAMENT)", bh_staked: "TOTAL MIZAT", bh_drawdown: "MAX DRAWDOWN"
         },
         it: {
           resp: "GIOCA RESPONSABILMENTE", donate: "DONA REVOLUT", net_profit: "Profitto Netto", start_bal: "Saldo Iniziale", win_rate: "Vittorie", recent_form: "Forma", target_goal: "Obiettivo (RON)", realized: "realizzato", cashout_reset: "INCASSA (RESET)", filter_all: "TUTTI", filter_pending: "IN ATTESA", filter_win: "VINTI", filter_loss: "PERSI", sport_all: "TUTTI GLI SPORT", sport_foot: "CALCIO", sport_ten: "TENNIS", sport_basket: "BASKET", sport_other: "ALTRO", sport_foot_short: "Calcio", sport_ten_short: "Tennis", sport_basket_short: "Basket", sport_other_short: "Altro", place_new: "NUOVO BIGLIETTO", match_name: "Nome Partita", odds: "Quota", events_on: "EVENTI SUL BIGLIETTO", total_odds: "Quota Totale:", conf_meter: "LIVELLO FIDUCIA", ticket_name: "Nome biglietto", stake: "Puntata (RON)", add_photo: "AGGIUNGI FOTO", no_file: "Nessun file", photo_added: "Foto aggiunta!", risk_meter: "LIVELLO RISCHIO", risk_low: "RISCHIO BASSO", risk_med: "RISCHIO MEDIO", risk_high: "RISCHIO ALTO!", add_ticket: "AGGIUNGI BIGLIETTO", perf_last5: "RENDIMENTO (ULTIME 5)", active_hist: "BIGLIETTI ATTIVI E STORICO", no_tickets: "NESSUN BIGLIETTO", miza: "Puntata:", payout: "Vincita:", cashout_txt: "Incasso:", btn_win: "VINTA", btn_cashout: "INCASSA", btn_loss: "PERSA", err_odds: "Inserisci nome e quota > 1!", err_stake: "Puntata valida!", err_event: "Aggiungi un evento!", prompt_cashout: "Importo incasso (RON):", alert_bal: "rGdbet: Aggiungi saldo!", sport_football: "CALCIO", sport_tennis: "TENNIS", sport_basketball: "BASKET", sport_other: "ALTRO", income_calc: "CALCOLATORE ENTRATE", calc_btn: "CALCOLA", calc_result_label: "Profitto periodo:", calendar_title: "CALENDARIO PROFITTO", create_port: "+ Crea Portfolio...", prompt_name: "Nome nuovo portfolio:", prompt_bank: "Banca iniziale (RON):", main_bank: "Banca Principale", total_budget: "Budget Totale", total_tickets: "Totale Biglietti"
@@ -130,6 +130,11 @@ function scheduleRender() {
       document.addEventListener('mousemove', (e) => {
         const cards = document.querySelectorAll('.stat-card, .form-card, .bet-item, .bankroll-health-card, .target-card');
         cards.forEach(card => {
+          if (card.id === 'add-ticket-card') {
+            card.style.transform = '';
+            card.style.zIndex = "";
+            return;
+          }
           const rect = card.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
@@ -154,6 +159,11 @@ function scheduleRender() {
         const touch = e.touches[0];
         const cards = document.querySelectorAll('.stat-card, .form-card, .bet-item, .bankroll-health-card, .target-card');
         cards.forEach(card => {
+          if (card.id === 'add-ticket-card') {
+            card.style.transform = '';
+            card.style.zIndex = "";
+            return;
+          }
           const rect = card.getBoundingClientRect();
           const x = touch.clientX - rect.left;
           const y = touch.clientY - rect.top;
@@ -184,27 +194,38 @@ function scheduleRender() {
 
       /* --- MIGRATE TO PORTFOLIOS & INIT --- */
       function runDataMigrations() {
-        if (portfolios.length === 0) {
+        if (!Array.isArray(portfolios) || portfolios.length === 0) {
           let oldBudget = parseFloat(localStorage.getItem('rgb_initial_budget')) || 1000;
           let oldOffset = parseFloat(localStorage.getItem('rgb_profit_offset')) || 0;
           let oldTarget = parseFloat(localStorage.getItem('rgb_target')) || 1000;
-          portfolios.push({
+          portfolios = [{
             id: 'default',
             name: currentLang === 'ro' ? 'Banca Principală' : 'Main Bank',
             budget: oldBudget,
             offset: oldOffset,
             target: oldTarget
-          });
+          }];
           localStorage.setItem('rgb_portfolios', JSON.stringify(portfolios));
         }
 
         let betsMigrated = false;
-        bets.forEach(b => {
-          if (!b.portfolioId) {
-            b.portfolioId = 'default';
-            betsMigrated = true;
-          }
-        });
+        if (Array.isArray(bets)) {
+          bets.forEach(b => {
+            if (!b.portfolioId) {
+              b.portfolioId = 'default';
+              betsMigrated = true;
+            }
+            // Migrare spre Ultra-Premium format (events array)
+            if (!b.events || !Array.isArray(b.events) || b.events.length === 0) {
+              b.events = [{
+                match: b.name || "Meci Necunoscut",
+                sport: b.sport || "other",
+                selections: [{ market: "Pariu", odds: b.odds || 1.00 }]
+              }];
+              betsMigrated = true;
+            }
+          });
+        }
         if (betsMigrated) {
           localStorage.setItem('rgb_bets', JSON.stringify(bets));
         }
@@ -258,10 +279,10 @@ function scheduleRender() {
           target: pBank * 2
         });
         localStorage.setItem('rgb_portfolios', JSON.stringify(portfolios));
-        
+
         currentPortfolioId = newId;
         localStorage.setItem('rgb_current_portfolio', currentPortfolioId);
-        
+
         initPortfolios();
         render();
       }
@@ -273,13 +294,14 @@ function scheduleRender() {
       }
 
       function getCurrentBets() {
-        return bets.filter(b => b.portfolioId === currentPortfolioId);
+        const portId = currentPortfolioId || 'default';
+        return bets.filter(b => b.portfolioId === portId);
       }
 
       function toggleCustomWallpaper() {
         const body = document.body;
         const icon = document.getElementById('themeIcon');
-        
+
         if (body.classList.contains('mode-standard')) {
           body.classList.remove('mode-standard');
           body.classList.add('mode-gold');
@@ -293,11 +315,11 @@ function scheduleRender() {
           body.classList.add('mode-standard');
           if(icon) icon.className = 'fa-solid fa-moon';
         }
-        
+
         let newMode = 'standard';
         if(body.classList.contains('mode-gold')) newMode = 'gold';
         if(body.classList.contains('legend-mode')) newMode = 'legend';
-        
+
         localStorage.setItem('rgb_wallpaper_mode', newMode);
         updateChart();
       }
@@ -307,28 +329,42 @@ function scheduleRender() {
         let modeToApply = currentWallpaperMode;
         if(modeToApply === 'legend') modeToApply = 'legend-mode';
         else modeToApply = 'mode-' + modeToApply;
-        
+
         document.body.classList.add(modeToApply);
-        
+
         const icon = document.getElementById('themeIcon');
-        if(icon) 
+        if(icon)
         {
           if(currentWallpaperMode === 'gold') icon.className = 'fa-solid fa-sun';
           else if(currentWallpaperMode === 'legend') icon.className = 'fa-solid fa-star';
           else icon.className = 'fa-solid fa-moon';
         }
 
+        const today = new Date().toISOString().split('T')[0];
+
         const dateInput = document.getElementById('ticket-date');
         if (dateInput) {
-          const today = new Date().toISOString().split('T')[0];
           dateInput.value = today;
         }
 
-        document.getElementById('langSelect').value = currentLang;
-        
+        const calcStart = document.getElementById('calc-start');
+        const calcEnd = document.getElementById('calc-end');
+        if (calcStart) calcStart.value = today;
+        if (calcEnd) calcEnd.value = today;
+
+        const langSel = document.getElementById('langSelect');
+        if (langSel) langSel.value = currentLang;
+
         runDataMigrations();
         initPortfolios();
         applyTranslations();
+
+        // Check if user is logged in, if not show auth
+        if (!getCurrentUser()) {
+          const auth = document.getElementById('auth-screen');
+          if (auth) auth.style.display = 'flex';
+        }
+
         render();
       });
 
@@ -347,34 +383,197 @@ function scheduleRender() {
         });
       }
 
-      function handlePhotoSelect(input) {
-        const file = input.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            base64Photo = e.target.result;
-            const statusEl = document.getElementById('photo-status');
-            statusEl.setAttribute('data-i18n', 'photo_added');
-            statusEl.textContent = t('photo_added');
-          };
-          reader.readAsDataURL(file);
+      let ticketEvents = [];
+
+      function toggleFullSlip(show) {
+        const overlay = document.getElementById('fullSlipOverlay');
+        if (overlay) overlay.style.display = show ? 'flex' : 'none';
+        if (show) renderBetSlip();
+      }
+
+      function addSelectionToSlip() {
+        const matchInput = document.getElementById('event-name');
+        const leagueInput = document.getElementById('event-league');
+        const marketInput = document.getElementById('event-market');
+        const oddsInput = document.getElementById('event-odds');
+
+        const matchName = matchInput.value.trim();
+        const league = leagueInput?.value.trim() || "";
+        const market = marketInput.value.trim();
+        const odds = parseFloat(oddsInput.value);
+
+        if (!matchName || !market || isNaN(odds) || odds <= 1) {
+          alert("Completați meciul, pariul și cota corect!");
+          return;
+        }
+
+        let event = ticketEvents.find(e => e.match.toLowerCase() === matchName.toLowerCase());
+        if (event) {
+          event.selections.push({ market, odds });
+        } else {
+          ticketEvents.push({
+            match: matchName,
+            league: league,
+            sport: currentSport,
+            selections: [{ market, odds }]
+          });
+        }
+
+        marketInput.value = '';
+        oddsInput.value = '';
+
+        updateSlipBar();
+        if (window.Android && typeof Android.vibrate === 'function') Android.vibrate(40);
+
+        const bar = document.getElementById('floatingSlipBar');
+        if (bar) {
+          bar.style.transform = 'scale(1.1)';
+          setTimeout(() => bar.style.transform = 'scale(1)', 200);
         }
       }
 
-      function addEventToTicket() {
-        const nameInput = document.getElementById('event-name');
-        const oddsInput = document.getElementById('event-odds');
-        const name = nameInput.value.trim();
-        const odds = parseFloat(oddsInput.value);
-        if(!name || !odds || odds <= 1) {
-          alert(t('err_odds'));
+      function updateSlipBar() {
+        const bar = document.getElementById('floatingSlipBar');
+        const countBadge = document.getElementById('slipCountBadge');
+        const barOdds = document.getElementById('slipBarOdds');
+
+        if (!bar) return;
+
+        if (ticketEvents.length === 0) {
+          bar.style.display = 'none';
           return;
         }
-        ticketEvents.push({ name: name, odds: odds });
-        nameInput.value = '';
-        oddsInput.value = '';
-        renderEvents();
+
+        bar.style.display = 'flex';
+        let count = 0;
+        let totalOdds = 1;
+        ticketEvents.forEach(e => {
+          count += e.selections.length;
+          e.selections.forEach(s => totalOdds *= s.odds);
+        });
+
+        if (countBadge) countBadge.textContent = count;
+        if (barOdds) barOdds.textContent = '@' + totalOdds.toFixed(2);
       }
+
+      function renderBetSlip() {
+        const container = document.getElementById('betSlipContainer');
+        const footer = document.getElementById('slip-footer-premium');
+        const oddsVal = document.getElementById('slip-total-odds');
+
+        if (!container) return;
+
+        if (ticketEvents.length === 0) {
+          container.innerHTML = `
+            <div class="empty-slip-msg">
+              <i class="fa-solid fa-receipt"></i>
+              <p>Nu aveți selecții active.</p>
+            </div>`;
+          if (footer) footer.style.display = 'none';
+          return;
+        }
+
+        if (footer) footer.style.display = 'block';
+        container.innerHTML = '';
+
+        let totalOdds = 1;
+        ticketEvents.forEach((ev, eIdx) => {
+          let eventHtml = `
+            <div class="slip-group">
+              <div class="slip-group-header">
+                <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                  <span><i class="fa-solid fa-futbol" style="font-size:10px; color:var(--nb);"></i> ${ev.match}</span>
+                  ${ev.league ? `<span style="font-size:8px; opacity:0.6; text-transform:uppercase;">${ev.league}</span>` : ''}
+                </div>
+              </div>`;
+
+          ev.selections.forEach((sel, sIdx) => {
+            totalOdds *= sel.odds;
+            eventHtml += `
+              <div class="slip-selection">
+                <div class="sel-info">
+                  <div class="sel-market">${sel.market}</div>
+                  <div class="sel-odds">@${sel.odds.toFixed(2)}</div>
+                </div>
+                <button class="btn-remove-sel" onclick="removeSelection(${eIdx}, ${sIdx})">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>`;
+          });
+          eventHtml += `</div>`;
+          container.innerHTML += eventHtml;
+        });
+
+        if (oddsVal) oddsVal.textContent = totalOdds.toFixed(2);
+        updatePayoutPreview();
+      }
+
+      function updatePayoutPreview() {
+        const stake = parseFloat(document.getElementById('slip-stake').value) || 0;
+        let totalOdds = 1;
+        ticketEvents.forEach(e => e.selections.forEach(s => totalOdds *= s.odds));
+
+        const preview = document.getElementById('payoutPreview');
+        if (preview) {
+          const payout = (stake * totalOdds).toFixed(2);
+          preview.textContent = payout + ' RON';
+        }
+      }
+
+      function removeSelection(eIdx, sIdx) {
+        ticketEvents[eIdx].selections.splice(sIdx, 1);
+        if (ticketEvents[eIdx].selections.length === 0) ticketEvents.splice(eIdx, 1);
+        renderBetSlip();
+        updateSlipBar();
+      }
+
+      function confirmPlacePremiumTicket() {
+        const stake = parseFloat(document.getElementById('slip-stake').value);
+        if (!stake || stake <= 0) {
+          alert("Introduceți o miză validă!");
+          return;
+        }
+
+        let totalOdds = 1;
+        ticketEvents.forEach(e => e.selections.forEach(s => totalOdds *= s.odds));
+
+        const dateVal = document.getElementById('ticket-date').value || new Date().toISOString().split('T')[0];
+        const isAccumulator = ticketEvents.length > 1;
+        const isBetBuilder = ticketEvents.some(e => e.selections.length > 1);
+        const typeLabel = isAccumulator ? (isBetBuilder ? 'Combo Builder' : 'Accumulator') : (isBetBuilder ? 'Bet Builder' : 'Single');
+
+        const newBet = {
+          id: Date.now(),
+          portfolioId: currentPortfolioId,
+          type: typeLabel,
+          sport: ticketEvents[0].sport,
+          confidence: currentConfidence, // Restaurat v25.2
+          kellyProbability: kellyProbability, // Restaurat v25.2
+          stake: stake,
+          odds: totalOdds,
+          date: dateVal,
+          events: JSON.parse(JSON.stringify(ticketEvents)),
+          status: 'pending'
+        };
+
+        bets.push(newBet);
+        localStorage.setItem('rgb_bets', JSON.stringify(bets));
+
+        if (typeof syncTicketXP === 'function') syncTicketXP(newBet);
+
+        ticketEvents = [];
+        document.getElementById('event-name').value = '';
+        const leagueInp = document.getElementById('event-league');
+        if (leagueInp) leagueInp.value = '';
+        document.getElementById('slip-stake').value = '';
+        updateSlipBar();
+        toggleFullSlip(false);
+
+        if (typeof playSuccessSound === 'function') playSuccessSound();
+        render();
+        alert("Bilet plasat cu succes!");
+      }
+
       function setupScrollAnimations() {
         const observer = new IntersectionObserver((entries, observerInstance) => {
           entries.forEach(entry => {
@@ -387,41 +586,6 @@ function scheduleRender() {
         document.querySelectorAll('.bet-item.scroll-animate').forEach(el => {
           observer.observe(el);
         });
-      }
-      function renderEvents() {
-        const list = document.getElementById('ticketEventsList');
-        const bar = document.getElementById('totalOddsBar');
-        const val = document.getElementById('totalOddsVal');
-        const transLabel = document.getElementById('trans_total_odds');
-        if (transLabel) transLabel.textContent = t('total_odds');
-        if(list) list.innerHTML = '';
-        let totalOdds = 1;
-        ticketEvents.forEach((ev, idx) => {
-          totalOdds *= ev.odds;
-          if(list) {
-            list.innerHTML += `
-              <div class="event-item">
-                <span class="event-item-name">🔹 ${ev.name}</span>
-                <span class="event-item-odds">@${ev.odds.toFixed(2)}</span>
-                <button class="event-del" onclick="removeEvent(${idx})"><i class="fa-solid fa-trash"></i></button>
-               </div>
-            `;
-          }
-        });
-        if(ticketEvents.length > 0) {
-          if(bar) bar.style.display = 'flex';
-          if(val) val.textContent = totalOdds.toFixed(2);
-        } else {
-          if(bar) bar.style.display = 'none';
-          if(val) val.textContent = '1.00';
-        }
-        updateRiskMeter();
-        updateKellyRecommendation();
-      }
-
-      function removeEvent(idx) {
-        ticketEvents.splice(idx, 1);
-        renderEvents();
       }
 
       /* ═══════════════════════════════════════════════
@@ -653,7 +817,7 @@ function scheduleRender() {
         document.getElementById('stake').value = '';
         document.getElementById('ticket-photo').value = '';
         document.getElementById('ticket-date').value = new Date().toISOString().split('T')[0];
-        
+
         const statusEl = document.getElementById('photo-status');
         if(statusEl) {
           statusEl.setAttribute('data-i18n', 'no_file');
@@ -841,7 +1005,7 @@ function scheduleRender() {
         getCurrentBets().forEach(b => {
           if (!b.date) return;
           const betDate = new Date(b.date);
-          
+
           if (betDate >= start && betDate <= end) {
             if(b.status === 'win') {
               periodProfit += (b.stake * b.odds) - b.stake;
@@ -854,7 +1018,7 @@ function scheduleRender() {
         });
         const resultBar = document.getElementById('calcResultBar');
         const resultVal = document.getElementById('calcResultVal');
-        
+
         resultBar.style.display = 'flex';
         if (periodProfit > 0) {
           resultVal.style.color = 'var(--ng)';
@@ -886,14 +1050,14 @@ function scheduleRender() {
         let dailyProfits = {};
         getCurrentBets().forEach(b => {
           if (b.status === 'win' || b.status === 'loss' || b.status === 'cashout') {
-            const bDate = new Date(b.date || parseInt(b.id)); 
+            const bDate = new Date(b.date || parseInt(b.id));
             if (bDate.getFullYear() === year && bDate.getMonth() === month) {
               const day = bDate.getDate();
               let profit = 0;
               if (b.status === 'win') profit = (b.stake * b.odds) - b.stake;
               else if (b.status === 'loss') profit = -b.stake;
               else if (b.status === 'cashout') profit = b.cashoutAmount - b.stake;
-              
+
               dailyProfits[day] = (dailyProfits[day] || 0) + profit;
             }
           }
@@ -992,7 +1156,7 @@ function scheduleRender() {
       }
 
       /* ═══ ACTUALIZAREA STATISTICILOR (NUMAR BILETE) ═══ */
-      /* ── ANIMATE PROFIT ROLL (SLOT MACHINE EFFECT v21.1) ── */
+      /* ── ANIMATE PROFIT ROLL (REAL SLOT MACHINE FX v22.0) ── */
       let _isRolling = false;
       function animateProfitRoll() {
         if (_isRolling) return;
@@ -1000,48 +1164,126 @@ function scheduleRender() {
         if (!totalP) return;
 
         _isRolling = true;
-        totalP.classList.add('rolling-fx');
-
-        // Salvăm valoarea finală corectă (deja afișată de render)
-        const finalValue = totalP.textContent;
+        const finalValue = totalP.textContent; // e.g. "+123.45"
         const isPos = finalValue.startsWith('+');
 
-        let count = 0;
-        const maxTicks = 15;
-        const interval = setInterval(() => {
-          // Generăm cifre aleatorii în formatul biletului (+123.45)
-          const randomVal = (Math.random() * 1000).toFixed(2);
-          totalP.textContent = (isPos ? '+' : '-') + randomVal;
+        // Dezactivăm hover-ul și adăugăm un mic blur global în timpul animației
+        totalP.classList.add('rolling-fx');
 
-          count++;
-          if (count >= maxTicks) {
-            clearInterval(interval);
-            totalP.textContent = finalValue; // Revenim la valoarea reală
-            totalP.classList.remove('rolling-fx');
-            _isRolling = false;
+        // Curățăm containerul și pregătim elementele pentru slot
+        const chars = finalValue.split('');
+        totalP.innerHTML = '';
 
-            // Efect de tip "Win" dacă e profit pozitiv
-            if (isPos && window.Android && typeof Android.vibrate === 'function') {
-              Android.vibrate(50);
+        chars.forEach((char, index) => {
+          if (/\d/.test(char)) {
+            // Este o cifră, facem animația de slot
+            const digitContainer = document.createElement('div');
+            digitContainer.className = 'slot-digit';
+
+            const inner = document.createElement('div');
+            inner.className = 'slot-inner';
+
+            const targetDigit = char;
+            // Generăm mai multe cifre pentru o rotație mai lungă și mai rapidă
+            const intermediateDigits = [];
+            for (let i = 0; i < 8; i++) {
+              intermediateDigits.push(Math.floor(Math.random() * 10));
             }
+            const startDigit = Math.floor(Math.random() * 10);
+
+            // Structura: [Target, ...Intermediare, Start]
+            // Offset-ul va fi (intermediateDigits.length + 1) * 1.1em
+            [targetDigit, ...intermediateDigits, startDigit].forEach(d => {
+              const s = document.createElement('span');
+              s.textContent = d;
+              inner.appendChild(s);
+            });
+
+            // Setăm poziția inițială (ultima cifră din listă)
+            inner.style.transform = `translateY(-${(intermediateDigits.length + 1) * 1.1}em)`;
+
+            digitContainer.appendChild(inner);
+            totalP.appendChild(digitContainer);
+
+            // Declanșăm animația cu un delay per digit (staggered)
+            setTimeout(() => {
+              inner.style.transform = 'translateY(0)';
+            }, index * 80 + 50);
+          } else {
+            // Nu e cifră (+, -, .), o punem ca text simplu
+            const span = document.createElement('span');
+            span.textContent = char;
+            totalP.appendChild(span);
           }
-        }, 40);
+        });
+
+        // După ce s-a terminat animația (aprox 2.5s total pentru a cuprinde toate cifrele), revenim la text pur
+        setTimeout(() => {
+          totalP.textContent = finalValue;
+          totalP.classList.remove('rolling-fx');
+          _isRolling = false;
+
+          if (isPos && window.Android && typeof Android.vibrate === 'function') {
+            Android.vibrate(50);
+          }
+        }, 2500);
+      }
+
+      /* --- ANIMATE COUNTER (NUMERIC PROGRESSION v22.2) --- */
+      let _isWRRolling = false;
+      function animateCounter(el, target, suffix = '') {
+        if (!el || _isWRRolling) return;
+        _isWRRolling = true;
+
+        const duration = 2000; // Crescut la 2 secunde pentru o animație mai lentă
+        const startTime = performance.now();
+
+        function update(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+
+          // easeOutQuart pentru o încetinire mult mai pronunțată la final
+          const easedProgress = 1 - Math.pow(1 - progress, 4);
+          const current = Math.floor(easedProgress * target);
+
+          el.textContent = current + suffix;
+
+          if (progress < 1) {
+            requestAnimationFrame(update);
+          } else {
+            el.textContent = target + suffix;
+            _isWRRolling = false; // Deblocăm după finalizare
+          }
+        }
+        requestAnimationFrame(update);
+      }
+
+      function animateWinRateRoll() {
+        const totalWr = document.getElementById('total-wr');
+        if (!totalWr) return;
+        const val = parseInt(totalWr.textContent) || 0;
+        animateCounter(totalWr, val, '%');
       }
 
       function renderStatsOnly() {
-        let p = portfolios.find(x => x.id === currentPortfolioId);
-        let initialBudget = p ? p.budget : 1000;
-        let profitOffset = p ? p.offset : 0;
+        const portId = currentPortfolioId || 'default';
+        let p = portfolios.find(x => x.id === portId) || portfolios[0] || { budget: 1000, offset: 0 };
+        let initialBudget = p.budget;
+        let profitOffset = p.offset || 0;
 
-        document.getElementById('budget-input').value = initialBudget;
+        const budgetInput = document.getElementById('budget-input');
+        if (budgetInput) budgetInput.value = initialBudget;
+
         let netProfit = 0;
         let wins = 0;
         let settledCount = 0;
         let totalStaked = 0;
-        
+
         const currentBets = getCurrentBets();
 
         currentBets.forEach(b => {
+          if (!b.stake || !b.odds) return;
+
           if(b.status === 'win') {
             netProfit += (b.stake * b.odds) - b.stake;
             wins++;
@@ -1052,7 +1294,7 @@ function scheduleRender() {
             settledCount++;
             totalStaked += b.stake;
           } else if(b.status === 'cashout') {
-            netProfit += (b.cashoutAmount - b.stake);
+            netProfit += ((b.cashoutAmount || 0) - b.stake);
             wins++;
             settledCount++;
             totalStaked += b.stake;
@@ -1083,9 +1325,11 @@ function scheduleRender() {
 
         const totalWr = document.getElementById('total-wr');
         if(totalWr) {
-          totalWr.textContent = settledCount > 0 ? Math.round((wins / settledCount) * 100) + '%' : '0%';
+          const wrValue = settledCount > 0 ? Math.round((wins / settledCount) * 100) : 0;
+          totalWr.textContent = wrValue + '%';
+          animateCounter(totalWr, wrValue, '%');
         }
-        
+
         const totalTicketsEl = document.getElementById('total-tickets');
         if (totalTicketsEl) {
           totalTicketsEl.textContent = currentBets.length;
@@ -1151,12 +1395,12 @@ function scheduleRender() {
           console.warn('Chart.js nu este încărcat — graficul de evoluție este omis temporar.');
           return;
         }
-        
+
         let p = portfolios.find(x => x.id === currentPortfolioId);
         let initialBudget = p ? p.budget : 1000;
         let settledBets = getCurrentBets().filter(b => b.status === 'win' || b.status === 'loss' || b.status === 'cashout');
         settledBets.sort((a, b) => a.id - b.id);
-        
+
         let dataPoints = [initialBudget];
         let labels = ['Start'];
         let currentBalance = initialBudget;
@@ -1169,7 +1413,7 @@ function scheduleRender() {
             currentBalance += (b.cashoutAmount - b.stake);
           }
           dataPoints.push(currentBalance);
-          
+
           let label = `#${idx + 1}`;
           if(b.date) {
             const d = new Date(b.date);
@@ -1180,9 +1424,16 @@ function scheduleRender() {
         const style = getComputedStyle(document.documentElement);
         const textColor = style.getPropertyValue('--text2').trim() || '#aabbcc';
         const lineColor = currentWallpaperMode === 'gold' ? '#ffcc00' : '#00c8ff';
+
         if (chartInstance) {
           chartInstance.destroy();
         }
+
+        // Create Holographic Gradient
+        const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 150);
+        gradient.addColorStop(0, lineColor === '#ffcc00' ? 'rgba(255, 204, 0, 0.3)' : 'rgba(0, 200, 255, 0.3)');
+        gradient.addColorStop(1, 'rgba(0, 200, 255, 0)');
+
         chartInstance = new Chart(ctx, {
           type: 'line',
           data: {
@@ -1191,19 +1442,47 @@ function scheduleRender() {
               label: 'Balance',
               data: dataPoints,
               borderColor: lineColor,
-              borderWidth: 2,
-              pointRadius: dataPoints.length > 15 ? 0 : 3,
-              tension: 0.2,
-              fill: false
+              borderWidth: 3,
+              pointRadius: 4,
+              pointBackgroundColor: lineColor,
+              pointBorderColor: '#fff',
+              pointBorderWidth: 1,
+              pointHoverRadius: 6,
+              tension: 0.4,
+              fill: true,
+              backgroundColor: gradient
             }]
            },
            options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(0, 10, 20, 0.8)',
+                titleFont: { family: 'Syncopate', size: 10 },
+                bodyFont: { family: 'Rajdhani', size: 12 },
+                borderColor: lineColor,
+                borderWidth: 1,
+                displayColors: false
+              }
+            },
             scales: {
-              x: { ticks: { color: textColor, font: { family: 'Rajdhani', size: 10 } }, grid: { display: false } },
-              y: { ticks: { color: textColor, font: { family: 'Rajdhani', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+              x: {
+                ticks: { color: textColor, font: { family: 'Rajdhani', size: 9 } },
+                grid: { display: true, color: 'rgba(0, 200, 255, 0.05)' }
+              },
+              y: {
+                ticks: {
+                  color: textColor,
+                  font: { family: 'Rajdhani', size: 9 },
+                  callback: (val) => val.toLocaleString()
+                },
+                grid: { color: 'rgba(0, 200, 255, 0.05)', drawBorder: false }
+              }
+            },
+            animations: {
+              y: { easing: 'easeInOutQuart', duration: 1000 }
             }
           }
         });
@@ -1296,12 +1575,13 @@ function scheduleRender() {
         renderStatsOnly();
         renderStreakFlames();
         renderProfitCalendar();
-        updateSportChart();
+        if (typeof updateSportChart === 'function') updateSportChart();
 
         const formCircles = document.getElementById('form-circles');
         if(formCircles) {
           formCircles.innerHTML = '';
-          let allSettled = getCurrentBets().filter(b => b.status === 'win' || b.status === 'loss' || b.status === 'cashout');
+          const betsToProcess = getCurrentBets() || [];
+          let allSettled = betsToProcess.filter(b => b.status === 'win' || b.status === 'loss' || b.status === 'cashout');
 
           // Streak Calculation
           let winStreak = 0;
@@ -1341,7 +1621,7 @@ function scheduleRender() {
              formCircles.innerHTML += `<div class="lose-streak-badge"><i class="fa-solid fa-snowflake"></i> ${loseStreak}</div>`;
           }
         }
-        
+
         const container = document.getElementById('betsContainer');
         if(!container) return;
         container.innerHTML = '';
@@ -1352,7 +1632,7 @@ function scheduleRender() {
           return matchesFilter && matchesSport;
         });
         let displayBets = [...filteredBets].reverse();
-        
+
         if(displayBets.length === 0) {
           container.innerHTML = `<div class="no-bets">${t('no_tickets')}</div>`;
           document.getElementById('paginationContainer').innerHTML = ''; // Ascunde paginația
@@ -1431,55 +1711,80 @@ function scheduleRender() {
             dateStr = d.toLocaleDateString(currentLang === 'ro' ? 'ro-RO' : 'en-GB', { day: '2-digit', month: 'short' });
           }
 
+          // Ultra-Premium Digital Receipt Template
+          let eventsHtml = '';
+          if (b.events) {
+            b.events.forEach(ev => {
+              let sels = '';
+              const leagueName = ev.league || "";
+              if (ev.selections) {
+                ev.selections.forEach(s => {
+                  sels += `<div class="group-sel-row"><span class="group-sel-market">${s.market}</span><span class="group-sel-odds">@${s.odds.toFixed(2)}</span></div>`;
+                });
+              } else {
+                sels = `<div class="group-sel-row"><span class="group-sel-market">${b.name || 'Pariu'}</span><span class="group-sel-odds">@${ev.odds ? ev.odds.toFixed(2) : '1.00'}</span></div>`;
+              }
+              eventsHtml += `
+                <div class="bet-group-item">
+                  <div class="group-match-title">
+                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                      <span>${ev.match || ev.name}</span>
+                      ${leagueName ? `<span style="font-size:8px; opacity:0.5; text-transform:uppercase;">${leagueName}</span>` : ''}
+                    </div>
+                  </div>
+                  ${sels}
+                </div>`;
+            });
+          }
+
+          const watermark = b.status === 'win' ? 'WON' : (b.status === 'loss' ? 'LOST' : '');
+
           container.innerHTML += `
-            <div class="bet-item scroll-animate ${statusClass} bet-status-${b.status}" style="margin-bottom:25px;">
-              <div class="bet-header-row">
-                <div class="bet-title-wrap">
-                  <div class="bet-match">
-                    <i class="fa-solid ${statusIcon} ${iconClass}"></i>
-                    <span class="bet-teams-text">${b.events && b.events.length > 0 ? b.events[0].name : 'Echipe'}</span>
-                  </div>
-                  <div class="bet-meta">
-                    <span class="meta-pill"><i class="fa-solid fa-trophy"></i> ${t('sport_' + b.sport)}</span>
-                    <span class="meta-pill"><i class="fa-regular fa-calendar"></i> ${dateStr}</span>
-                    <span class="win-prob-badge">
-                      <i class="fa-solid ${statusIcon}"></i> ${winProb}% ${currentLang === 'ro' ? 'Reușită' : 'Win Prob.'}
-                    </span>
-                  </div>
+            <div class="bet-item scroll-animate ${statusClass} bet-status-${b.status}">
+              ${watermark ? `<div class="status-watermark">${watermark}</div>` : ''}
+
+              <!-- ROW 1 -->
+              <div class="bet-row">
+                <div class="row1-left">
+                  <span class="bet-sport-pill">${t('sport_' + b.sport)}</span>
+                  <span class="bet-date-pill">${dateStr}</span>
                 </div>
-                <div class="bet-controls-group">
+                <div class="row1-right">
                   <span class="header-odds">@${b.odds.toFixed(2)}</span>
-                  ${editButtonHtml}
+                  ${statusControls || editButtonHtml}
                 </div>
               </div>
 
-              <div class="prediction-box">
-                <div class="prediction-label">${currentLang === 'ro' ? 'Pronostic' : 'Prediction'}</div>
-                <div class="prediction-text">${b.name}</div>
+              <!-- RECEIPT BODY -->
+              <div style="position:relative; z-index:2;">
+                ${eventsHtml}
               </div>
 
-              <div class="bet-footer-grid">
-                <div class="footer-cell">
-                  <div class="footer-cell-label">${t('miza')}</div>
-                  <div class="footer-cell-val" style="font-size:16px; font-weight:800;">${b.stake} ${getCurrency()}</div>
+              <!-- ROW 4 -->
+              <div class="bet-row" style="border-top:1px dashed rgba(255,255,255,0.1); padding-top:15px; margin-top:15px;">
+                <div class="fin-cell">
+                  <div class="fin-lbl">${t('miza')}</div>
+                  <div class="fin-val" style="font-size:14px;">${b.stake} ${getCurrency()}</div>
                 </div>
-                <div class="footer-cell" style="text-align:right;">
-                  <div class="footer-cell-label">${b.status === 'cashout' ? t('cashout_txt') : t('payout')}</div>
+                <div class="fin-cell" style="text-align:right;">
+                  <div class="fin-lbl">${b.status === 'cashout' ? t('cashout_txt') : t('payout')}</div>
                   ${payoutHtml}
                 </div>
               </div>
 
-              ${b.photo ? `<div class="bet-photo-container" style="margin-top:15px;"><img src="${b.photo}" class="bet-thumb" onclick="viewFullImage('${b.photo}')" style="width:100%; border-radius:10px;"></div>` : ''}
+              <div class="ticket-barcode"></div>
+              <div style="font-family:'Syncopate'; font-size:6px; color:rgba(255,255,255,0.15); text-align:center; margin-top:5px; letter-spacing:2px;">TICKET-ID-${b.id}</div>
 
-              ${statusControls}
-
-              <button class="bet-share-btn" onclick="if(window.shareTicket) shareTicket('${b.id}'); else alert('Loading...');">
-                <i class="fa-solid fa-share-nodes"></i> SHARE
-              </button>
+              <!-- SHARE -->
+              <div class="bet-share-wrap">
+                <button class="premium-share-btn" onclick="if(window.shareTicket) shareTicket('${b.id}'); else alert('Loading...');">
+                  <i class="fa-solid fa-share-nodes"></i> SHARE
+                </button>
+              </div>
             </div>
           `;
         });
-        
+
         updateChart();
         setupScrollAnimations();
         renderPagination(totalPages);
@@ -1515,3 +1820,18 @@ function scheduleRender() {
         // Scroll lin înapoi la începutul listei de bilete
         document.querySelector('[data-i18n="active_hist"]').scrollIntoView({ behavior: 'smooth' });
       }
+
+      window.openUpgradeAction = function() {
+        if (window.Android && typeof window.Android.purchasePremium === 'function') {
+          window.Android.purchasePremium();
+        } else {
+          // Fallback for web/testing
+          if (typeof navigateTo === 'function') {
+            navigateTo('profile', null);
+            setTimeout(() => {
+              const el = document.getElementById('premium-plans-section');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+          }
+        }
+      };

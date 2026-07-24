@@ -745,6 +745,7 @@ window.simSetModel = function(model) {
 ───────────────────────────────────────────── */
 
 window.runSimulatorUI = function() {
+  if (typeof updateQuestProgress === 'function') updateQuestProgress('analyze_lab');
   const btn = document.getElementById('simRunBtn');
   const loader = document.getElementById('simLoader');
   const label = document.getElementById('simRunLabel');

@@ -7,6 +7,11 @@
 
 /* ─── Helpers pentru tier ─── */
 function premiumGetTier() {
+  // Verificăm prin bridge-ul Android dacă suntem în aplicație
+  if (window.Android && typeof window.Android.isPremiumUser === 'function') {
+    return window.Android.isPremiumUser() ? 'premium' : 'free';
+  }
+
   const session = typeof authGetSession === 'function' ? authGetSession() : null;
   if (!session) return 'free';
   const users = typeof authGetUsers === 'function' ? authGetUsers() : {};
@@ -104,6 +109,12 @@ window.premiumScrollToPlans = function () {
 
 /* ─── Simulare activare abonament ─── */
 window.premiumActivate = function (plan) {
+  // Dacă suntem în aplicația Android, folosim Google Play Billing
+  if (window.Android && typeof window.Android.purchasePremium === 'function') {
+    window.Android.purchasePremium();
+    return;
+  }
+
   // In productie: integreaza Stripe / RevenueCat / Google Pay
   // Deocamdata: simulare locala cu confirmare
   const prices = { monthly: '4.99 RON', yearly: '39.99 RON' };
@@ -209,6 +220,16 @@ function premiumBuildPlansSection(tier) {
 window.premiumBuildPlansSection = premiumBuildPlansSection;
 
 /* ─── INIT ─── */
+window.onPremiumStatusChanged = function(isPremium) {
+  console.log("Premium status changed from Android:", isPremium);
+  premiumApplyLocks();
+
+  // Re-build profil dacă e necesar
+  if (typeof buildProfilePage === 'function') {
+    buildProfilePage();
+  }
+};
+
 function premiumInit() {
   // Hook pe builderi (poate nu sunt inca disponibili)
   let attempts = 0;

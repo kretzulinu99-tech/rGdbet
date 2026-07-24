@@ -1,218 +1,138 @@
 /* ═══════════════════════════════════════════════════════════════
-   themes.js — Sistem teme premium pentru rGdbet
-   Teme: neon | aurora | sunset | cyber | matrix | gold
-   Fiecare temă are culori vii, gradiente și efecte luminoase
+   themes.js — Sistem teme premium rGdbet (v17.0 Apex Ultimate)
+   Teme ultra-complexe: obsidian | emerald | inferno | amethyst | vortex
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
 const THEMES = [
   {
     id: 'neon',
-    label: 'NEON',
+    label: 'Cyber Neon',
     icon: '⚡',
     vars: {
-      '--bg':      '#06090f',
-      '--bg2':     '#0a0f1a',
-      '--card':    'rgba(0,20,50,0.75)',
-      '--border':  'rgba(0,200,255,0.25)',
-      '--ng':      '#00ff88',
-      '--nb':      '#00c8ff',
-      '--np':      '#bf5fff',
-      '--gold':    '#ffcc00',
-      '--danger':  '#ff3366',
-      '--text':    '#e8f4ff',
-      '--text2':   '#7ec8e3',
-      '--text3':   '#b0d4e8',
-      '--accent1': '#00c8ff',
-      '--accent2': '#00ff88',
-      '--glow1':   'rgba(0,200,255,0.35)',
-      '--glow2':   'rgba(0,255,136,0.25)',
+      '--bg': '#06090f', '--bg2': '#0a0f1a', '--card': 'rgba(10,15,25,0.4)', '--border': 'rgba(0,200,255,0.4)',
+      '--ng': '#00ff88', '--nb': '#00c8ff', '--np': '#bf5fff', '--gold': '#ffcc00', '--danger': '#ff3366',
+      '--text': '#ffffff', '--text2': '#7ec8e3', '--text3': '#b0d4e8', '--glow': 'rgba(0,200,255,0.6)',
+      '--card-radius': '14px', '--card-blur': '15px', '--card-shadow': '0 8px 32px rgba(0,0,0,0.8)',
+      '--border-weight': '1.5px', '--border-style': 'solid', '--font-ls': '1px', '--font-up': 'none'
     },
     bodyClass: 'theme-neon',
-    bgGradient: 'radial-gradient(ellipse at 20% 0%, rgba(0,200,255,0.12) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(0,255,136,0.08) 0%, transparent 60%), linear-gradient(180deg,#06090f 0%,#080c14 100%)',
+    bgGradient: 'radial-gradient(circle at 20% 0%, rgba(0,200,255,0.15) 0%, transparent 50%), linear-gradient(180deg,#06090f 0%,#0a0f1a 100%)'
   },
   {
-    id: 'aurora',
-    label: 'AURORA',
-    icon: '🌌',
+    id: 'obsidian',
+    label: 'Obsidian Deep',
+    icon: '💎',
     vars: {
-      '--bg':      '#050812',
-      '--bg2':     '#080d1c',
-      '--card':    'rgba(10,5,40,0.78)',
-      '--border':  'rgba(180,80,255,0.28)',
-      '--ng':      '#40ffb0',
-      '--nb':      '#a855f7',
-      '--np':      '#ec4899',
-      '--gold':    '#fbbf24',
-      '--danger':  '#f87171',
-      '--text':    '#f0e8ff',
-      '--text2':   '#c084fc',
-      '--text3':   '#e0d0ff',
-      '--accent1': '#a855f7',
-      '--accent2': '#40ffb0',
-      '--glow1':   'rgba(168,85,247,0.40)',
-      '--glow2':   'rgba(64,255,176,0.25)',
+      '--bg': '#020406', '--bg2': '#05070a', '--card': 'rgba(2,2,4,0.9)', '--border': 'rgba(212,175,55,0.4)',
+      '--ng': '#ffffff', '--nb': '#d4af37', '--np': '#888888', '--gold': '#d4af37', '--danger': '#ff0000',
+      '--text': '#ffffff', '--text2': '#aaaaaa', '--text3': '#666666', '--glow': 'rgba(212,175,55,0.3)',
+      '--card-radius': '0px', '--card-blur': '8px', '--card-shadow': '0 20px 50px rgba(0,0,0,1)',
+      '--border-weight': '2px', '--border-style': 'solid', '--font-ls': '3px', '--font-up': 'uppercase'
     },
-    bodyClass: 'theme-aurora',
-    bgGradient: 'radial-gradient(ellipse at 10% 20%, rgba(168,85,247,0.18) 0%, transparent 55%), radial-gradient(ellipse at 90% 80%, rgba(64,255,176,0.12) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(236,72,153,0.08) 0%, transparent 70%), linear-gradient(160deg,#050812 0%,#0a0520 100%)',
+    bodyClass: 'theme-obsidian',
+    bgGradient: 'linear-gradient(180deg, #020406 0%, #080a0f 100%)'
   },
   {
-    id: 'sunset',
-    label: 'SUNSET',
+    id: 'emerald',
+    label: 'Emerald Wealth',
+    icon: '🍀',
+    vars: {
+      '--bg': '#040d08', '--bg2': '#061a10', '--card': 'rgba(8,30,15,0.45)', '--border': 'rgba(0,255,136,0.5)',
+      '--ng': '#00ffa2', '--nb': '#059669', '--np': '#10b981', '--gold': '#fcd34d', '--danger': '#ef4444',
+      '--text': '#ecfdf5', '--text2': '#6ee7b7', '--text3': '#a7f3d0', '--glow': 'rgba(0,255,136,0.4)',
+      '--card-radius': '24px', '--card-blur': '12px', '--card-shadow': '0 12px 40px rgba(0,255,136,0.15)',
+      '--border-weight': '1px', '--border-style': 'double', '--font-ls': '0.5px', '--font-up': 'none'
+    },
+    bodyClass: 'theme-emerald',
+    bgGradient: 'radial-gradient(circle at top, rgba(0,255,136,0.15) 0%, transparent 70%), linear-gradient(180deg,#040d08 0%,#061a10 100%)'
+  },
+  {
+    id: 'inferno',
+    label: 'Inferno Strike',
     icon: '🔥',
     vars: {
-      '--bg':      '#0f0805',
-      '--bg2':     '#180c06',
-      '--card':    'rgba(40,10,5,0.78)',
-      '--border':  'rgba(255,100,30,0.28)',
-      '--ng':      '#fbbf24',
-      '--nb':      '#f97316',
-      '--np':      '#ec4899',
-      '--gold':    '#fde68a',
-      '--danger':  '#ef4444',
-      '--text':    '#fff1e6',
-      '--text2':   '#fdba74',
-      '--text3':   '#fed7aa',
-      '--accent1': '#f97316',
-      '--accent2': '#fbbf24',
-      '--glow1':   'rgba(249,115,22,0.40)',
-      '--glow2':   'rgba(251,191,36,0.28)',
+      '--bg': '#0d0404', '--bg2': '#1a0606', '--card': 'rgba(40,10,10,0.5)', '--border': 'rgba(255,61,0,0.6)',
+      '--ng': '#ff9100', '--nb': '#ff3d00', '--np': '#d32f2f', '--gold': '#ffea00', '--danger': '#ff1744',
+      '--text': '#fff5f5', '--text2': '#ffab91', '--text3': '#ffccbc', '--glow': 'rgba(255,61,0,0.7)',
+      '--card-radius': '18px 4px', '--card-blur': '10px', '--card-shadow': '0 10px 40px rgba(255,61,0,0.3)',
+      '--border-weight': '2px', '--border-style': 'dashed', '--font-ls': '1px', '--font-up': 'none'
     },
-    bodyClass: 'theme-sunset',
-    bgGradient: 'radial-gradient(ellipse at 0% 0%, rgba(239,68,68,0.20) 0%, transparent 50%), radial-gradient(ellipse at 100% 100%, rgba(251,191,36,0.15) 0%, transparent 55%), linear-gradient(160deg,#0f0805 0%,#180a04 100%)',
+    bodyClass: 'theme-inferno',
+    bgGradient: 'radial-gradient(circle at 50% -20%, rgba(255,61,0,0.2) 0%, transparent 60%), linear-gradient(180deg,#0d0404 0%,#1a0606 100%)'
   },
   {
-    id: 'cyber',
-    label: 'CYBER',
-    icon: '🤖',
+    id: 'vortex',
+    label: 'Cosmic Vortex',
+    icon: '🌀',
     vars: {
-      '--bg':      '#050f0a',
-      '--bg2':     '#080f0c',
-      '--card':    'rgba(0,30,15,0.80)',
-      '--border':  'rgba(0,255,128,0.22)',
-      '--ng':      '#00ff80',
-      '--nb':      '#00ffcc',
-      '--np':      '#80ff00',
-      '--gold':    '#ccff00',
-      '--danger':  '#ff4060',
-      '--text':    '#e0ffe8',
-      '--text2':   '#66ffaa',
-      '--text3':   '#99ffcc',
-      '--accent1': '#00ff80',
-      '--accent2': '#ccff00',
-      '--glow1':   'rgba(0,255,128,0.38)',
-      '--glow2':   'rgba(204,255,0,0.25)',
+      '--bg': '#020008', '--bg2': '#08001a', '--card': 'rgba(15,0,40,0.4)', '--border': 'rgba(180,80,255,0.5)',
+      '--ng': '#a855f7', '--nb': '#6366f1', '--np': '#ec4899', '--gold': '#fbbf24', '--danger': '#f43f5e',
+      '--text': '#f5f3ff', '--text2': '#c4b5fd', '--text3': '#ddd6fe', '--glow': 'rgba(139,92,246,0.6)',
+      '--card-radius': '30px', '--card-blur': '40px', '--card-shadow': '0 0 40px rgba(139,92,246,0.3)',
+      '--border-weight': '1px', '--border-style': 'solid', '--font-ls': '4px', '--font-up': 'uppercase'
     },
-    bodyClass: 'theme-cyber',
-    bgGradient: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,128,0.015) 2px, rgba(0,255,128,0.015) 4px), radial-gradient(ellipse at 50% 0%, rgba(0,255,128,0.15) 0%, transparent 60%), linear-gradient(180deg,#050f0a 0%,#040c08 100%)',
-  },
-  {
-    id: 'gold',
-    label: 'GOLD',
-    icon: '👑',
-    vars: {
-      '--bg':      '#0c0900',
-      '--bg2':     '#140d00',
-      '--card':    'rgba(30,20,0,0.80)',
-      '--border':  'rgba(255,200,0,0.25)',
-      '--ng':      '#ffd700',
-      '--nb':      '#ffaa00',
-      '--np':      '#ff6600',
-      '--gold':    '#ffe066',
-      '--danger':  '#ff4444',
-      '--text':    '#fff8e0',
-      '--text2':   '#ffd060',
-      '--text3':   '#ffe8a0',
-      '--accent1': '#ffaa00',
-      '--accent2': '#ffd700',
-      '--glow1':   'rgba(255,170,0,0.42)',
-      '--glow2':   'rgba(255,215,0,0.28)',
-    },
-    bodyClass: 'theme-gold',
-    bgGradient: 'radial-gradient(ellipse at 30% 0%, rgba(255,200,0,0.18) 0%, transparent 55%), radial-gradient(ellipse at 70% 100%, rgba(255,100,0,0.12) 0%, transparent 55%), linear-gradient(160deg,#0c0900 0%,#150b00 100%)',
-  },
-  {
-    id: 'matrix',
-    label: 'MATRIX',
-    icon: '💊',
-    vars: {
-      '--bg':      '#020602',
-      '--bg2':     '#040a04',
-      '--card':    'rgba(0,20,0,0.85)',
-      '--border':  'rgba(0,200,60,0.22)',
-      '--ng':      '#00ff41',
-      '--nb':      '#00cc33',
-      '--np':      '#66ff66',
-      '--gold':    '#aaff00',
-      '--danger':  '#ff3300',
-      '--text':    '#e0ffe0',
-      '--text2':   '#55ff55',
-      '--text3':   '#99ff99',
-      '--accent1': '#00ff41',
-      '--accent2': '#aaff00',
-      '--glow1':   'rgba(0,255,65,0.38)',
-      '--glow2':   'rgba(170,255,0,0.22)',
-    },
-    bodyClass: 'theme-matrix',
-    bgGradient: 'repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,255,65,0.012) 3px, rgba(0,255,65,0.012) 6px), radial-gradient(ellipse at 50% 50%, rgba(0,200,60,0.10) 0%, transparent 70%), linear-gradient(180deg,#020602 0%,#030804 100%)',
-  },
+    bodyClass: 'theme-vortex',
+    bgGradient: 'conic-gradient(from 180deg at 50% 50%, #020008, #08001a, #020008)'
+  }
 ];
 
-let currentThemeIdx = 0;
-
-/* ── Aplică tema ── */
-function applyTheme(theme) {
-  // Setează variabilele CSS
+function applyThemeById(id) {
+  const theme = THEMES.find(t => t.id === id) || THEMES[0];
   const root = document.documentElement;
   Object.entries(theme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
-
-  // Salvăm gradientul temei într-o variabilă CSS în loc să suprascriem body direct
-  // Acest lucru permite imaginii de fundal din CSS să rămână vizibilă sub gradient
   root.style.setProperty('--theme-gradient', theme.bgGradient);
 
-  // Clase body
   THEMES.forEach(t => document.body.classList.remove(t.bodyClass));
   document.body.classList.add(theme.bodyClass);
-
-  // Update buton
-  const icon  = document.getElementById('themeCycleIcon');
-  const label = document.getElementById('themeCycleLabel');
-  if (icon)  icon.textContent  = theme.icon;
-  if (label) label.textContent = theme.label;
-
-  // Salvează preferința
   localStorage.setItem('rgb_theme', theme.id);
 
-  // Update chart dacă există
+  updateThemeFX(theme.id);
+
   if (typeof updateChart === 'function') setTimeout(updateChart, 100);
 }
 
-/* ── Cycle tema la click ── */
-window.cycleTheme = function () {
-  currentThemeIdx = (currentThemeIdx + 1) % THEMES.length;
-  applyTheme(THEMES[currentThemeIdx]);
+function updateThemeFX(id) {
+  const layer = document.getElementById('theme-fx-layer');
+  if (!layer) return;
+  layer.innerHTML = '';
 
-  // Animație flash pe buton
-  const btn = document.getElementById('themeCycleBtn');
-  if (btn) {
-    btn.classList.add('theme-btn-flash');
-    setTimeout(() => btn.classList.remove('theme-btn-flash'), 400);
+  let count = 0;
+  if (id === 'emerald') count = 20;
+  if (id === 'inferno') count = 35;
+  if (id === 'vortex') count = 30;
+
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'theme-fx-particle';
+    const size = Math.random() * (id === 'vortex' ? 10 : 5) + 2;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = Math.random() * 100 + '%';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.animationDuration = (id === 'inferno' ? 3 : 8) + Math.random() * 5 + 's';
+    if (id === 'vortex') {
+        p.style.background = `rgba(${Math.random()*255}, ${Math.random()*255}, 255, 0.6)`;
+        p.style.boxShadow = `0 0 15px ${p.style.background}`;
+    }
+    layer.appendChild(p);
   }
+}
+
+window.setTheme = function(id) {
+  applyThemeById(id);
+  const cards = document.querySelectorAll('.theme-option-card');
+  cards.forEach(c => {
+    c.classList.remove('active');
+    if (c.dataset.theme === id) c.classList.add('active');
+  });
 };
 
-/* ── Init: restaurează tema salvată ── */
 (function initTheme() {
   const saved = localStorage.getItem('rgb_theme') || 'neon';
-  const idx   = THEMES.findIndex(t => t.id === saved);
-  currentThemeIdx = idx >= 0 ? idx : 0;
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => applyTheme(THEMES[currentThemeIdx]));
-  } else {
-    applyTheme(THEMES[currentThemeIdx]);
-  }
+  applyThemeById(saved);
 })();
 
-// Expune pentru eventuale alte scripturi
-window.THEMES    = THEMES;
-window.applyTheme = applyTheme;
+window.THEMES = THEMES;
+window.applyThemeById = applyThemeById;

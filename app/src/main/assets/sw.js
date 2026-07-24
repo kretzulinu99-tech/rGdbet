@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rgdbet-v9.7-cache';
+const CACHE_NAME = 'rgdbet-v17.06-cache';
 const ASSETS = [
   './',
   './index.html',
@@ -9,14 +9,30 @@ const ASSETS = [
   './themes.js',
   './manifest.json',
   './notifications.js',
-  './gamification.js'
+  './gamification.js',
+  './flashscore-sync.js'
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS);
     })
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
   );
 });
 

@@ -20,7 +20,8 @@ const CLOUD_KEYS = [
   'rgb_social_feed',
   'rgb_gamb_test',
   'rgb_xp',
-  'rgb_currency'
+  'rgb_currency',
+  'rgb_global_persistent_avatar'
 ];
 
 /**
@@ -29,6 +30,15 @@ const CLOUD_KEYS = [
 window.cloudPushData = function() {
   return new Promise((resolve) => {
     const payload = {};
+
+    // Asigurăm că avem avatarul în payload chiar dacă nu e în LocalStorage direct
+    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    if (user && user.username && user.avatar && user.avatar !== '👤') {
+      const pKey = 'rgd_persistent_avatar_' + user.username.toLowerCase();
+      localStorage.setItem(pKey, user.avatar);
+      if (!CLOUD_KEYS.includes(pKey)) CLOUD_KEYS.push(pKey);
+    }
+
     CLOUD_KEYS.forEach(key => {
       const raw = localStorage.getItem(key);
       if (raw !== null) {
@@ -87,6 +97,14 @@ window.cloudPullData = async function() {
           if (key === 'rgb_user' && typeof window.saveCurrentUser === 'function') {
             try {
               const restoredUser = JSON.parse(val);
+
+              // RESTAURARE AVATAR PERSISTENT (v16.21 FIX)
+              const userKey = 'rgd_persistent_avatar_' + (restoredUser.username || '').toLowerCase();
+              const persistentAvatar = localStorage.getItem(userKey) || localStorage.getItem('rgb_global_persistent_avatar');
+              if (persistentAvatar && (!restoredUser.avatar || restoredUser.avatar === '👤')) {
+                restoredUser.avatar = persistentAvatar;
+              }
+
               window.saveCurrentUser(restoredUser);
               console.log('[CloudSync] Avatar restaurat:', restoredUser.avatar ? 'DETECTOR ACTIV' : 'DEFAULT');
             } catch(e) {}

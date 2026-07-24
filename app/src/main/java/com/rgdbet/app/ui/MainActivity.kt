@@ -19,12 +19,15 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.rgdbet.app.RgdbetApplication
 import com.rgdbet.app.auth.AuthState
 import com.rgdbet.app.databinding.ActivityMainBinding
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -49,7 +52,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val pickAvatarLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let { convertUriToBase64AndSendToWeb(it) }
+        uri?.let { convertUriToBase64AndSendToWeb(it, "avatar") }
+    }
+
+    private val pickChatImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { convertUriToBase64AndSendToWeb(it, "chat") }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,11 +66,30 @@ class MainActivity : AppCompatActivity() {
 
         setupWebView()
         setupBackNavigation()
+        observePremiumStatus()
+    }
+
+    private fun observePremiumStatus() {
+        val app = application as RgdbetApplication
+        lifecycleScope.launch {
+            combine(
+                app.billingManager.isPremium,
+                app.premiumManager.isPremium
+            ) { billing, firestore ->
+                billing || firestore
+            }.collect { isPremium ->
+                binding.webView.evaluateJavascript(
+                    "if(typeof window.onPremiumStatusChanged === 'function') window.onPremiumStatusChanged($isPremium);",
+                    null
+                )
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         syncUserToWebView()
+        (application as RgdbetApplication).billingManager.checkCurrentPurchases()
     }
 
     private fun setupWebView() {
@@ -73,6 +99,7 @@ class MainActivity : AppCompatActivity() {
                 domStorageEnabled = true
                 allowFileAccess = true
                 allowContentAccess = true
+                mediaPlaybackRequiresUserGesture = false
                 mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             }
 
@@ -126,12 +153,16 @@ class MainActivity : AppCompatActivity() {
             val js = """
                 (function() {
                     const existingUser = JSON.parse(localStorage.getItem('rgb_user') || '{}');
+                    const persistentKey = 'rgd_persistent_avatar_' + "$username".toLowerCase();
+                    const globalKey = 'rgb_global_persistent_avatar';
+                    const savedAvatar = localStorage.getItem(persistentKey) || localStorage.getItem(globalKey);
+
                     const user = {
                         username: "$username",
                         email: "$email",
                         passwordHash: "firebase_auth",
                         createdAt: "${System.currentTimeMillis()}",
-                        avatar: existingUser.avatar || "👤",
+                        avatar: existingUser.avatar && existingUser.avatar !== '👤' ? existingUser.avatar : (savedAvatar || "👤"),
                         theme: "neon",
                         language: "ro"
                     };
@@ -203,21 +234,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun convertUriToBase64AndSendToWeb(uri: Uri) {
+    private fun convertUriToBase64AndSendToWeb(uri: Uri, target: String = "avatar") {
         try {
             val inputStream = contentResolver.openInputStream(uri)
             val bytes = inputStream?.readBytes()
             inputStream?.close()
-            
+
             if (bytes != null) {
                 val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
                 val dataUrl = "data:image/jpeg;base64,${base64.replace("\n", "").replace("\r", "")}"
-                
+
                 runOnUiThread {
-                    binding.webView.evaluateJavascript(
-                        "if(typeof window.onAvatarUploaded === 'function') window.onAvatarUploaded('$dataUrl');",
-                        null
-                    )
+                    val js = if (target == "avatar") {
+                        "if(typeof window.onAvatarUploaded === 'function') window.onAvatarUploaded('$dataUrl');"
+                    } else {
+                        "if(typeof window.onChatImageUploaded === 'function') window.onChatImageUploaded('$dataUrl');"
+                    }
+                    binding.webView.evaluateJavascript(js, null)
                 }
             }
         } catch (e: Exception) {
@@ -229,7 +262,7 @@ class MainActivity : AppCompatActivity() {
     private fun parseTicketText(text: String): JSONObject {
         val json = JSONObject()
         val lines = text.split("\n")
-        
+
         var totalOdds = 1.0
         var stake = 0.0
         var win = 0.0
@@ -238,7 +271,7 @@ class MainActivity : AppCompatActivity() {
         // Regex simple pentru detecție (Superbet, Casa, etc.)
         val oddsRegex = Regex("""\b(\d+[\.,]\d{2})\b""")
         val moneyRegex = Regex("""(\d+[\.,]\d{2})\s*(RON|LEI|Lei)""", RegexOption.IGNORE_CASE)
-        
+
         lines.forEach { line ->
             // Detecție meciuri (Linii care conțin " - " sau " v ")
             if (line.contains(" - ") || line.contains(" v ")) {
@@ -247,14 +280,14 @@ class MainActivity : AppCompatActivity() {
                 event.put("odds", 1.85) // Default if not found on same line
                 events.put(event)
             }
-            
+
             // Căutăm miza
             if (line.contains("Miza", true) || line.contains("Suma", true)) {
-                moneyRegex.find(line)?.let { 
+                moneyRegex.find(line)?.let {
                     stake = it.groupValues[1].replace(",", ".").toDoubleOrNull() ?: 0.0
                 }
             }
-            
+
             // Căutăm câștig potențial
             if (line.contains("Castig", true) || line.contains("Potential", true)) {
                 moneyRegex.find(line)?.let {
@@ -270,7 +303,7 @@ class MainActivity : AppCompatActivity() {
         json.put("stake", stake)
         json.put("totalWon", win)
         json.put("rawText", text) // Pentru debug sau rafinare in JS
-        
+
         return json
     }
 
@@ -316,6 +349,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
+        fun selectChatImageFromPhone() {
+            runOnUiThread {
+                pickChatImageLauncher.launch("image/*")
+            }
+        }
+
+        @JavascriptInterface
         fun vibrate(milliseconds: Long) {
             val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val vibratorManager = mContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -331,6 +371,27 @@ class MainActivity : AppCompatActivity() {
                 @Suppress("DEPRECATION")
                 vibrator.vibrate(milliseconds)
             }
+        }
+
+        @JavascriptInterface
+        fun purchasePremium() {
+            val app = mContext.applicationContext as RgdbetApplication
+            runOnUiThread {
+                app.billingManager.launchBillingFlow(this@MainActivity)
+            }
+        }
+
+        @JavascriptInterface
+        fun getAiKey(): String {
+            // Returnăm cheia validă din proiect
+            return "AIzaSyCxhvk4QcFsdP9yZdJzjvQ6uAUo1Qv7rXc"
+        }
+
+        @JavascriptInterface
+        fun isPremiumUser(): Boolean {
+            val app = mContext.applicationContext as RgdbetApplication
+            // Verificăm atât local (BillingClient) cât și remote (Firestore)
+            return app.billingManager.isPremium.value || app.premiumManager.isPremium.value
         }
     }
 }

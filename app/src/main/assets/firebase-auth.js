@@ -7,12 +7,12 @@
 'use strict';
 
 const FIREBASE_CONFIG = {
-  apiKey:            "AI_API_KEY_AICI",
-  authDomain:        "rgdbet-app.firebaseapp.com",
-  projectId:         "rgdbet-app",
-  storageBucket:     "rgdbet-app.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId:             "APP_ID",
+  apiKey:            "AIzaSyCxhvk4QcFsdP9yZdJzjvQ6uAUo1Qv7rXc",
+  authDomain:        "rgdbet-rgd1495.firebaseapp.com",
+  projectId:         "rgdbet-rgd1495",
+  storageBucket:     "rgdbet-rgd1495.firebasestorage.app",
+  messagingSenderId: "679777601888",
+  appId:             "1:679777601888:android:e24dd003116b52681ef605",
 };
 
 let fbApp = null, fbAuth = null, fbDb = null, fbUser = null, fbReady = false;

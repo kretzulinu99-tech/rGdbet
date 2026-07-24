@@ -6,52 +6,156 @@
   <title>rGdbet — Social Betting Network</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.cdnfonts.com/css/pricedown" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css?v=16.74"/>
 </head>
-<body class="theme-neon mode-standard" data-page="home">
+<body class="theme-neon mode-standard splash-active" data-page="home">
 
-<!-- ── 4D ULTRA HD SPLASH SCREEN ── -->
+<!-- ── RPG LEVEL UP OVERLAY ── -->
+<div id="level-up-screen" class="level-up-screen"></div>
+
+
+<!-- ── ULTRA-CINEMATIC VIDEO SPLASH SCREEN ── -->
 <div id="splash-screen" class="splash-screen">
-  <div class="splash-bg-fx"></div>
-
-  <div class="splash-logo-container">
-    <div class="splash-ring-4d"></div>
-    <i class="fa-solid fa-crown splash-crown-4d"></i>
-    <div class="splash-text-4d">rGdbet</div>
+  <!-- Video Background -->
+  <div class="splash-video-container" style="position:fixed; inset:0; width:100vw; height:100vh; overflow:hidden; background:#000;">
+    <video id="splash-video-element" autoplay playsinline webkit-playsinline loop preload="auto"
+           style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; pointer-events:none; background:#000; opacity:0; transition:opacity 0.5s ease;">
+      <source src="splash_video.mp4" type="video/mp4">
+    </video>
   </div>
 
-  <div class="splash-progress-track">
-    <div class="splash-progress-fill"></div>
-  </div>
+  <div class="splash-overlay-hud"></div>
+  <div class="splash-scanline"></div>
+  <div id="splash-particles"></div>
 
-  <!-- Liquid 4D Filter -->
-  <svg style="position: absolute; width: 0; height: 0;">
-    <filter id="liquid-fx">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
-      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="liquid" />
-    </filter>
-  </svg>
+  <div class="splash-loader-wrap">
+    <div class="splash-loader-bar">
+      <div id="splash-fill" class="splash-loader-fill"></div>
+    </div>
+    <span id="splash-status" class="splash-loader-status">INITIALIZING SYSTEM... 0%</span>
+  </div>
 </div>
 
 <script>
-  // Splash Screen Logic (v9.8)
-  window.addEventListener('load', () => {
-    const splash = document.getElementById('splash-screen');
-    // Simulăm încărcarea resurselor HD (3.5s)
-    setTimeout(() => {
-      splash.classList.add('hidden');
-      setTimeout(() => splash.remove(), 1000);
-    }, 3800);
-  });
+  // --- APEX IDENTITY GUARD (v16.27) ---
+  // Runs before anything else to prevent any data loss of the avatar.
+  (function() {
+    const backupAvatar = (username, av) => {
+      if (av && av !== '👤' && av !== 'default' && username) {
+        localStorage.setItem('rgd_safe_avatar_' + username.toLowerCase(), av);
+      }
+    };
+
+    const restoreAvatar = (user) => {
+      if (user && user.username && (!user.avatar || user.avatar === '👤')) {
+        const saved = localStorage.getItem('rgd_safe_avatar_' + user.username.toLowerCase());
+        if (saved) {
+          user.avatar = saved;
+          localStorage.setItem('rgb_user', JSON.stringify(user));
+        }
+      }
+      return user;
+    };
+
+    // Override localStorage.setItem to catch any user updates
+    const originalSet = localStorage.setItem;
+    localStorage.setItem = function(key, val) {
+      if (key === 'rgb_user' || key === 'rgd_user') {
+        try {
+          const u = JSON.parse(val);
+          backupAvatar(u.username, u.avatar);
+        } catch(e) {}
+      }
+      originalSet.apply(this, arguments);
+    };
+
+    // Immediate check on load
+    try {
+      const uStr = localStorage.getItem('rgb_user');
+      if (uStr) restoreAvatar(JSON.parse(uStr));
+    } catch(e) {}
+  })();
 </script>
 
-<img src="rGdbet_bg.png" class="bg-fix bg-home" alt="">
+<script>
+  // HIGH-PERFORMANCE APEX SPLASH (v16.56)
+  (function startSplash() {
+    const splash = document.getElementById('splash-screen');
+    const fill = document.getElementById('splash-fill');
+    const status = document.getElementById('splash-status');
+    const particlesContainer = document.getElementById('splash-particles');
+    const video = document.getElementById('splash-video-element');
+
+    const duration = 10000;
+    const startTime = Date.now();
+
+    if (video) {
+      // System allows autoplay with sound now
+      video.muted = false;
+      video.volume = 1.0;
+
+      const showVideo = () => { video.style.opacity = '1'; };
+      video.onplaying = showVideo;
+
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.then(showVideo).catch(() => {
+          // Fail-safe: try muted if still blocked
+          video.muted = true;
+          video.play().then(showVideo);
+        });
+      }
+
+      video.onerror = () => {
+        const container = document.querySelector('.splash-video-container');
+        if (container) container.innerHTML = `<div style="width:100%; height:100%; background:url('rGdbet_bg.png') center/cover;"></div>`;
+      };
+    }
+
+    if (particlesContainer && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      for(let i=0; i<10; i++) {
+        const p = document.createElement('div');
+        p.className = 'splash-particle';
+        const size = Math.random() * 2 + 1;
+        p.style.cssText = `width:${size}px; height:${size}px; left:${Math.random()*100}%; top:${Math.random()*100}%; opacity:0; will-change: transform;`;
+        particlesContainer.appendChild(p);
+        p.animate([
+          { transform: 'translate3d(0,0,0)', opacity: 0 },
+          { opacity: 0.3, offset: 0.5 },
+          { transform: `translate3d(${Math.random()*20-10}px, -80px, 0)`, opacity: 0 }
+        ], { duration: 3000, iterations: Infinity });
+      }
+    }
+
+    const messages = ["SYNC APEX DATA...", "BOOT HUD...", "LOAD VIDEO...", "FINALIZING...", "ONLINE"];
+    function frame() {
+      const p = Math.min(((Date.now() - startTime) / duration) * 100, 100);
+      if (fill) fill.style.width = p + '%';
+      if (status) status.textContent = `${messages[Math.floor((p/101)*messages.length)]} ${Math.round(p)}%`;
+      if (p < 100) requestAnimationFrame(frame);
+      else {
+        setTimeout(() => {
+          if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.remove(), 800);
+          }
+        }, 400);
+      }
+    }
+    requestAnimationFrame(frame);
+  })();
+</script>
+
+<img src="rGdbet_bg.png"
+class="bg-fix bg-home" alt="">
 <img src="simulator_bg.png" class="bg-fix bg-sim" alt="">
 <img src="addbet_bg.png" class="bg-fix bg-addbet" alt="">
 <img src="social_bg.png" class="bg-fix bg-social" alt="">
 <div class="bg-overlay"></div>
+<div id="theme-fx-layer" class="theme-fx-layer"></div>
 <div id="age-gate" class="age-gate-overlay" role="dialog" aria-modal="true">
   <div class="age-gate-box">
     <div class="age-gate-icon">🔞</div>
@@ -70,11 +174,11 @@
 <!-- ═══ AUTH SCREEN ═══ -->
 <div id="auth-screen" class="auth-screen" style="display:none;">
   <div class="auth-bg-glow"></div>
-  <div class="auth-logo">
-    <div class="auth-logo-crown"><i class="fa-solid fa-crown"></i></div>
-    <div class="auth-logo-text">rGdbet</div>
-    <div class="auth-logo-sub">SOCIAL BETTING NETWORK</div>
-  </div>
+    <div class="auth-logo">
+      <div class="auth-logo-crown"><i class="fa-solid fa-crown"></i></div>
+      <div class="auth-logo-text"><span class="logo-rgd">rGd</span><span class="logo-bet">bet</span></div>
+      <div class="auth-logo-sub">SOCIAL BETTING NETWORK</div>
+    </div>
   <div class="auth-card">
     <div class="auth-tabs">
       <button class="auth-tab active" id="tab-login"    onclick="authSwitchTab('login')">INTRĂ</button>
@@ -187,7 +291,7 @@
     <div class="app-header">
       <div class="logo-main">
         <div class="logo-crown"><i class="fa-solid fa-crown"></i></div>
-        <span class="logo-text">rGdbet</span>
+        <span class="logo-text"><span class="logo-rgd">rGd</span><span class="logo-bet">bet</span></span>
       </div>
       <div class="logo-line"></div>
     </div>
@@ -196,7 +300,7 @@
       <a href="https://facebook.com"  target="_blank" class="social-icon"><i class="fa-brands fa-facebook"></i></a>
       <a href="https://tiktok.com"    target="_blank" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
     </div>
-    <a href="https://revolut.me" target="_blank" class="btn-donate" id="donateBtn">⚡ <span data-i18n="donate">REVOLUT DONATE</span></a>
+    <a href="javascript:void(0)" class="btn-donate" id="donateBtn" onclick="openUpgradeAction()">⚡ <span data-i18n="donate">FĂ-ȚI UPGRADE!</span></a>
     <div class="stats-grid">
       <div class="stat-card" onclick="animateProfitRoll()"><span class="stat-val pos" id="total-p">+0.00</span><span class="stat-label" data-i18n="net_profit">Net Profit</span></div>
       <div class="stat-card">
@@ -204,7 +308,7 @@
         <input type="number" class="editable-input" id="budget-input" value="1000" oninput="handleDeposit(this.value)"/>
         <span class="stat-label" data-i18n="start_bal">Starting Balance</span>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" onclick="animateWinRateRoll()">
         <span class="stat-val" id="total-wr">0%</span>
         <span class="stat-label" data-i18n="win_rate">Win Rate</span>
         <div class="sub-stat-container"><span class="sub-stat-val" id="total-tickets">0</span><span class="sub-stat-label" data-i18n="total_tickets">Total Tickets</span></div>
@@ -241,7 +345,14 @@
       </div>
     </div>
     <div style="margin:0 16px 12px;"><button class="btn-cashout-glitch" onclick="globalCashoutReset()">💸 <span data-i18n="cashout_reset">CASHOUT (RESET)</span></button></div>
-    <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+
+    <div class="chart-wrap">
+      <div class="data-bits-bg" id="chartParticles"></div>
+      <div class="chart-container-inner">
+        <canvas id="mainChart"></canvas>
+      </div>
+    </div>
+
     <div class="form-card" id="income-calculator">
       <div class="sec-title">📅 <span data-i18n="income_calc">INCOME CALCULATOR</span></div>
       <div class="row"><input type="date" id="calc-start"/><input type="date" id="calc-end"/></div>
@@ -264,6 +375,10 @@
       <div class="cal-weekdays"><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div></div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
+
+    <!-- DAILY MISSIONS & STREAK -->
+    <div class="form-card" id="daily-quests-container"></div>
+
     <div class="rg-banner">
       <div class="rg-banner-top"><span class="rg-badge">🔞 18+</span><span class="rg-title">PARIAZĂ RESPONSABIL</span><span class="rg-badge">🔞 18+</span></div>
       <p class="rg-text">Această aplicație este destinată exclusiv persoanelor cu vârsta de peste 18 ani.</p>
@@ -273,13 +388,18 @@
         <a class="rg-link" href="https://jocresponsabil.ro" target="_blank">🆘 Ajutor</a>
       </div>
       <div class="rg-logos"><div class="rg-logo-pill">ONJN</div><div class="rg-logo-pill">GamCare</div><div class="rg-logo-pill">BeGambleAware</div></div>
+      <div style="text-align:center; font-size:9px; color:var(--text3); margin-top:10px; opacity:0.5;">v17.06 Apex Master (Neural v3.3 Master)</div>
     </div>
   </div><!-- /home -->
 
   <!-- BILETE -->
   <div id="page-addbet" class="spa-page">
-    <div class="page-top-title"><i class="fa-solid fa-ticket" style="color:var(--nb);"></i><span>BILETELE MELE</span></div>
-    <div class="form-card">
+    <div class="page-top-title">
+      <i class="fa-solid fa-ticket" style="color:var(--nb);"></i>
+      <span>BILETELE MELE</span>
+      <button class="icon-btn" onclick="render()" style="margin-left:auto; border:none; background:none; color:var(--text3);"><i class="fa-solid fa-rotate"></i></button>
+    </div>
+    <div class="form-card" id="add-ticket-card">
       <div class="sec-title">📋 ADAUGĂ BILET NOU</div>
       <div class="sport-pills">
         <div class="sport-pill sel" data-sport-pill="football" onclick="setSport('football',this)">⚽ Football</div>
@@ -287,19 +407,25 @@
         <div class="sport-pill" data-sport-pill="basketball" onclick="setSport('basketball',this)">🏀 Basketball</div>
         <div class="sport-pill" data-sport-pill="other" onclick="setSport('other',this)">🎮 Other</div>
       </div>
-        <div class="row">
-          <input type="text"   id="event-name" placeholder="Echipe (ex: FCSB - CFR)"/>
-          <input type="number" id="event-odds" step="0.01" placeholder="Cotă" style="width:110px;"/>
-          <button class="icon-btn" onclick="addEventToTicket()" style="height:39px;border-color:var(--nb);color:var(--nb);"><i class="fa-solid fa-plus"></i></button>
+        <div class="row" style="position:relative;">
+          <input type="text"   id="event-league" placeholder="Ligă (ex: La Liga)" autocomplete="off" style="width: 100%;"/>
+        </div>
+        <div class="row" style="position:relative;">
+          <input type="text"   id="event-name" placeholder="Meci (ex: Barca - Real)" autocomplete="off" style="width: 100%;"/>
+        </div>
+        <div class="row" style="margin-top:5px; margin-bottom:10px;">
+          <input type="text" id="event-market" placeholder="Pronostic (ex: 1, X, 2, Over 2.5...)" style="flex:2;"/>
+          <input type="number" id="event-odds" step="0.01" placeholder="Cotă" style="flex:1; width:80px;"/>
+        </div>
+        <div class="row" style="margin-top:-5px; margin-bottom:10px;">
+          <div style="flex:2; display:flex; flex-direction:column;">
+            <label style="font-size:8px; font-family:Syncopate; color:var(--text3); margin-bottom:4px; opacity:0.6;">ORA ÎNCEPERE</label>
+            <input type="time" id="event-time" style="margin-bottom:0;"/>
+          </div>
+          <button class="icon-btn" onclick="addEventToTicket()" style="height:39px; border-color:var(--nb); color:var(--nb); flex-shrink:0; align-self:flex-end;"><i class="fa-solid fa-plus"></i></button>
         </div>
       <div class="sec-title" style="margin-top:12px;">EVENIMENTE PE BILET</div>
       <div class="events-list" id="ticketEventsList"></div>
-      <select id="bet-type" class="portfolio-select">
-        <option value="solist">Solist (1X2)</option><option value="cornere">Cornere</option>
-        <option value="cartonase">Cartonașe</option><option value="goluri">Goluri</option>
-        <option value="goluri-1p">Goluri Prima Repriză</option><option value="handicap">Handicap</option>
-        <option value="asiatic">Handicap Asiatic</option><option value="altele">Altele</option>
-      </select>
       <div class="odds-bar" id="totalOddsBar"><span style="color:var(--text2)">Total Cotă:</span><strong id="totalOddsVal">1.00</strong></div>
       <div class="sec-title">NIVEL ÎNCREDERE</div>
       <div class="stars-row">
@@ -308,7 +434,6 @@
         <button class="star-btn" onclick="setConfidence(5)">⭐</button>
       </div>
       <input type="date" id="ticket-date"/>
-      <input type="text"   id="match"  placeholder="Pronostic (ex: 1 solist)"/>
       <input type="number" id="stake"  placeholder="Miză (RON)" oninput="updateRiskMeter()"/>
       <div class="kelly-box" id="kellyBox" style="display:none;">
         <div class="kelly-prob-row">
@@ -350,7 +475,7 @@
       <button class="filter-btn" data-sport="basketball" onclick="setSportFilter('basketball',this)">🏀</button>
       <button class="filter-btn" data-sport="other"     onclick="setSportFilter('other',this)">🎮</button>
     </div>
-    <div class="sec-title" style="margin-left:16px;">ACTIV &amp; ISTORIC</div>
+    <div class="sec-title" style="margin-left:16px;" data-i18n="active_hist">ACTIV & ISTORIC</div>
     <div id="betsContainer"></div>
     <div id="paginationContainer" class="pagination-container"></div>
   </div><!-- /bilete -->
@@ -364,21 +489,28 @@
   <!-- SOCIAL -->
   <div id="page-social" class="spa-page"><!-- buildSocialPage() --></div>
 
+  <!-- DNA -->
+  <div id="page-dna" class="spa-page"><!-- buildDnaPage() --></div>
+
   <!-- MESAJE -->
   <div id="page-messages" class="spa-page"><!-- buildMessagesPage() --></div>
 
   <!-- PROFIL -->
   <div id="page-profile" class="spa-page"><!-- buildProfilePage() --></div>
 
-  <!-- NAV — 5 butoane + central -->
+  <!-- NAV — 6 butoane + central -->
   <nav class="bottom-nav" id="bottomNav">
     <button class="nav-btn active" data-page="home" onclick="navigateTo('home',this)">
       <div class="nav-icon-wrap"><i class="fa-solid fa-house"></i><div class="nav-active-dot"></div></div>
       <span class="nav-label">ACASĂ</span>
     </button>
     <button class="nav-btn" data-page="lab" onclick="navigateTo('lab',this)">
-      <div class="nav-icon-wrap"><i class="fa-solid fa-chart-line"></i><div class="nav-active-dot"></div></div>
+      <div class="nav-icon-wrap"><i class="fa-solid fa-flask"></i><div class="nav-active-dot"></div></div>
       <span class="nav-label">LAB</span>
+    </button>
+    <button class="nav-btn" data-page="dna" onclick="navigateTo('dna',this)">
+      <div class="nav-icon-wrap"><i class="fa-solid fa-dna"></i><div class="nav-active-dot"></div></div>
+      <span class="nav-label">DNA</span>
     </button>
     <button class="nav-btn-center" onclick="navigateTo('addbet',null)" aria-label="Bilete">
       <div class="nav-center-inner">
@@ -405,16 +537,31 @@
 
 <!-- Terms -->
 <div id="terms-modal" class="modal-overlay" style="display:none;">
-  <div class="modal-box">
-    <div class="modal-header"><span class="modal-title">📄 TERMENI ȘI CONDIȚII</span><button class="modal-close" onclick="closeModal('terms-modal')"><i class="fa-solid fa-xmark"></i></button></div>
-    <div class="modal-body">
-      <p><strong>1. Acceptarea Termenilor</strong><br>Prin utilizarea rGdbet, confirmi că ai peste 18 ani și ești de acord cu acești termeni.</p>
-      <p><strong>2. Scop</strong><br>rGdbet este o aplicație de analiză sportivă, tracker de pariuri și rețea socială pentru pasionații de sport. Nu este o platformă de pariuri online.</p>
-      <p><strong>3. Mesagerie</strong><br>Sistemul de mesagerie este local. Utilizatorii sunt responsabili pentru conținutul trimis.</p>
-      <p><strong>4. Joc Responsabil</strong><br>Dacă ai probleme, contactează <a href="https://jocresponsabil.ro" target="_blank" style="color:var(--nb)">jocresponsabil.ro</a>.</p>
-      <p><strong>5. Vârsta Minimă</strong><br>Aplicația este destinată exclusiv persoanelor de minimum 18 ani.</p>
+  <div class="modal-box" style="max-width:480px; width:95%;">
+    <div class="modal-header"><span class="modal-title">📄 TERMENI, CONDIȚII & CADRU JURIDIC</span><button class="modal-close" onclick="closeModal('terms-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body" style="text-align:justify; font-size:12px; line-height:1.6; max-height:60vh; overflow-y:auto; padding-right:10px;">
+      <p><strong>1. DEFINIȚIA SERVICIULUI (SIMULATOR FICTIV)</strong><br>
+      rGdbet este o platformă de <strong>simulare, monitorizare și analiză statistică</strong> a activității sportive. Toate tranzacțiile, sumele de bani (RON/EURO/etc.), cotele, profiturile sau pierderile afișate în cadrul aplicației sunt <strong>STRICT FICTIVE (VIRTUALE)</strong>. Aplicația NU colectează mize reale, NU intermediază plasarea biletelor către operatori licențiați și NU oferă câștiguri în bani reali sau bunuri cu valoare materială.</p>
+
+      <p><strong>2. CADRU JURIDIC ȘI CONFORMITATE ONJN</strong><br>
+      Conform legislației din România (OUG 77/2009), organizarea jocurilor de noroc necesită licență emisă de <strong>Oficiul Național pentru Jocuri de Noroc (ONJN)</strong>. Deoarece rGdbet NU îndeplinește criteriile unui joc de noroc (lipsa mizei reale și a posibilității de câștig real), aceasta <strong>NU intră sub jurisdicția licențierii ONJN</strong>. rGdbet funcționează ca un instrument educațional și social de tip "Bet Tracker".</p>
+
+      <p><strong>3. RESTRICȚIE DE VÂRSTĂ (18+)</strong><br>
+      Deși aplicația este un simulator, datorită tematicii legate de pariuri sportive, accesul este strict interzis persoanelor sub <strong>18 ani</strong>. Prin utilizarea rGdbet, declarați pe propria răspundere că ați împlinit vârsta legală.</p>
+
+      <p><strong>4. JOC RESPONSABIL</strong><br>
+      Pariurile sportive reale pot crea dependență și pierderi financiare. rGdbet promovează exclusiv analiza matematică și controlul bugetului. Dacă simțiți că pierdeți controlul în viața reală, accesați <a href="https://jocresponsabil.ro" target="_blank" style="color:var(--nb)">jocresponsabil.ro</a>. <em>Joacă pentru distracție, nu pentru venit!</em></p>
+
+      <p><strong>5. CONȚINUT SOCIAL ȘI COMUNITATE</strong><br>
+      Utilizatorii sunt singurii responsabili pentru mesajele și biletele partajate în secțiunea "SOCIAL". Este interzisă publicitatea către agenții ilegale, limbajul licențios sau hărțuirea membrilor. Administratorii își rezervă dreptul de a șterge conținutul neconform.</p>
+
+      <p><strong>6. PRELUCRAREA DATELOR (GDPR)</strong><br>
+      Datele sunt stocate prioritar local. În cazul utilizării funcției de Sincronizare Cloud, datele sunt stocate securizat (Firebase) exclusiv pentru restaurarea profilului pe multiple dispozitive.</p>
+
+      <p><strong>7. LIMITAREA RĂSPUNDERII</strong><br>
+      Rezultatele oferite de motorul "Apex Neural Validator" se bazează pe date publice și pot conține erori tehnice independente de rGdbet. Aplicația nu garantează succesul în pariurile reale plasate la operatori autorizați.</p>
     </div>
-    <button class="modal-confirm-btn" onclick="closeModal('terms-modal')">AM ÎNȚELES</button>
+    <button class="modal-confirm-btn" onclick="closeModal('terms-modal')">AM LUAT LA CUNOȘTINȚĂ</button>
   </div>
 </div>
 
@@ -511,7 +658,7 @@
 /* ══ SPA NAVIGATION ══ */
 let currentPage = 'home';
 let _navLock    = false;
-const NAV_ORDER = ['home','lab','addbet','match','social','messages','profile'];
+const NAV_ORDER = ['home','lab','dna','addbet','match','social','messages','profile'];
 
 function navigateTo(pageId, btnEl, fromPopState) {
   if (_navLock) return;
@@ -575,7 +722,9 @@ function navigateTo(pageId, btnEl, fromPopState) {
   document.body.classList.toggle('page-profile-active', pageId === 'profile');
 
   window.scrollTo({top:0,behavior:'smooth'});
+  if (pageId==='addbet'   && typeof render          ==='function') render();
   if (pageId==='lab'      && typeof buildLabUI      ==='function') buildLabUI();
+  if (pageId==='dna'      && typeof buildDnaPage    ==='function') buildDnaPage();
   if (pageId==='match'    && typeof buildMatchUI    ==='function') buildMatchUI();
   if (pageId==='profile'  && typeof buildProfilePage==='function') buildProfilePage();
   if (pageId==='social'   && typeof buildSocialPage ==='function') buildSocialPage();
@@ -736,16 +885,19 @@ if ('serviceWorker' in navigator) {
 </script>
 <script src="age-gate.js"></script>
 <script src="gamification.js"></script>
-<script src="script.js"></script>
+<script src="quests.js"></script>
+<script src="dna-engine.js"></script>
+<script src="script.js?v=17.0"></script>
 <script src="simulator.js"></script>
 <script src="themes.js"></script>
 <script src="streak-mode.js"></script>
 <script src="firebase-auth.js"></script>
+<script src="cloud-sync.js"></script>
 <script src="social.js"></script>
 <script src="messages.js"></script>
 <script src="profile-viewer.js"></script>
 <script src="badges.js"></script>
 <script src="notifications.js"></script>
-<script src="cloud-sync.js"></script>
+<script src="gambling-test.js"></script>
 </body>
 </html>

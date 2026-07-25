@@ -160,18 +160,6 @@ function calcGlobalRank(currentUsername, currentXP) {
   } catch(e) { return { rank: '?', total: '?' }; }
 }
 
-window.authLogout = function() {
-  if (window.Android && typeof window.Android.logout === 'function') {
-    window.Android.logout();
-  } else {
-    // Fallback pentru mediul Web / Testare
-    localStorage.removeItem('rgd_session');
-    localStorage.removeItem('rgb_session');
-    localStorage.removeItem('rgb_user');
-    localStorage.removeItem('rgd_user');
-    window.location.reload();
-  }
-};
 
 window.buildProfilePage = function() {
   const page = document.getElementById('page-profile'); if (!page) return;

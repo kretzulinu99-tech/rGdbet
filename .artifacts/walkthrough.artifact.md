@@ -1,30 +1,27 @@
-# Walkthrough — Fix Critic Script Loading Order (v10.1)
+# Walkthrough — Unificare Sistem de Share (v11.0)
 
-Am corectat ordinea de încărcare a scripturilor în `index.html` și am inclus fișierele care lipseau. Această modificare asigură că toate componentele esențiale (Autentificare, Social, AI, Premium) sunt disponibile în memorie înainte ca logica principală a aplicației să fie executată.
+Am consolidat logica de partajare a biletelor și postărilor într-o singură funcție centralizată, eliminând conflictele dintre module și asigurând o experiență de utilizare consistentă.
 
 ## Modificări realizate
 
-### 1. Reordonare și Includere Scripturi [FIXED]
-Am actualizat `index.html` pentru a include următoarele scripturi în ordinea corectă de dependență:
-*   `auth.js`: Modulul de autentificare locală.
-*   `firebase-auth.js`: Integrarea cu Firebase pentru conturi cloud.
-*   `premium.js`: Logica pentru funcțiile Elite/Premium.
-*   `ai-analyst.js`: Motorul de analiză inteligentă.
-*   `social.js`: Sistemul social și feed-ul de bilete.
-*   `streak-effects.js`: Efectele vizuale pentru seriile de câștiguri/pierderi.
-*   `flashscore-sync.js`: Sincronizarea datelor externe.
+### 1. Centralizare în `social.js` [UNIFIED]
+*   Am creat funcția **`window.openShareModal`** în `social.js`. Aceasta înlocuiește vechile implementări fragmentate și poate partaja atât bilete locale cât și postări din feed.
+*   Logica include acum verificarea automată a SDK-ului Firebase și generarea corectă a URL-ului de sharing.
 
-### 2. Sincronizare GitHub Pages [SYNCED]
-*   Am copiat toate fișierele actualizate în folderul `docs/`.
-*   Am trimis modificările pe GitHub, astfel încât varianta live de la [https://kretzulinu99-tech.github.io/rGdbet/](https://kretzulinu99-tech.github.io/rGdbet/) să fie acum complet funcțională.
+### 2. Curățare `firebase-auth.js`
+*   Am eliminat toate funcțiile de sharing din `firebase-auth.js` pentru a preveni suprascrierea codului la încărcare. Acest fișier rămâne acum dedicat exclusiv conexiunii de bază cu serviciile cloud.
+
+### 3. Actualizare Interfață
+*   Am actualizat butoanele de share de pe biletele din pagina principală și din social feed pentru a apela noua funcție unificată.
+*   Am îmbunătățit feedback-ul vizual la copierea link-ului (acum folosește sistemul de toast-uri al aplicației).
 
 ## Cum să verifici
-1.  **Login/Register**: Verifică dacă poți deschide ecranele de autentificare (acum că `auth.js` este încărcat).
-2.  **Social Feed**: Verifică dacă feed-ul social se încarcă corect (acum că `social.js` este disponibil înainte de pornirea aplicației).
-3.  **DNA/AI**: Navighează la pagina DNA și verifică dacă analizele AI pornesc fără erori în consolă.
+1.  **Share Bilet**: Mergi la lista de bilete și apasă pe iconița de share. Modalul trebuie să se deschidă și să genereze link-ul corect.
+2.  **Share Postare**: Mergi la Social Feed și apasă share pe biletul unei postări. Procesul trebuie să fie identic.
+3.  **Copiere Link**: Apasă butonul de copiere din modal și verifică dacă link-ul a fost salvat în clipboard.
 
 > [!IMPORTANT]
-> Această corecție elimină erorile de tip "ReferenceError" care blocau funcționarea butoanelor de login și a feed-ului social.
+> Această schimbare rezolvă bug-ul raportat unde share-ul nu funcționa corect din cauza conflictelor de definiție a funcțiilor.
 
 > [!TIP]
-> Dacă observi că o pagină nu se încarcă pe web, asigură-te că ai golit cache-ul browserului (Ctrl+F5) pentru a forța încărcarea noii ordini a scripturilor.
+> Versiunea live este actualizată pe [GitHub Pages](https://kretzulinu99-tech.github.io/rGdbet/).

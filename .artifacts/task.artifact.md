@@ -1,8 +1,7 @@
-- `[/]` Unify Share System (v11.0)
-    - `[ ]` Implement `window.openShareModal` in `social.js`
-    - `[ ]` Remove `shareTicket` and `closeShareModal` from `firebase-auth.js`
-    - `[ ]` Update all `onclick` calls in `script.js` and `social.js`
-    - `[ ]` Sync changes to `docs/`
+- `[/]` Consolidate Auth Logic (v12.0)
+    - `[ ]` Remove `authLogout` from `social.js`
+    - `[ ]` Audit `social.js` for `authLogin`, `authRegister`, `authSwitchTab` and remove if found
+    - `[ ]` Ensure `social.js` uses `auth.js` helper functions for user data access
+    - `[ ]` Sync changes to `docs/` folder
+- `[x]` Unify Share System (v11.0)
 - `[x]` Fix Script Loading Order (v10.1)
-- `[x]` Implement Apex Engagement Engine (v9.0)
-- `[x]` Redesign Ticket Status Change (Apex Action Dock 2.0)

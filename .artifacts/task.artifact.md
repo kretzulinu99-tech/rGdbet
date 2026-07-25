@@ -1,9 +1,7 @@
-- `[/]` Unified Storage Access (v14.0)
-    - `[ ]` Create `app/src/main/assets/utils.js` with unified get/save functions
-    - `[ ]` Include `utils.js` in `index.html` (first position)
-    - `[ ]` Refactor `messages.js` to use unified functions
-    - `[ ]` Refactor `badges.js` to use unified functions
-    - `[ ]` Audit `social.js` and `profile-viewer.js` for direct storage access
+- `[/]` Implement Ticket Monthly Limit (v15.0)
+    - `[ ]` Define `window.isPremium()` in `premium.js`
+    - `[ ]` Insert monthly check logic in `confirmPlaceTicket` (`script.js`)
+    - `[ ]` Add upgrade redirection on limit reach
     - `[ ]` Sync changes to `docs/` folder
+- `[x]` Unified Storage Access (v14.0)
 - `[x]` Consolidate Auth Logic (v12.0)
-- `[x]` Unify Share System (v11.0)

@@ -669,6 +669,23 @@ function scheduleRender() {
           return;
         }
 
+        /* ─── FREEMIUM LIMIT CHECK (v15.0) ─── */
+        if (typeof isPremium === 'function' && !isPremium()) {
+          const now = new Date();
+          const currentMonth = now.toISOString().slice(0, 7); // "YYYY-MM"
+          const monthlyBets = bets.filter(b => b.date && b.date.startsWith(currentMonth));
+
+          if (monthlyBets.length >= 20) {
+            if (typeof showMsgToast === 'function') {
+                showMsgToast('Ai atins limita de 20 bilete/lună (Cont FREE)', 'error');
+            } else {
+                alert('Ai atins limita de 20 bilete/lună pentru contul FREE. Fă upgrade pentru nelimitat!');
+            }
+            if (typeof openUpgradeAction === 'function') openUpgradeAction();
+            return;
+          }
+        }
+
         // Efecte vizuale, sonore și haptice
         if (btn) {
           btn.classList.add('btn-flash');

@@ -33,6 +33,10 @@ function premiumSetTier(tier) {
 window.premiumGetTier = premiumGetTier;
 window.premiumSetTier = premiumSetTier;
 
+window.isPremium = function() {
+    return premiumGetTier() === 'premium';
+};
+
 /* ─── Inject lock overlay pe o pagina ─── */
 function premiumInjectLock(pageId, featureName) {
   const page = document.getElementById(pageId);

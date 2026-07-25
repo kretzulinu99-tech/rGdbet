@@ -1,38 +1,35 @@
-# Plan de Unificare Stocare: Prieteni și Urmăriri (v14.0)
+# Plan de Implementare: Limitare Bilete pentru Utilizatori Free (v15.0)
 
-Acest plan vizează eliminarea redundanței și a riscului de desincronizare a listelor de prieteni și persoane urmărite prin crearea unui modul centralizat de utilitare.
+Acest plan vizează activarea modelului Freemium prin impunerea unei limite de **20 de bilete pe lună** pentru utilizatorii care nu au un abonament Premium.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> Voi crea un nou fișier, `utils.js`, care va conține toți "accessorii" pentru LocalStorage (get/save pentru friends, follows, messages etc.). Acest fișier va fi încărcat primul în `index.html` pentru a fi disponibil global.
+> Limita se va aplica global pe contul utilizatorului (însumând biletele din toate portofoliile) pentru luna calendaristică curentă. Dacă limita este atinsă, procesul de adăugare va fi blocat și utilizatorul va fi invitat să facă upgrade.
 
 ## Propuneri de modificări
 
-### 1. Creare `utils.js` [NEW]
-Acest script va centraliza accesul la datele care sunt partajate între module:
-*   `getFriends()` / `saveFriends(data)` -> Cheia `rgb_friends`
-*   `getFollows()` / `saveFollows(data)` -> Cheia `rgb_follows`
-*   `getFriendReqs()` / `saveFriendReqs(data)` -> Cheia `rgb_friend_reqs`
-*   `getMessages()` / `saveMessages(data)` -> Cheia `rgb_messages`
-*   `getUnread()` / `saveUnread(data)` -> Cheia `rgb_unread`
-*   `getMyFriends()` & `getMyFollows()` -> Helpers pentru utilizatorul logat.
+### 1. Definire Helper `isPremium` [MODIFY] [premium.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/premium.js)
+*   Voi adăuga funcția globală `window.isPremium()` care returnează `true` dacă utilizatorul are tier-ul 'premium'.
 
-### 2. Actualizare `index.html` [MODIFY]
-*   Adăugarea `<script src="utils.js"></script>` imediat după dependințele externe (Chart.js, Confetti) și înaintea oricărui script local.
+### 2. Implementare Verificare Limită [MODIFY] [script.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/script.js)
+*   În funcția `confirmPlaceTicket()`, înainte de a adăuga biletul în array-ul `bets`, voi insera următoarea logică:
+    *   Dacă `!isPremium()`:
+        *   Calculez numărul de bilete existente în luna curentă.
+        *   Dacă numărul este `>= 20`:
+            *   Afișez un mesaj de tip alertă/toast: "Ai atins limita de 20 de bilete/lună pentru contul Free."
+            *   Apelez `openUpgradeAction()` pentru a deschide secțiunea de upgrade.
+            *   Întrerup execuția (nu salvez biletul).
 
-### 3. Refactorizare Module Existente [CLEANUP]
-*   **`messages.js`**: Eliminarea definițiilor locale de storage (lines 14-21) și utilizarea celor globale.
-*   **`badges.js`**: Înlocuirea accesului direct `localStorage.getItem('rgb_follows')` cu apeluri către `getFollows()`.
-*   **`social.js`**: Asigurarea consistenței cu noile funcții globale.
-*   **`profile-viewer.js`**: Audit pentru orice acces direct la prieteni/urmăriri și înlocuirea acestuia.
+### 3. Sincronizare `docs/`
+*   Actualizarea folderului de publicare pentru a activa limitarea și pe versiunea web.
 
 ## Plan de Verificare
 
 ### Verificare Funcțională
-*   **Mesagerie**: Trimiterea unui mesaj și verificarea dacă lista de prieteni rămâne consistentă.
-*   **Urmăriri**: Testarea funcției de follow (dacă există) și verificarea dacă numărul de urmăriri din Badges se actualizează corect folosind noua funcție unificată.
-*   **Sincronizare Cloud**: Verificarea dacă `cloud-sync.js` încă poate accesa cheile corecte (nu le vom schimba, doar modul de acces în JS).
+*   **Cont Free (< 20 bilete)**: Adăugarea unui bilet ar trebui să funcționeze normal.
+*   **Cont Free (>= 20 bilete)**: Încercarea de a adăuga biletul 21 trebuie să fie blocată cu mesajul corespunzător.
+*   **Cont Premium**: Adăugarea biletelor trebuie să fie nelimitată, indiferent de numărul lor.
 
-### Sincronizare Cloud (GitHub)
-*   Sincronizarea folderului `docs/` pentru a propaga arhitectura curată.
+### Verificare Vizuală
+*   Confirmarea faptului că butonul de upgrade din alertă trimite utilizatorul la pagina corectă.

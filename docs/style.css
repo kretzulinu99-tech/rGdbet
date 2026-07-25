@@ -251,7 +251,7 @@
 }
 
 /* GLOBAL THEMATIC TYPOGRAPHY */
-.sec-title, .stat-label, .nav-label, .modal-title, .prof-stat-lbl {
+.sec-title, .stat-label, .nav-label-text, .modal-title, .prof-stat-lbl {
   letter-spacing: var(--font-ls) !important;
   text-transform: var(--font-up) !important;
 }
@@ -1981,7 +1981,7 @@ body[data-page="social"] .soc-action-bar {
 }
 
 /* Nav label text */
-.nav-label {
+.nav-label-text {
   font-family: 'Syncopate', sans-serif;
   font-size: 7px;
   font-weight: 700;
@@ -2002,7 +2002,7 @@ body[data-page="social"] .soc-action-bar {
   transform: translateX(-50%) scale(1);
 }
 
-.nav-btn.active .nav-label {
+.nav-btn.active .nav-label-text {
   color: var(--nb);
   text-shadow: 0 0 8px rgba(0, 200, 255, 0.5);
 }
@@ -2793,7 +2793,7 @@ body[data-page="social"] .soc-action-bar {
 /* ── 5-BUTTON NAV layout ── */
 .bottom-nav { padding: 0 4px; }
 .nav-btn { flex: 1; min-width: 0; padding: 6px 2px; }
-.nav-label { font-size: 7px; letter-spacing: 0.5px; }
+.nav-label-text { font-size: 7px; letter-spacing: 0.5px; }
 .nav-icon-wrap i { font-size: 16px; }
 
 /* ── PAGE LAB / MATCH header accents ── */
@@ -2994,7 +2994,7 @@ body[data-page="social"] .soc-action-bar {
 
 /* ── Auth form panels ── */
 .auth-panel { display: none; }
-.auth-panel.active { display: block; }
+
 
 
 /* ═══════════════════════════════════════════════════════════
@@ -3228,7 +3228,7 @@ body[data-page="social"] .soc-action-bar {
 /* ── Nav with 6 items ── */
 .bottom-nav-6 { padding: 0 2px; }
 .bottom-nav-6 .nav-btn { flex: 1; padding: 4px 1px; min-width: 0; }
-.bottom-nav-6 .nav-label { font-size: 6.5px; letter-spacing: .3px; }
+.bottom-nav-6 .nav-label-text { font-size: 6.5px; letter-spacing: .3px; }
 .bottom-nav-6 .nav-icon-wrap i { font-size: 15px; }
 
 
@@ -3254,7 +3254,7 @@ body[data-page="social"] .soc-action-bar {
   min-height: 100vh;
   padding-bottom: 90px;
 }
-.spa-page.active { display: block; }
+
 
 /* ── Auth screen ── */
 #auth-screen {
@@ -3358,11 +3358,7 @@ body[data-page="social"] .soc-action-bar {
   border-radius: 11px;
   transition: all .25s ease;
 }
-.auth-tab.active {
-  background: linear-gradient(135deg, rgba(0,200,255,.2), rgba(0,200,255,.05));
-  color: var(--nb);
-  box-shadow: 0 0 16px rgba(0,200,255,.12);
-}
+
 /* OAuth buttons */
 .auth-social-row {
   display: flex;
@@ -3415,7 +3411,7 @@ body[data-page="social"] .soc-action-bar {
   background: rgba(255,255,255,.1);
 }
 .auth-panel { display: none; }
-.auth-panel.active { display: block; }
+
 
 .auth-field { margin-bottom: 14px; }
 .auth-field label {
@@ -3820,7 +3816,7 @@ body[data-page="social"] .soc-action-bar {
 /* ── Nav 6 ── */
 .bottom-nav-6 { padding:0 2px; }
 .bottom-nav-6 .nav-btn { flex:1; padding:4px 1px; min-width:0; }
-.bottom-nav-6 .nav-label { font-size:6.5px; letter-spacing:.3px; }
+.bottom-nav-6 .nav-label-text { font-size:6.5px; letter-spacing:.3px; }
 .bottom-nav-6 .nav-icon-wrap i { font-size:15px; }
 
 /* ── Premium active badge on nav ── */
@@ -4040,7 +4036,7 @@ body[data-page="social"] .soc-action-bar {
   transition: opacity .25s, width .25s, box-shadow .25s;
   box-shadow: 0 0 8px var(--accent1, #00c8ff);
 }
-.nav-label {
+.nav-label-text {
   font-family: 'Syncopate', sans-serif;
   font-size: 7px; letter-spacing: 1.2px;
   color: rgba(255,255,255,0.25);
@@ -4061,7 +4057,7 @@ body[data-page="social"] .soc-action-bar {
   width: 20px;
   border-radius: 3px;
 }
-.nav-btn.active .nav-label {
+.nav-btn.active .nav-label-text {
   color: var(--accent1, #00c8ff);
   text-shadow: 0 0 10px var(--glow1, rgba(0,200,255,0.6));
 }
@@ -5212,8 +5208,8 @@ body[data-page="social"] .soc-action-bar {
 }
 
 /* Paneluri taburi */
+/* Soc panel specific classes - Cleaned up v16.0 */
 .soc-panel { display: none; }
-.soc-panel.active { display: block; padding-bottom: 80px; }
 
 /* -- REALISTIC SOCIAL TICKET UI (v16.30 Final) -- */
 .soc-ticket-realistic {
@@ -9387,5 +9383,48 @@ body[data-page="social"] .soc-action-bar {
 @keyframes questFlash {
     from { opacity: 1; transform: scale(0.8); }
     to { opacity: 0; transform: scale(1.5); }
+}
+
+
+/* ─── SPECIFICITY SHIELD v16.0 ─── */
+/* Enforcing combined classes to resolve conflicts */
+
+.nav-btn.active .nav-label-text {
+    color: var(--nb) !important;
+    text-shadow: 0 0 10px rgba(0, 200, 255, 0.6) !important;
+    opacity: 1 !important;
+}
+
+.spa-page.active {
+    display: block !important;
+    opacity: 1 !important;
+}
+
+.auth-tab.active {
+    background: linear-gradient(135deg, rgba(0,200,255,.25), rgba(0,200,255,.08)) !important;
+    color: var(--nb) !important;
+    box-shadow: 0 0 12px rgba(0,200,255,.15) !important;
+}
+
+.auth-panel.active {
+    display: block !important;
+}
+
+.soc-tab.active {
+    color: var(--nb) !important;
+    border-bottom: 2px solid var(--nb) !important;
+}
+
+.soc-panel.active {
+    display: block !important;
+}
+
+.modal.open, .prof-edit-modal.open, .share-modal-overlay.open {
+    display: flex !important;
+}
+
+.lab-card-body.open, .ai-accordion-body.open {
+    display: block !important;
+    max-height: 2000px !important;
 }
 

@@ -1,7 +1,9 @@
+- `[/]` Refactor CSS Class Specificity (v16.0)
+    - `[ ]` Rename `.nav-label` to `.nav-label-text` in `index.html` and `style.css`
+    - `[ ]` Scope `.active` in `style.css` (e.g., `.nav-btn.active`, `.spa-page.active`)
+    - `[ ]` Scope `.open` in `style.css` (e.g., `.modal.open`, `.lab-card-body.open`)
+    - `[ ]` Audit and update JS files for class name changes (`script.js`, `social.js`, `auth.js`)
+    - `[ ]` Cleanup redundant CSS definitions in `style.css`
+    - `[ ]` Sync changes to `docs/` folder
 - `[x]` Implement Ticket Monthly Limit (v15.0)
-    - `[x]` Define `window.isPremium()` in `premium.js`
-    - `[x]` Insert monthly check logic in `confirmPlaceTicket` (`script.js`)
-    - `[x]` Add upgrade redirection on limit reach
-    - `[x]` Sync changes to `docs/` folder
 - `[x]` Unified Storage Access (v14.0)
-- `[x]` Consolidate Auth Logic (v12.0)

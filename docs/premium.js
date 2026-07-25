@@ -59,7 +59,7 @@ function premiumInjectLock(pageId, featureName) {
       ${featureName} este disponibil exclusiv utilizatorilor
       cu abonament <strong style="color:var(--gold);">Premium</strong>.
     </div>
-    <button class="lock-upgrade-btn" onclick="navigateTo('profil',document.querySelector('.nav-btn[data-page=profil]'));premiumScrollToPlans()">
+    <button class="lock-upgrade-btn" onclick="navigateTo('profile', null); premiumScrollToPlans()">
       ⚡ UPGRADE TO PREMIUM
     </button>
     <div style="margin-top:12px;font-family:Rajdhani,sans-serif;font-size:12px;color:rgba(255,255,255,.3);">

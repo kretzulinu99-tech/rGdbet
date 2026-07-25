@@ -1,26 +1,28 @@
-# Walkthrough — Consolidare Logică Autentificare (v12.0)
+# Walkthrough — Sistem Logout Unificat & Async (v13.0)
 
-Am eliminat funcțiile de autentificare duplicate din `social.js` pentru a restabili integritatea sistemului definit în `auth.js`. Această intervenție previne suprascrierea logicii robuste (validări, hash-uri, management de sesiune) de către versiuni simplificate încărcate ulterior.
+Am implementat o nouă arhitectură pentru procesul de deconectare, transformând `authLogout` într-o funcție asincronă hibridă. Aceasta garantează integritatea datelor atât în mediul local, cât și în cloud (Firebase), eliminând riscul de desincronizare.
 
 ## Modificări realizate
 
-### 1. Eliminare Duplicate din `social.js` [FIXED]
-*   Am șters funcția **`authLogout`** din `social.js`. Aceasta era o versiune incompletă care nu se ocupa de persistarea datelor utilizatorului înainte de deconectare.
-*   Acum, la apăsarea butonului de "Deconectare", se apelează exclusiv funcția din `auth.js`, care asigură salvarea biletelor și a setărilor în namespace-ul corect.
+### 1. Logout Asincron Hibrid [UNIFIED]
+*   **Sincronizare Finală**: Înainte de deconectare, aplicația forțează acum un ultim push de date (`cloudPushData`) către Firebase pentru a salva orice progres recent.
+*   **Chaining Corect**: Am integrat apelul `fbAuth.signOut()` direct în fluxul principal, asigurându-ne că sesiunea cloud este închisă *după* ce datele au fost securizate.
+*   **Curățare Totală**: Funcția șterge acum toate urmele sesiunii din `LocalStorage` și `SessionStorage`, prevenind erorile de tip "zombie session".
 
-### 2. Audit și Validare
-*   Am scanat `social.js` pentru alte funcții conflictuale (`authLogin`, `authRegister`). Acestea nu au fost găsite în versiunea curentă a activelor, confirmând că singura sursă activă pentru aceste acțiuni este acum `auth.js`.
+### 2. Eliminare Conflicte
+*   Am curățat `firebase-auth.js` și `social.js` de orice implementări vechi sau parțiale ale logout-ului.
+*   Am eliminat logica de tip `_origLogout` care putea cauza execuții fragmentate sau eșecuri silențioase.
 
-### 3. Sincronizare Live [SYNCED]
-*   Am sincronizat folderul `docs/` cu ultimele modificări.
-*   Am trimis commit-ul pe GitHub, astfel încât versiunea live de pe [GitHub Pages](https://kretzulinu99-tech.github.io/rGdbet/) să fie protejată împotriva bug-urilor de sesiune.
+### 3. Integrare Nativă
+*   Am păstrat și optimizat bridge-ul pentru Android, asigurând apelul corect către `Android.logout()` pentru curățarea cache-ului sistemului.
 
 ## Cum să verifici
-1.  **Logout**: Mergi la profil și apasă pe "Deconectare". Verifică dacă ești redirecționat corect la ecranul de Login și dacă datele tale sunt salvate local.
-2.  **Login**: Autentifică-te din nou și verifică dacă sesiunea este recunoscută corect (username-ul apare în top bar).
+1.  **Sincronizare Cloud**: Loghează-te cu un cont Google/Email, modifică o setare (ex: tema), apoi apasă pe **Deconectare**.
+2.  **Verificare Locală**: Verifică dacă ești trimis la ecranul de Login și dacă formularele sunt resetate.
+3.  **Relogare**: Loghează-te din nou și verifică dacă setarea modificată anterior a fost restaurată din Cloud.
 
 > [!IMPORTANT]
-> Această curățenie tehnică rezolvă problemele unde sesiunea utilizatorului se pierdea sau nu se salva corect din cauza conflictelor între scripturi.
+> Această actualizare este critică pentru utilizatorii care folosesc aplicația pe mai multe dispozitive, prevenind pierderea datelor la schimbarea contului.
 
 > [!TIP]
-> Dacă întâmpini probleme la Login pe web, curăță cache-ul (Ctrl+F5) pentru a te asigura că browserul încarcă versiunea unificată a scriptului `social.js`.
+> Versiunea live este disponibilă pe [GitHub Pages](https://kretzulinu99-tech.github.io/rGdbet/).

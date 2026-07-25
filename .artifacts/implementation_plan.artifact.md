@@ -1,35 +1,38 @@
-# Plan de Unificare și Sincronizare Logout (v13.0)
+# Plan de Unificare Stocare: Prieteni și Urmăriri (v14.0)
 
-Acest plan vizează transformarea funcției `authLogout` dintr-o simplă procedură locală într-o funcție asincronă hibridă care gestionează simultan deconectarea din mediul local (LocalStorage), Cloud (Firebase) și mediul Nativ (Android), asigurând totodată salvarea finală a datelor.
+Acest plan vizează eliminarea redundanței și a riscului de desincronizare a listelor de prieteni și persoane urmărite prin crearea unui modul centralizat de utilitare.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> Funcția `authLogout` va deveni **`async`**. Voi implementa un lanț de execuție care garantează că datele sunt salvate în Cloud *înainte* ca sesiunea Firebase să fie închisă, prevenind astfel desincronizarea semnalată.
+> Voi crea un nou fișier, `utils.js`, care va conține toți "accessorii" pentru LocalStorage (get/save pentru friends, follows, messages etc.). Acest fișier va fi încărcat primul în `index.html` pentru a fi disponibil global.
 
 ## Propuneri de modificări
 
-### 1. Actualizare `auth.js` [MODIFY]
-Voi înlocui implementarea curentă a `window.authLogout` cu una asincronă care include:
-1.  **Persistare**: Apel către `authPersistUserData` și `cloudPushData` (dacă sunt disponibile).
-2.  **Firebase**: `await fbAuth.signOut()` (dacă `fbAuth` este inițializat).
-3.  **Android**: Apel către bridge-ul nativ pentru curățarea cache-ului aplicației.
-4.  **Local**: Ștergerea tuturor cheilor de sesiune (`rgb_user`, `rgd_session` etc.).
-5.  **UI**: Revenirea la ecranul de Login.
+### 1. Creare `utils.js` [NEW]
+Acest script va centraliza accesul la datele care sunt partajate între module:
+*   `getFriends()` / `saveFriends(data)` -> Cheia `rgb_friends`
+*   `getFollows()` / `saveFollows(data)` -> Cheia `rgb_follows`
+*   `getFriendReqs()` / `saveFriendReqs(data)` -> Cheia `rgb_friend_reqs`
+*   `getMessages()` / `saveMessages(data)` -> Cheia `rgb_messages`
+*   `getUnread()` / `saveUnread(data)` -> Cheia `rgb_unread`
+*   `getMyFriends()` & `getMyFollows()` -> Helpers pentru utilizatorul logat.
 
-### 2. Eliminare Suprascrieri Redundante [CLEANUP]
-*   Voi verifica din nou `firebase-auth.js` și `social.js` pentru a mă asigura că nicio altă funcție nu încearcă să redefească `authLogout`.
-*   Voi elimina orice logică de tip `_origLogout` care cauza confuzie asincronă.
+### 2. Actualizare `index.html` [MODIFY]
+*   Adăugarea `<script src="utils.js"></script>` imediat după dependințele externe (Chart.js, Confetti) și înaintea oricărui script local.
 
-### 3. Sincronizare Scripturi
-*   Actualizarea folderului `docs/` pentru a reflecta noul flux de logout pe varianta live.
+### 3. Refactorizare Module Existente [CLEANUP]
+*   **`messages.js`**: Eliminarea definițiilor locale de storage (lines 14-21) și utilizarea celor globale.
+*   **`badges.js`**: Înlocuirea accesului direct `localStorage.getItem('rgb_follows')` cu apeluri către `getFollows()`.
+*   **`social.js`**: Asigurarea consistenței cu noile funcții globale.
+*   **`profile-viewer.js`**: Audit pentru orice acces direct la prieteni/urmăriri și înlocuirea acestuia.
 
 ## Plan de Verificare
 
 ### Verificare Funcțională
-*   **Logout Cloud**: Autentificare cu un cont Firebase, efectuarea unor modificări, apoi Logout. Verificarea dacă datele au fost salvate pe server înainte de deconectare.
-*   **Logout Local**: Verificarea dacă `localStorage` este curățat complet de cheile sensibile.
-*   **Erori Asincrone**: Verificarea consolei pentru a asigura că `signOut()` nu blochează restul procesului în caz de eroare de rețea.
+*   **Mesagerie**: Trimiterea unui mesaj și verificarea dacă lista de prieteni rămâne consistentă.
+*   **Urmăriri**: Testarea funcției de follow (dacă există) și verificarea dacă numărul de urmăriri din Badges se actualizează corect folosind noua funcție unificată.
+*   **Sincronizare Cloud**: Verificarea dacă `cloud-sync.js` încă poate accesa cheile corecte (nu le vom schimba, doar modul de acces în JS).
 
-### Sincronizare
-*   `git commit` și `git push` pentru propagarea fix-ului.
+### Sincronizare Cloud (GitHub)
+*   Sincronizarea folderului `docs/` pentru a propaga arhitectura curată.

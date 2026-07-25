@@ -4,21 +4,8 @@
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
 
-const MSK = {
-  msgs:   'rgb_messages',
-  reqs:   'rgb_friend_reqs',
-  friends:'rgb_friends',
-  unread: 'rgb_unread',
-};
-
-function getMessages()      { try { return JSON.parse(localStorage.getItem(MSK.msgs)    || '{}'); } catch { return {}; } }
-function saveMessages(d)    { localStorage.setItem(MSK.msgs,    JSON.stringify(d)); }
-function getFriendReqs()    { try { return JSON.parse(localStorage.getItem(MSK.reqs)    || '{}'); } catch { return {}; } }
-function saveFriendReqs(d)  { localStorage.setItem(MSK.reqs,    JSON.stringify(d)); }
-function getFriends()       { try { return JSON.parse(localStorage.getItem(MSK.friends) || '{}'); } catch { return {}; } }
-function saveFriends(d)     { localStorage.setItem(MSK.friends, JSON.stringify(d)); }
-function getUnread()        { try { return JSON.parse(localStorage.getItem(MSK.unread)  || '{}'); } catch { return {}; } }
-function saveUnread(d)      { localStorage.setItem(MSK.unread,  JSON.stringify(d)); }
+/* ── STORAGE WRAPPERS (Migrated to utils.js v14.0) ── */
+// Using window.getFriends, window.saveFriends, etc.
 
 function convId(a, b) {
   return [a.toLowerCase(), b.toLowerCase()].sort().join('::');

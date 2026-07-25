@@ -120,10 +120,8 @@ window.pvOpenChat = function(username) {
 };
 
 function calcTargetStats(username) {
-  /* Statisticile publice sunt calculate din biletele POSTATE în feed.
-     Dacă vrem să fim realiști, calculăm din baza de date globală dacă e disponibilă,
-     dar momentan ne bazăm pe ce a postat utilizatorul. */
-  const posts = (function(){ try { return JSON.parse(localStorage.getItem('rgb_social_feed') || '[]'); } catch { return []; }})();
+  /* Statisticile publice sunt calculate din biletele POSTATE în feed. */
+  const posts = typeof getPosts === 'function' ? getPosts() : [];
   const userPosts = posts.filter(p => p.author?.toLowerCase() === username.toLowerCase());
   let wins = 0, profit = 0;
   const settled = userPosts.filter(p => p.status === 'win' || p.status === 'loss' || p.status === 'cashout');

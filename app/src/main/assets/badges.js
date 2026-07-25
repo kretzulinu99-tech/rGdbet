@@ -198,11 +198,9 @@ function getExtendedStats() {
   s.daysActive = activeDays.size;
 
   try {
-    const meStr = localStorage.getItem('rgb_user');
-    const me = meStr ? JSON.parse(meStr) : {};
-    const fMapStr = localStorage.getItem('rgb_follows');
-    const fMap = fMapStr ? JSON.parse(fMapStr) : {};
-    if (me.username) {
+    const me = typeof getCurrentUser === 'function' ? getCurrentUser() : {};
+    const fMap = typeof getFollows === 'function' ? getFollows() : {};
+    if (me && me.username) {
       s.followingCount = (fMap[me.username.toLowerCase()] || []).length;
     }
     const allPostsStr = localStorage.getItem('rgb_social_feed');

@@ -1,8 +1,9 @@
-- `[x]` Implement Unified Async Logout (v13.0)
-    - `[x]` Update `authLogout` to `async` in `auth.js`
-    - `[x]` Add Firebase `signOut` logic to unified logout
-    - `[x]` Add final `cloudPushData` call before sign out
-    - `[x]` Ensure no overrides exist in `firebase-auth.js`
-    - `[x]` Sync changes to `docs/` folder
+- `[/]` Unified Storage Access (v14.0)
+    - `[ ]` Create `app/src/main/assets/utils.js` with unified get/save functions
+    - `[ ]` Include `utils.js` in `index.html` (first position)
+    - `[ ]` Refactor `messages.js` to use unified functions
+    - `[ ]` Refactor `badges.js` to use unified functions
+    - `[ ]` Audit `social.js` and `profile-viewer.js` for direct storage access
+    - `[ ]` Sync changes to `docs/` folder
 - `[x]` Consolidate Auth Logic (v12.0)
 - `[x]` Unify Share System (v11.0)

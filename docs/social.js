@@ -19,42 +19,8 @@ function hashStr(s) {
   return (h >>> 0).toString(16);
 }
 
-function getUsers()       { try { return JSON.parse(localStorage.getItem(SK.users)) || {}; } catch { return {}; } }
-window.getUsers = getUsers;
-function saveUsers(u)     { localStorage.setItem(SK.users, JSON.stringify(u)); }
-window.saveUsers = saveUsers;
-function getCurrentUser() {
-  try {
-    const uStr = sessionStorage.getItem(SK.user) || localStorage.getItem(SK.user);
-    if (!uStr || uStr === 'null') return null;
-    let u = JSON.parse(uStr);
-    if (u && u.username) {
-      const pKey = 'rgd_persistent_avatar_' + u.username.toLowerCase();
-      const saved = localStorage.getItem(pKey) || localStorage.getItem('rgb_global_persistent_avatar');
-      if (saved && (!u.avatar || u.avatar === '👤' || u.avatar === 'default')) {
-        u.avatar = saved;
-        localStorage.setItem(SK.user, JSON.stringify(u));
-        sessionStorage.setItem(SK.user, JSON.stringify(u));
-      }
-    }
-    return u;
-  } catch { return null; }
-}
-window.getCurrentUser = getCurrentUser;
-function saveCurrentUser(u){
-  if (!u) return;
-  if (u.avatar && u.avatar !== '👤' && u.avatar !== 'default' && u.username) {
-    localStorage.setItem('rgd_persistent_avatar_' + u.username.toLowerCase(), u.avatar);
-    localStorage.setItem('rgb_global_persistent_avatar', u.avatar);
-  }
-  sessionStorage.setItem(SK.user, JSON.stringify(u));
-  localStorage.setItem(SK.user, JSON.stringify(u));
-}
-window.saveCurrentUser = saveCurrentUser;
-function getPosts()       { try { return JSON.parse(localStorage.getItem(SK.posts)) || []; } catch { return []; } }
-window.getPosts = getPosts;
-function savePosts(p)     { localStorage.setItem(SK.posts, JSON.stringify(p)); }
-window.savePosts = savePosts;
+/* ── DATA CORE (Migrated to utils.js v14.0) ── */
+// Using window.getUsers, window.getCurrentUser, window.getPosts, etc.
 
 window.getVerificationBadge = function(username) {
   if (!username) return '';

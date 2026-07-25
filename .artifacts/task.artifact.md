@@ -1,7 +1,7 @@
-- `[/]` Implement Ticket Monthly Limit (v15.0)
-    - `[ ]` Define `window.isPremium()` in `premium.js`
-    - `[ ]` Insert monthly check logic in `confirmPlaceTicket` (`script.js`)
-    - `[ ]` Add upgrade redirection on limit reach
-    - `[ ]` Sync changes to `docs/` folder
+- `[x]` Implement Ticket Monthly Limit (v15.0)
+    - `[x]` Define `window.isPremium()` in `premium.js`
+    - `[x]` Insert monthly check logic in `confirmPlaceTicket` (`script.js`)
+    - `[x]` Add upgrade redirection on limit reach
+    - `[x]` Sync changes to `docs/` folder
 - `[x]` Unified Storage Access (v14.0)
 - `[x]` Consolidate Auth Logic (v12.0)

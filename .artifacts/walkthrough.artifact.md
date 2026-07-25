@@ -1,29 +1,28 @@
-# Walkthrough — Arhitectură Unificată de Stocare (v14.0)
+# Walkthrough — Implementare Limită Bilete Freemium (v15.0)
 
-Am implementat un nou strat de bază pentru managementul datelor în aplicație, centralizând toate operațiunile de citire/scriere în noul modul `utils.js`. Această schimbare elimină redundanța și garantează că listele de prieteni, urmăriri și postări sunt identice în toate secțiunile aplicației.
+Am activat modelul de business "Freemium" prin impunerea unei limite de utilizare pentru conturile gratuite. Această modificare este esențială pentru a încuraja utilizatorii să facă upgrade la abonamentul Premium.
 
 ## Modificări realizate
 
-### 1. Noul Nucleu: `utils.js` [NEW]
-*   Am creat un fișier dedicat pentru accesarea `LocalStorage`.
-*   **Funcții incluse**: `getFriends()`, `getFollows()`, `getUsers()`, `getPosts()`, `getCurrentUser()` și variantele lor de `save`.
-*   **Helpers**: Am adăugat `getMyFriends()` și `getMyFollows()` pentru a extrage instant datele utilizatorului logat.
+### 1. Detecție Status Premium [NEW]
+*   Am definit funcția globală **`window.isPremium()`** în `premium.js`.
+*   Aceasta oferă un mod rapid și sigur de a verifica dacă utilizatorul curent are acces la funcțiile Elite, integrându-se atât cu bridge-ul Android, cât și cu sistemul local de sesiuni.
 
-### 2. Refactorizare Module Existente [CLEANED]
-*   **`messages.js`**: Am eliminat definițiile locale care puteau intra în conflict cu restul aplicației. Acum folosește nucleul unificat.
-*   **`social.js`**: Am curățat peste 100 de linii de cod redundant legate de managementul postărilor și al utilizatorilor.
-*   **`badges.js` & `profile-viewer.js`**: Am înlocuit accesele directe la memorie cu apeluri către funcțiile globale, asigurând o calculare corectă a statisticilor.
+### 2. Controlul Fluxului de Adăugare [ENFORCED]
+*   Am modificat logica de adăugare a biletelor din `script.js`.
+*   **Verificare Lunară**: Acum, înainte de a salva un bilet, aplicația scanează istoricul pentru luna calendaristică curentă.
+*   **Limita de 20**: Dacă un utilizator Free a atins pragul de 20 de bilete, adăugarea celui de-al 21-lea bilet este blocată automat.
 
-### 3. Sincronizare Live [SYNCED]
-*   Nucleul `utils.js` este acum primul script încărcat în `index.html`.
-*   Toate schimbările sunt active pe [GitHub Pages](https://kretzulinu99-tech.github.io/rGdbet/).
+### 3. Experiența Utilizatorului la Blocare
+*   Când limita este atinsă, utilizatorul primește o notificare clară (toast sau alertă).
+*   Aplicația deschide automat secțiunea de **Upgrade**, facilitând procesul de abonare.
 
 ## Cum să verifici
-1.  **Consistență**: Adaugă un prieten sau urmărește pe cineva din Feed-ul Social și verifică dacă acesta apare imediat și în pagina de Mesaje sau în profilul tău la statistici (Following count).
-2.  **Stabilitate**: Verifică dacă avatarul tău rămâne persistent după logout/login (logica de restaurare este acum centralizată).
+1.  **Cont Free**: Încearcă să adaugi bilete până ajungi la 20 în luna curentă. La încercarea de a adăuga biletul 21, ar trebui să vezi mesajul de limită și să fii redirecționat către planurile de plată.
+2.  **Cont Premium**: Verifică dacă poți adăuga peste 20 de bilete fără nicio restricție.
+
+> [!WARNING]
+> Această limită este aplicată în funcție de data setată pe bilet. Dacă un utilizator schimbă manual data biletului în viitor/trecut, acesta va fi contorizat în luna respectivă.
 
 > [!TIP]
-> Această schimbare nu afectează datele tale salvate, ci doar modul în care aplicația le citește, făcând-o mult mai rapidă și mai puțin predispusă la bug-uri de desincronizare.
-
-> [!IMPORTANT]
-> Toate modulele viitoare trebuie să folosească funcțiile din `utils.js` în loc de `localStorage.getItem` direct.
+> Versiunea live cu această limitare este disponibilă acum la: [https://kretzulinu99-tech.github.io/rGdbet/](https://kretzulinu99-tech.github.io/rGdbet/)

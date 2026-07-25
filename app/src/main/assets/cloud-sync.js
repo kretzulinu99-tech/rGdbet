@@ -51,7 +51,7 @@ window.cloudPushData = function() {
 
     // 1. Motor NATIV (Android Bridge)
     if (typeof Android !== 'undefined' && Android.saveToCloud) {
-      console.log('[CloudSync] Trimitere date profil către Android...');
+      log('[CloudSync] Trimitere date profil către Android...');
       Android.saveToCloud(JSON.stringify(payload));
       setTimeout(() => resolve(true), 800); // Barrieră de 800ms pentru siguranță
       return;
@@ -79,7 +79,7 @@ window.cloudPullData = async function() {
 
   if (!uid || typeof fbDb === 'undefined') return;
 
-  console.log('[CloudSync] Restaurare date cont pentru UID:', uid);
+  log('[CloudSync] Restaurare date cont pentru UID:', uid);
 
   try {
     const doc = await fbDb.collection('user_data').doc(uid).get();
@@ -106,13 +106,13 @@ window.cloudPullData = async function() {
               }
 
               window.saveCurrentUser(restoredUser);
-              console.log('[CloudSync] Avatar restaurat:', restoredUser.avatar ? 'DETECTOR ACTIV' : 'DEFAULT');
+              log('[CloudSync] Avatar restaurat:', restoredUser.avatar ? 'DETECTOR ACTIV' : 'DEFAULT');
             } catch(e) {}
           }
         }
       });
 
-      console.log('[CloudSync] Sincronizare memorie completă.');
+      log('[CloudSync] Sincronizare memorie completă.');
 
       // Notificăm interfața să se actualizeze IMEDIAT
       if (typeof buildProfilePage === 'function') buildProfilePage(true);

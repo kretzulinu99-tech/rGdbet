@@ -469,7 +469,7 @@ window.buildSocialPage = function() {
 
 /* ── UNIFIED SHARING SYSTEM (v11.0 Apex Sovereign) ── */
 window.openShareModal = async function (id) {
-  console.log('[Share] Uni-Proces pentru ID:', id);
+  log('[Share] Uni-Proces pentru ID:', id);
   const modal = document.getElementById('share-modal');
   const shareUrlInp = document.getElementById('share-url-input');
   const status = document.getElementById('share-status');

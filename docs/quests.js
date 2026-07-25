@@ -29,7 +29,7 @@ function checkDailyReset() {
         DAILY_MISSIONS.forEach(m => initialProgress[m.id] = 0);
         localStorage.setItem(QUESTS_STORAGE_KEY, JSON.stringify(initialProgress));
         localStorage.setItem('rgb_last_quest_reset', today);
-        console.log("Daily Quests Reset for:", today);
+        log("Daily Quests Reset for:", today);
     }
 }
 

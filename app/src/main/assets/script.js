@@ -600,7 +600,7 @@ function scheduleRender() {
 
           oscillator.start();
           oscillator.stop(audioCtx.currentTime + 0.2);
-        } catch (e) { console.log("Audio API error", e); }
+        } catch (e) { log("Audio API error", e); }
       }
 
       function requestPlaceTicket() {
@@ -813,7 +813,7 @@ function scheduleRender() {
           return Math.random() * (max - min) + min;
         }
 
-        const interval = setInterval(function() {
+        const interval = setApexInterval(function() {
           const timeLeft = animationEnd - Date.now();
 
           if (timeLeft <= 0) {

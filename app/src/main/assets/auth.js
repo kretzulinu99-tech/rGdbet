@@ -181,7 +181,7 @@ function authStartSession(user) {
    7. LOGOUT — UNIFIED ASYNC (v13.0 Apex Sovereign)
 ───────────────────────────────────────────── */
 window.authLogout = async function() {
-  console.log('[Auth] Inițiere proces deconectare hibridă (Local + Cloud)...');
+  log('[Auth] Inițiere proces deconectare hibridă (Local + Cloud)...');
 
   // 1. Salvează datele curente înainte de logout
   const session = authGetSession();
@@ -190,7 +190,7 @@ window.authLogout = async function() {
       authPersistUserData(session.username);
       // Dacă avem sistem de cloud sync, îl forțăm o ultimă dată pentru a nu pierde progresul
       if (typeof window.cloudPushData === 'function') {
-        console.log('[Auth] Push final de date către cloud...');
+        log('[Auth] Push final de date către cloud...');
         await window.cloudPushData();
       }
     } catch(e) {
@@ -202,7 +202,7 @@ window.authLogout = async function() {
   if (typeof fbAuth !== 'undefined' && fbAuth) {
     try {
       await fbAuth.signOut();
-      console.log('[Auth] Sesiune Cloud (Firebase) închisă cu succes.');
+      log('[Auth] Sesiune Cloud (Firebase) închisă cu succes.');
     } catch(e) {
       console.error('[Auth] Eroare la deconectarea Firebase:', e);
     }

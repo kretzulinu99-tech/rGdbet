@@ -380,7 +380,7 @@ function triggerBigWinEffect() {
 // Hook navigation
 (function hookSlotsNav() {
     let tries = 0;
-    const iv = setInterval(() => {
+    const iv = setApexInterval(() => {
         tries++;
         if (typeof window.navigateTo === 'function' && !window._slotsNavHooked) {
             const origNav = window.navigateTo;

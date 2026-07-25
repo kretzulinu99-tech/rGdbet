@@ -721,6 +721,9 @@ function navigateTo(pageId, btnEl, fromPopState) {
   document.body.setAttribute('data-page', pageId);
   document.body.classList.toggle('page-profile-active', pageId === 'profile');
 
+  // --- CLEANUP (v17.0) ---
+  if (typeof window.clearApexIntervals === 'function') window.clearApexIntervals();
+
   window.scrollTo({top:0,behavior:'smooth'});
   if (pageId==='addbet'   && typeof render          ==='function') render();
   if (pageId==='lab'      && typeof buildLabUI      ==='function') buildLabUI();

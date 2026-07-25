@@ -225,7 +225,7 @@ window.premiumBuildPlansSection = premiumBuildPlansSection;
 
 /* ─── INIT ─── */
 window.onPremiumStatusChanged = function(isPremium) {
-  console.log("Premium status changed from Android:", isPremium);
+  log("Premium status changed from Android:", isPremium);
   premiumApplyLocks();
 
   // Re-build profil dacă e necesar
@@ -237,7 +237,7 @@ window.onPremiumStatusChanged = function(isPremium) {
 function premiumInit() {
   // Hook pe builderi (poate nu sunt inca disponibili)
   let attempts = 0;
-  const iv = setInterval(() => {
+  const iv = setApexInterval(() => {
     attempts++;
     premiumHookBuilders();
     if ((window.buildLabUI && window.buildLabUI._premiumHooked) &&

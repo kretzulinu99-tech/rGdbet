@@ -376,7 +376,7 @@ function renderDnaEmpty(count) {
 
 (function hookDnaNav() {
     let tries = 0;
-    const iv = setInterval(() => {
+    const iv = setApexInterval(() => {
         tries++;
         if (typeof window.navigateTo === 'function' && !window._dnaNavHooked) {
             const origNav = window.navigateTo;

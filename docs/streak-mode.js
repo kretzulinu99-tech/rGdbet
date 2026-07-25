@@ -339,7 +339,7 @@ function _showToast(type, count) {
 ══════════════════════════════════════════════════════════ */
 function _hookApp() {
   let tries = 0;
-  const iv = setInterval(() => {
+  const iv = setApexInterval(() => {
     tries++;
     if (typeof window.changeStatus === 'function' && !window._smHooked) {
       const orig = window.changeStatus;

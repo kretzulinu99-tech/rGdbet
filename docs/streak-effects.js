@@ -75,7 +75,7 @@
   ══════════════════════════════════════════ */
   function hookOnce() {
     var attempts = 0;
-    var iv = setInterval(function () {
+    var iv = setApexInterval(function () {
       attempts++;
       if (typeof window.changeStatus === 'function' && !window._sfxHooked) {
         var orig = window.changeStatus;

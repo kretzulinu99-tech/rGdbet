@@ -747,7 +747,7 @@ body.theme-inferno .theme-fx-particle {
       .fa-tiktok{color:var(--text)!important}
 
       /* ═══ BUTON DONAȚII CU UNDE MULTIPLE ═══ */
-      .btn-donate {
+      .btn-upgrade-elite {
   will-change: box-shadow;
         position: relative;
         display: flex;
@@ -770,8 +770,8 @@ body.theme-inferno .theme-fx-particle {
         z-index: 1;
       }
 
-      .btn-donate::before,
-      .btn-donate::after {
+      .btn-upgrade-elite::before,
+      .btn-upgrade-elite::after {
         content: '';
         position: absolute;
         top: 0; left: 0; right: 0;
@@ -782,11 +782,11 @@ body.theme-inferno .theme-fx-particle {
         pointer-events: none;
       }
 
-      .btn-donate::after {
+      .btn-upgrade-elite::after {
         animation-delay: 1.05s;
       }
 
-      .btn-donate:hover { transform: scale(1.05); }
+      .btn-upgrade-elite:hover { transform: scale(1.05); }
 
       @keyframes pulse-orange {
         0%, 100% { transform: scale(1);

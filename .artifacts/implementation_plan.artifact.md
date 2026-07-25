@@ -1,33 +1,41 @@
-# Plan de Unificare a Funcțiilor de Hashing (v18.0)
+# Plan de Eliminare Completă "Donate Revolut" (v19.0)
 
-Acest plan vizează centralizarea logicii de hashing (algoritmul djb2) într-o singură funcție globală definită în `utils.js`, eliminând redundanța și riscul de inconsistență între modulele `auth.js` și `social.js`.
+Acest plan vizează eliminarea oricărei referințe la "Revolut" sau "Donate" din sistemul de traduceri și interfața aplicației, pentru a asigura conformitatea cu politicile Play Store.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> Toate instanțele funcției `authHash` vor fi redenumite în **`hashStr`**. Logica rămâne identică, deci datele salvate anterior (hash-urile parolelor) vor rămâne valide.
+> Voi redenumi cheia de traducere `donate` în **`upgrade_btn`** și voi actualiza toate textele din cele 12 limbi pentru a reflecta exclusiv acțiunea de **Upgrade Elite / Premium**, eliminând cuvintele "Donate" sau "Revolut".
 
 ## Propuneri de modificări
 
-### 1. Definire `hashStr` în `utils.js` [MODIFY] [utils.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/utils.js)
-*   Voi adăuga funcția `window.hashStr(str)` în nucleul de utilitare. Aceasta va folosi algoritmul djb2 și va returna un string hexazecimal.
+### 1. Actualizare Traduceri [MODIFY] [script.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/script.js)
+Voi înlocui cheia `donate` cu `upgrade_btn` și voi seta următoarele valori (exemple):
+*   `en`: "UPGRADE ELITE"
+*   `ro`: "FĂ-ȚI UPGRADE!"
+*   `it`: "PASSA A ELITE"
+*   `es`: "MEJORAR A ELITE"
+*   ... și restul limbilor în mod similar.
 
-### 2. Curățare `auth.js` [MODIFY] [auth.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/auth.js)
-*   Voi șterge definiția locală a funcției `authHash`.
-*   Voi înlocui toate apelurile `authHash(...)` cu `hashStr(...)`.
+### 2. Actualizare Interfață [MODIFY] [index.html](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/index.html)
+*   Redenumirea ID-ului `donateBtn` în `upgradeBtn`.
+*   Schimbarea clasei CSS `.btn-donate` în `.btn-upgrade-elite`.
+*   Actualizarea atributului `data-i18n="donate"` la `data-i18n="upgrade_btn"`.
 
-### 3. Curățare `social.js` [MODIFY] [social.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/social.js)
-*   Voi șterge definiția redundantă a funcției `hashStr` (care oricum nu era folosită activ în versiunea curentă a acestui fișier, dar genera confuzie).
+### 3. Actualizare Stiluri [MODIFY] [style.css](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/style.css)
+*   Redenumirea tuturor regulilor care vizează `.btn-donate` pentru a folosi noul nume `.btn-upgrade-elite`.
 
-### 4. Sincronizare `docs/`
-*   Actualizarea folderului de publicare pentru a propaga noua arhitectură pe GitHub Pages.
+### 4. Sincronizare Scripturi [MODIFY] [script.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/script.js)
+*   Actualizarea oricărei referințe JS la elementul `donateBtn` (dacă există) pentru a folosi `upgradeBtn`.
 
 ## Plan de Verificare
 
+### Verificare Vizuală
+*   Confirmarea faptului că butonul galben de pe Home afișează acum "FĂ-ȚI UPGRADE!" (sau echivalentul în limba selectată) și nu mai conține textul "Revolut".
+*   Verificarea aspectului butonului după redenumirea clasei CSS.
+
 ### Verificare Funcțională
-*   **Login**: Verificarea dacă logarea mai funcționează pentru un cont existent (confirmă că `hashStr` produce aceleași rezultate ca `authHash`).
-*   **Register**: Crearea unui cont nou și verificarea salvării hash-ului.
-*   **Change Password**: Verificarea funcționalității de schimbare a parolei în profil.
+*   Asigurarea că butonul încă deschide fluxul de upgrade prin `openUpgradeAction()`.
 
 ### Sincronizare Cloud
-*   Confirmarea faptului că nu există erori în consolă legate de lipsa funcției `authHash`.
+*   Sincronizarea folderului `docs/` pentru a propaga curățenia pe GitHub Pages.

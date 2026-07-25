@@ -1,13 +1,10 @@
-- `[/]` Unify Hashing Functions (v18.0)
-    - `[ ]` Define `window.hashStr` in `utils.js`
-    - `[ ]` Replace `authHash` with `hashStr` in `auth.js`
-    - `[ ]` Remove `authHash` from `auth.js`
-    - `[ ]` Remove `hashStr` from `social.js`
+- `[/]` Remove "Donate Revolut" references (v19.0)
+    - `[ ]` Rename `donate` translation key to `upgrade_btn` in `script.js`
+    - `[ ]` Update all 12 language values for `upgrade_btn` (no Revolut/Donate)
+    - `[ ]` Rename ID `donateBtn` to `upgradeBtn` in `index.html`
+    - `[ ]` Rename class `.btn-donate` to `.btn-upgrade-elite` in `index.html` and `style.css`
+    - `[ ]` Update `data-i18n="donate"` to `data-i18n="upgrade_btn"` in `index.html`
     - `[ ]` Sync changes to `docs/` folder
-- `[x]` Production Optimization & Memory Shield (v17.0)
 - `[x]` Refactor CSS Class Specificity (v16.0)
 - `[x]` Implement Ticket Monthly Limit (v15.0)
 - `[x]` Unified Storage Access (v14.0)
-- `[x]` Consolidate Auth Logic (v12.0)
-- `[x]` Unify Share System (v11.0)
-- `[x]` Fix Script Loading Order (v10.1)

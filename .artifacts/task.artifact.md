@@ -1,10 +1,8 @@
+- `[/]` Integrate Claude AI Navigation Button (v21.0)
+    - `[ ]` Add `page-ai` div to `index.html`
+    - `[ ]` Add `'ai'` to `NAV_ORDER` and update `navigateTo` in `index.html`
+    - `[ ]` Add Claude AI button to `bottomNav` in `index.html`
+    - `[ ]` Add `.bottom-nav-6` class to `bottomNav`
+    - `[ ]` Sync changes to `docs/` folder
+- `[x]` Unify Hashing Functions (v18.0)
 - `[x]` Remove "Donate Revolut" references (v19.0)
-    - `[x]` Rename `donate` translation key to `upgrade_btn` in `script.js`
-    - `[x]` Update all 12 language values for `upgrade_btn` (no Revolut/Donate)
-    - `[x]` Rename ID `donateBtn` to `upgradeBtn` in `index.html`
-    - `[x]` Rename class `.btn-donate` to `.btn-upgrade-elite` in `index.html` and `style.css`
-    - `[x]` Update `data-i18n="donate"` to `data-i18n="upgrade_btn"` in `index.html`
-    - `[x]` Sync changes to `docs/` folder
-- `[x]` Refactor CSS Class Specificity (v16.0)
-- `[x]` Implement Ticket Monthly Limit (v15.0)
-- `[x]` Unified Storage Access (v14.0)

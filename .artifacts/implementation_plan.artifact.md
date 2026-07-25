@@ -1,32 +1,36 @@
-# Plan de Integrare Claude 3.5 Sonnet (v20.0)
+# Plan de Integrare Buton Navigație Claude AI (v21.0)
 
-Acest plan vizează activarea modelului **Claude 3.5 Sonnet** de la Anthropic ca motor principal pentru modulul **AI Analist** din aplicație, utilizând cheia API furnizată.
+Acest plan vizează adăugarea unui buton dedicat în meniul principal de jos (Bottom Nav) pentru accesul rapid la motorul de analiză **Claude AI**, transformând aplicația într-o experiență cu 6 secțiuni principale + butonul central.
 
 ## User Review Required
 
-> [!CAUTION]
-> Cheia API furnizată va fi stocată în codul sursă al aplicației (front-end). Deși acest lucru permite funcționarea imediată, este o practică nesigură pentru aplicații publice. Recomandăm mutarea acestei logici pe un server backend în viitor.
+> [!IMPORTANT]
+> Voi trece interfața de navigare de la 5 la 6 butoane (plus cel central). Acest lucru va activa clasa CSS `.bottom-nav-6` pentru a asigura spațierea corectă pe ecrane mici.
 
 ## Propuneri de modificări
 
-### 1. Configurare Sistem [NEW]
-*   Voi crea fișierul `C:\Users\kretzu\.claude\config.json` cu cheia ta, pentru a permite uneltelor locale (CLI/IDE) să recunoască modelul Claude.
+### 1. Actualizare `index.html` [MODIFY]
+*   **Structură Pagini**: Adăugarea `<div id="page-ai" class="spa-page"></div>` pentru a găzdui interfața Claude.
+*   **Logica de Navigație**:
+    *   Adăugarea `'ai'` în array-ul `NAV_ORDER`.
+    *   Apelarea `buildAiPage()` în funcția `navigateTo` pentru inițializarea interfeței la click.
+*   **Meniul de Jos**:
+    *   Introducerea noului buton între **LAB** și butonul central de **BILETE**.
+    *   Iconiță utilizată: `fa-robot`.
+    *   Activarea clasei `.bottom-nav-6` pe elementul `<nav id="bottomNav">`.
 
-### 2. Actualizare `ai-analyst.js` [MODIFY]
-Voi rescrie funcția `callAI` pentru a face apeluri către Anthropic API în loc de Gemini:
-*   **URL**: `https://api.anthropic.com/v1/messages`
-*   **Model**: `claude-3-5-sonnet-20240620`
-*   **Headers**: Includerea `x-api-key` și `anthropic-version`.
-*   **Adaptare Stream**: Conversia formatului de răspuns de la Gemini la formatul Anthropic (Message API).
-
-### 3. Sincronizare `docs/`
-*   Actualizarea folderului de publicare pentru a activa motorul Claude și pe varianta web.
+### 2. Sincronizare `docs/`
+*   Actualizarea folderului de publicare pentru ca noul buton să fie disponibil și pe GitHub Pages.
 
 ## Plan de Verificare
 
-### Verificare Funcțională
-*   **Analiză Meci**: Introducerea unui meci în pagina AI și verificarea dacă răspunsul vine de la Claude (ar trebui să fie mai detaliat și să respecte promptul de sistem).
-*   **Logs**: Verificarea consolei pentru a asigura că nu există erori de tip CORS (Anthropic ar putea necesita un proxy pe web, dar voi încerca implementarea directă mai întâi).
+### Verificare Vizuală
+*   Confirmarea faptului că meniul de jos nu este prea aglomerat și că toate cele 6 etichete sunt lizibile.
+*   Verificarea culorii de stare activă (Neon Blue) pentru noul buton la selectare.
 
-## Notă despre Android Studio
-Pentru a avea Claude AI ca asistent *în interiorul* editorului Android Studio (nu în aplicația ta), va trebui să instalezi manual un plugin precum **"Claude Dev"** sau **"Continue"** din *File > Settings > Plugins*, deoarece eu pot modifica doar codul proiectului, nu și funcționalitățile IDE-ului.
+### Verificare Funcțională
+*   Apasarea butonului "AI" trebuie să deschidă instantaneu interfața **Claude 3.5 Sonnet**.
+*   Navigarea înapoi de la AI la Home trebuie să funcționeze fluid, curățând intervalele active.
+
+### Sincronizare Cloud
+*   `git commit` și `git push` pentru activarea noii funcționalități.

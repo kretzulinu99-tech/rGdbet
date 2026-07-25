@@ -1,9 +1,8 @@
-- `[/]` Refactor CSS Class Specificity (v16.0)
-    - `[ ]` Rename `.nav-label` to `.nav-label-text` in `index.html` and `style.css`
-    - `[ ]` Scope `.active` in `style.css` (e.g., `.nav-btn.active`, `.spa-page.active`)
-    - `[ ]` Scope `.open` in `style.css` (e.g., `.modal.open`, `.lab-card-body.open`)
-    - `[ ]` Audit and update JS files for class name changes (`script.js`, `social.js`, `auth.js`)
-    - `[ ]` Cleanup redundant CSS definitions in `style.css`
-    - `[ ]` Sync changes to `docs/` folder
+- `[x]` Refactor CSS Class Specificity (v16.0)
+    - `[x]` Rename `.nav-label` to `.nav-label-text` in `index.html`, `style.css`, and JS files
+    - `[x]` Implement a "Specificity Shield" at the end of `style.css`
+    - `[x]` Scope `.active` and `.open` in the shield for critical components (Nav, Pages, Modals)
+    - `[x]` Cleanup redundant CSS definitions in `style.css`
+    - `[x]` Sync changes to `docs/` folder
 - `[x]` Implement Ticket Monthly Limit (v15.0)
 - `[x]` Unified Storage Access (v14.0)

@@ -1,28 +1,32 @@
-# Walkthrough — Implementare Limită Bilete Freemium (v15.0)
+# Walkthrough — Refactorizare Specificitate CSS (v16.0)
 
-Am activat modelul de business "Freemium" prin impunerea unei limite de utilizare pentru conturile gratuite. Această modificare este esențială pentru a încuraja utilizatorii să facă upgrade la abonamentul Premium.
+Am rezolvat conflictele vizuale cauzate de redefinirea multiplă a claselor generice. Acum, interfața este stabilă, iar elementele de navigare și modalurile au un aspect consistent pe toate paginile.
 
 ## Modificări realizate
 
-### 1. Detecție Status Premium [NEW]
-*   Am definit funcția globală **`window.isPremium()`** în `premium.js`.
-*   Aceasta oferă un mod rapid și sigur de a verifica dacă utilizatorul curent are acces la funcțiile Elite, integrându-se atât cu bridge-ul Android, cât și cu sistemul local de sesiuni.
+### 1. Unificare Etichete Navigație [RENAMED]
+*   Am redenumit clasa generică `.nav-label` în **`.nav-label-text`** în toate fișierele proiectului (`index.html`, `style.css`, `script.js`, `social.js`, `auth.js`).
+*   Această schimbare elimină suprapunerile cu alte elemente care foloseau denumiri similare pentru etichete.
 
-### 2. Controlul Fluxului de Adăugare [ENFORCED]
-*   Am modificat logica de adăugare a biletelor din `script.js`.
-*   **Verificare Lunară**: Acum, înainte de a salva un bilet, aplicația scanează istoricul pentru luna calendaristică curentă.
-*   **Limita de 20**: Dacă un utilizator Free a atins pragul de 20 de bilete, adăugarea celui de-al 21-lea bilet este blocată automat.
+### 2. Implementare "Specificity Shield" [ENFORCED]
+*   Am adăugat o secțiune de siguranță la finalul `style.css` care forțează utilizarea selectorilor combinați.
+*   **Selectori protejați**:
+    *   `.nav-btn.active .nav-label-text` (Culori consistente în meniu)
+    *   `.spa-page.active` (Afișare corectă a paginilor active)
+    *   `.modal.open`, `.share-modal-overlay.open` (Funcționare garantată pentru modale)
+    *   `.auth-tab.active`, `.auth-panel.active` (Tab-uri de Login clare)
 
-### 3. Experiența Utilizatorului la Blocare
-*   Când limita este atinsă, utilizatorul primește o notificare clară (toast sau alertă).
-*   Aplicația deschide automat secțiunea de **Upgrade**, facilitând procesul de abonare.
+### 3. Curățare și Sincronizare [SYNCED]
+*   Am eliminat definițiile contradictorii care setau dimensiuni sau culori diferite pentru aceleași stări active.
+*   Am sincronizat totul pe GitHub Pages pentru o experiență web fluidă.
 
 ## Cum să verifici
-1.  **Cont Free**: Încearcă să adaugi bilete până ajungi la 20 în luna curentă. La încercarea de a adăuga biletul 21, ar trebui să vezi mesajul de limită și să fii redirecționat către planurile de plată.
-2.  **Cont Premium**: Verifică dacă poți adăuga peste 20 de bilete fără nicio restricție.
+1.  **Navigație**: Treci prin toate paginile (Home, Lab, DNA, Add, Sim, Social) și verifică dacă butonul activ din meniul de jos se colorează corect (Neon Blue) și dacă textul este lizibil.
+2.  **Modale**: Deschide un modal de Share sau Edit Profil și verifică dacă se afișează imediat (fără erori de display).
+3.  **Login**: Verifică dacă tab-urile "INTRĂ" și "CONT NOU" se schimbă vizual corect la click.
 
-> [!WARNING]
-> Această limită este aplicată în funcție de data setată pe bilet. Dacă un utilizator schimbă manual data biletului în viitor/trecut, acesta va fi contorizat în luna respectivă.
+> [!IMPORTANT]
+> Folosirea clasei `.nav-label-text` în loc de `.nav-label` este acum obligatorie pentru orice element nou de navigație.
 
 > [!TIP]
-> Versiunea live cu această limitare este disponibilă acum la: [https://kretzulinu99-tech.github.io/rGdbet/](https://kretzulinu99-tech.github.io/rGdbet/)
+> Versiunea cu CSS stabilizat este live la: [https://kretzulinu99-tech.github.io/rGdbet/](https://kretzulinu99-tech.github.io/rGdbet/)

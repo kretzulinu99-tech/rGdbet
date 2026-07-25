@@ -1,33 +1,30 @@
-# Walkthrough — Publicare Live pe GitHub Pages
+# Walkthrough — Fix Critic Script Loading Order (v10.1)
 
-Am configurat sistemul astfel încât aplicația să poată fi accesată direct dintr-un link web, transformând repository-ul într-un site live functional.
+Am corectat ordinea de încărcare a scripturilor în `index.html` și am inclus fișierele care lipseau. Această modificare asigură că toate componentele esențiale (Autentificare, Social, AI, Premium) sunt disponibile în memorie înainte ca logica principală a aplicației să fie executată.
 
 ## Modificări realizate
 
-### 1. Sincronizare Folder `docs/` [SYNCED]
-*   Am golit vechiul conținut din folderul `docs/` și l-am înlocuit cu ultima versiune a codului din `app/src/main/assets/`.
-*   Aceasta include toate modulele noi: **Misiuni Zilnice**, **Independent Slots**, **Apex Action Dock** și **AI Apex DNA**.
+### 1. Reordonare și Includere Scripturi [FIXED]
+Am actualizat `index.html` pentru a include următoarele scripturi în ordinea corectă de dependență:
+*   `auth.js`: Modulul de autentificare locală.
+*   `firebase-auth.js`: Integrarea cu Firebase pentru conturi cloud.
+*   `premium.js`: Logica pentru funcțiile Elite/Premium.
+*   `ai-analyst.js`: Motorul de analiză inteligentă.
+*   `social.js`: Sistemul social și feed-ul de bilete.
+*   `streak-effects.js`: Efectele vizuale pentru seriile de câștiguri/pierderi.
+*   `flashscore-sync.js`: Sincronizarea datelor externe.
 
-### 2. Configurare GitHub Publishing
-*   Am trimis toate modificările pe branch-ul `main`.
-*   Folderul `docs/` este acum pregătit să servească aplicația ca un site static.
+### 2. Sincronizare GitHub Pages [SYNCED]
+*   Am copiat toate fișierele actualizate în folderul `docs/`.
+*   Am trimis modificările pe GitHub, astfel încât varianta live de la [https://kretzulinu99-tech.github.io/rGdbet/](https://kretzulinu99-tech.github.io/rGdbet/) să fie acum complet funcțională.
 
-## Cum să activezi link-ul (Pași finali)
-
-Pentru a vedea aplicația live, trebuie să faci următoarea setare pe interfața GitHub:
-1.  Mergi la repository-ul tău: **[kretzulinu99-tech/rGdbet](https://github.com/kretzulinu99-tech/rGdbet)**.
-2.  Apasă pe butonul **Settings** (sus).
-3.  În meniul din stânga, alege **Pages**.
-4.  La **Build and deployment > Branch**, asigură-te că:
-    *   E selectat branch-ul **`main`**.
-    *   Folderul este schimbat de la `/(root)` la **`/docs`**.
-5.  Apasă pe **Save**.
-
-După aprox. 60 de secunde, aplicația ta va fi live la:
-🔗 **[https://kretzulinu99-tech.github.io/rGdbet/](https://kretzulinu99-tech.github.io/rGdbet/)**
-
-> [!TIP]
-> Orice modificare viitoare pe care o voi face în `assets` va trebui sincronizată cu `docs` pentru a apărea și pe link-ul web. Eu mă pot ocupa de asta automat la fiecare cerere de push.
+## Cum să verifici
+1.  **Login/Register**: Verifică dacă poți deschide ecranele de autentificare (acum că `auth.js` este încărcat).
+2.  **Social Feed**: Verifică dacă feed-ul social se încarcă corect (acum că `social.js` este disponibil înainte de pornirea aplicației).
+3.  **DNA/AI**: Navighează la pagina DNA și verifică dacă analizele AI pornesc fără erori în consolă.
 
 > [!IMPORTANT]
-> Versiunea web nu are acces la funcțiile native de Android (vibrații, Billing API), dar funcționează perfect ca o aplicație de tip PWA (Progressive Web App).
+> Această corecție elimină erorile de tip "ReferenceError" care blocau funcționarea butoanelor de login și a feed-ului social.
+
+> [!TIP]
+> Dacă observi că o pagină nu se încarcă pe web, asigură-te că ai golit cache-ul browserului (Ctrl+F5) pentru a forța încărcarea noii ordini a scripturilor.

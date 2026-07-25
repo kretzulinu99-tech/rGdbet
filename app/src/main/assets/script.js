@@ -1702,7 +1702,7 @@ function scheduleRender() {
                 <div class="soc-ticket-header">
                   <span class="soc-ticket-brand" style="font-family:'Rajdhani', sans-serif; font-weight:900; font-size:22px; letter-spacing:2px;">rGdbet</span>
                   <div style="display:flex; align-items:center; gap:10px;">
-                    <button class="ticket-share-btn" onclick="if(window.shareTicket) shareTicket('${b.id}'); else alert('Loading...');">
+                    <button class="ticket-share-btn" onclick="if(window.openShareModal) openShareModal('${b.id}'); else alert('Loading...');">
                       <i class="fa-solid fa-share-nodes"></i>
                     </button>
                     <span class="soc-ticket-stamp ${stampClass}">${statusLabel}</span>

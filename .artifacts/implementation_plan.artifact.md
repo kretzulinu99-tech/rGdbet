@@ -1,45 +1,34 @@
-# Plan de Implementare: Corecție Încărcare Scripturi (v10.1)
+# Plan de Unificare a Sistemului de Share (v11.0)
 
-Acest plan vizează includerea tuturor scripturilor lipsă în `index.html` și corectarea ordinii de încărcare a acestora pentru a asigura funcționarea corectă a modulelor de Autentificare, AI, Premium și Social.
+Acest plan vizează consolidarea logicii de partajare a biletelor și postărilor într-o singură funcție robustă în `social.js`, eliminând redundanța și conflictele semnalate între `social.js` și `firebase-auth.js`.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> Scripturile esențiale (Auth, Firebase, Social, AI) vor fi mutate **ÎNAINTE** de `script.js`. Această schimbare este critică deoarece `script.js` inițializează aplicația și are nevoie ca funcțiile din aceste module să fie deja disponibile în memorie.
+> Voi redenumi funcția `shareTicket` în **`openShareModal`** pentru a respecta terminologia solicitată. Voi actualiza toate apelurile din aplicație (Home, Social, Bilete) pentru a folosi această nouă funcție unificată.
 
 ## Propuneri de modificări
 
-### 1. Actualizare `index.html` [MODIFY]
-Voi rearanja și adăuga scripturile în următoarea ordine optimă pentru a asigura disponibilitatea globalelor:
+### 1. Unificare în `social.js` [MODIFY]
+*   Voi adăuga funcția `window.openShareModal` care va centraliza logica de:
+    *   Identificare tip conținut (bilet local vs. postare socială).
+    *   Deschidere modal `#share-modal`.
+    *   Generare link de tip `?share=ID`.
+    *   Afișare butoane de social sharing (WhatsApp, Facebook, Copy).
 
-1.  `age-gate.js`
-2.  `auth.js` [NEW]
-3.  `firebase-auth.js` [MOVE]
-4.  `premium.js` [NEW]
-5.  `gamification.js`
-6.  `quests.js`
-7.  `dna-engine.js`
-8.  `ai-analyst.js` [NEW]
-9.  `social.js` [MOVE]
-10. `streak-effects.js` [NEW]
-11. `flashscore-sync.js` [NEW]
-12. `script.js?v=17.0` (Main app logic)
-13. `simulator.js`
-14. `themes.js`
-15. `streak-mode.js`
-16. `cloud-sync.js`
-17. `messages.js`
-18. `profile-viewer.js`
-19. `badges.js`
-20. `notifications.js`
-21. `gambling-test.js`
+### 2. Curățare `firebase-auth.js` [MODIFY]
+*   Voi elimina definițiile duplicat/vechi ale funcțiilor `shareTicket` și orice altă variantă de `openShareModal` din acest fișier.
+*   Funcția `fbShowShareButtons` va fi păstrată dacă este utilă, sau integrată în `social.js`.
+
+### 3. Actualizare Apeluri în `index.html`, `script.js` și `social.js` [MODIFY]
+*   Toate butoanele care foloseau `onclick="shareTicket(...)"` vor fi actualizate la `onclick="openShareModal(...)"`.
 
 ## Plan de Verificare
 
 ### Verificare Funcțională
-*   Verificarea în consolă a erorilor de tip "ReferenceError".
-*   Testarea butonului de Login/Register.
-*   Verificarea inițializării modulului AI.
+*   Testarea butonului de share de pe un bilet local (pagina Bilete).
+*   Testarea butonului de share de pe o postare din Social Feed.
+*   Verificarea faptului că modalul se deschide corect și link-ul generat conține ID-ul corect.
 
-### Sincronizare Cloud
-*   După aplicare, voi sincroniza folderul `docs/` pentru ca schimările să fie live și pe GitHub Pages.
+### Sincronizare
+*   După aplicare, folderul `docs/` va fi sincronizat pentru a reflecta unificarea pe varianta web.

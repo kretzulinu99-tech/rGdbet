@@ -1,8 +1,8 @@
-- `[x]` Fix Script Loading Order in `index.html` (v10.1)
-    - `[x]` Add missing scripts: `auth.js`, `premium.js`, `ai-analyst.js`, `streak-effects.js`, `flashscore-sync.js`
-    - `[x]` Move `firebase-auth.js` and `social.js` before `script.js`
-    - `[/]` Sync changes to `docs/` folder
+- `[/]` Unify Share System (v11.0)
+    - `[ ]` Implement `window.openShareModal` in `social.js`
+    - `[ ]` Remove `shareTicket` and `closeShareModal` from `firebase-auth.js`
+    - `[ ]` Update all `onclick` calls in `script.js` and `social.js`
+    - `[ ]` Sync changes to `docs/`
+- `[x]` Fix Script Loading Order (v10.1)
 - `[x]` Implement Apex Engagement Engine (v9.0)
-- `[x]` Relocate Daily Missions UI (v9.1)
 - `[x]` Redesign Ticket Status Change (Apex Action Dock 2.0)
-- `[x]` Upgrade AI Apex DNA to 4.0

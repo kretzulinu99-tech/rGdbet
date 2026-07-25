@@ -399,7 +399,7 @@ async function socRenderFeed() {
           <div class="soc-ticket-header">
             <span class="soc-ticket-brand" style="font-family:'Rajdhani', sans-serif; font-weight:900; font-size:22px; letter-spacing:2px; color:#000;">rGdbet</span>
             <div style="display:flex; align-items:center; gap:10px;">
-                <button class="ticket-share-btn" onclick="if(window.shareTicket) shareTicket('${p.id}'); else alert('Loading...');">
+                <button class="ticket-share-btn" onclick="if(window.openShareModal) openShareModal('${p.id}'); else alert('Loading...');">
                   <i class="fa-solid fa-share-nodes"></i>
                 </button>
                 <span class="soc-ticket-stamp ${stampClass}">${statusLabel}</span>
@@ -512,3 +512,83 @@ window.buildSocialPage = function() {
   const user = getCurrentUser(); if (user && typeof authUpdateTopBar === 'function') authUpdateTopBar(user);
   if (typeof fbLoadSDK === 'function') { try { await fbLoadSDK(); socRenderFeed(); } catch(e) {} }
 })();
+
+/* ── UNIFIED SHARING SYSTEM (v11.0 Apex Sovereign) ── */
+window.openShareModal = async function (id) {
+  console.log('[Share] Uni-Proces pentru ID:', id);
+  const modal = document.getElementById('share-modal');
+  const shareUrlInp = document.getElementById('share-url-input');
+  const status = document.getElementById('share-status');
+
+  if (modal) {
+    modal.classList.add('open');
+    modal.style.display = 'flex';
+  }
+  if (status) status.textContent = '⏳ Se generează linkul Apex...';
+
+  let dataToShare = null;
+  const isPost = String(id).startsWith('post_');
+
+  // Căutare date (Bilete Locale sau Postări Sociale)
+  if (isPost) {
+    const posts = typeof getPosts === 'function' ? getPosts() : [];
+    dataToShare = posts.find(p => p.id === id);
+  } else {
+    const bets = JSON.parse(localStorage.getItem('rgb_bets') || '[]');
+    dataToShare = bets.find(b => b.id === parseInt(id));
+  }
+
+  if (!dataToShare) {
+    console.error('[Share] Date negăsite pentru ID:', id);
+    if (status) status.textContent = '❌ Eroare: Conținutul nu a fost găsit.';
+    return;
+  }
+
+  try {
+    // Încărcăm SDK-ul Firebase dacă nu e gata
+    if (typeof fbLoadSDK === 'function') await fbLoadSDK();
+
+    const finalUrl = `${window.location.origin}${window.location.pathname}?share=${id}`;
+    if (shareUrlInp) shareUrlInp.value = finalUrl;
+    if (status) status.textContent = '✅ Gata de trimis!';
+
+    fbShowShareButtons(finalUrl, dataToShare);
+  } catch (err) {
+    console.error('[Share] Eroare:', err);
+    if (status) status.textContent = '❌ Eroare: ' + err.message;
+    // Fallback URL chiar și la eroare
+    const fallbackUrl = `${window.location.origin}${window.location.pathname}?share=${id}`;
+    if (shareUrlInp) shareUrlInp.value = fallbackUrl;
+    fbShowShareButtons(fallbackUrl, dataToShare);
+  }
+};
+
+function fbShowShareButtons(url, item) {
+  const container = document.getElementById('share-social-btns');
+  if (!container) return;
+  const encoded = encodeURIComponent(url);
+  const text = encodeURIComponent(`🎫 Verifică biletul meu pe rGdbet Apex!`);
+
+  container.innerHTML = `
+    <a class="share-social-btn share-whatsapp" href="https://wa.me/?text=${text}%20${encoded}" target="_blank" style="background:#25D366; color:#fff; padding:10px; border-radius:8px; text-decoration:none; display:flex; align-items:center; gap:5px;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+    <a class="share-social-btn share-facebook" href="https://www.facebook.com/sharer/sharer.php?u=${encoded}" target="_blank" style="background:#1877F2; color:#fff; padding:10px; border-radius:8px; text-decoration:none; display:flex; align-items:center; gap:5px;"><i class="fa-brands fa-facebook"></i> Facebook</a>
+    <button class="share-social-btn share-copy" onclick="fbCopyShareUrl()" style="background:var(--nb); color:#000; padding:10px; border:none; border-radius:8px; cursor:pointer;"><i class="fa-solid fa-copy"></i> Copiază</button>
+  `;
+}
+
+window.fbCopyShareUrl = function () {
+  const inp = document.getElementById('share-url-input');
+  if (!inp) return;
+  inp.select();
+  document.execCommand('copy');
+  if (typeof showMsgToast === 'function') showMsgToast('Link copiat!', 'success');
+  else alert('Link copiat în clipboard!');
+};
+
+window.closeShareModal = function() {
+  const modal = document.getElementById('share-modal');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
+};

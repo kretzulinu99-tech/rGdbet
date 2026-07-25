@@ -1,10 +1,10 @@
-- `[/]` Remove "Donate Revolut" references (v19.0)
-    - `[ ]` Rename `donate` translation key to `upgrade_btn` in `script.js`
-    - `[ ]` Update all 12 language values for `upgrade_btn` (no Revolut/Donate)
-    - `[ ]` Rename ID `donateBtn` to `upgradeBtn` in `index.html`
-    - `[ ]` Rename class `.btn-donate` to `.btn-upgrade-elite` in `index.html` and `style.css`
-    - `[ ]` Update `data-i18n="donate"` to `data-i18n="upgrade_btn"` in `index.html`
-    - `[ ]` Sync changes to `docs/` folder
+- `[x]` Remove "Donate Revolut" references (v19.0)
+    - `[x]` Rename `donate` translation key to `upgrade_btn` in `script.js`
+    - `[x]` Update all 12 language values for `upgrade_btn` (no Revolut/Donate)
+    - `[x]` Rename ID `donateBtn` to `upgradeBtn` in `index.html`
+    - `[x]` Rename class `.btn-donate` to `.btn-upgrade-elite` in `index.html` and `style.css`
+    - `[x]` Update `data-i18n="donate"` to `data-i18n="upgrade_btn"` in `index.html`
+    - `[x]` Sync changes to `docs/` folder
 - `[x]` Refactor CSS Class Specificity (v16.0)
 - `[x]` Implement Ticket Monthly Limit (v15.0)
 - `[x]` Unified Storage Access (v14.0)

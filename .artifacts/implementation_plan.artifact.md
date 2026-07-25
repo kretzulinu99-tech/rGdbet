@@ -1,41 +1,32 @@
-# Plan de Eliminare Completă "Donate Revolut" (v19.0)
+# Plan de Integrare Claude 3.5 Sonnet (v20.0)
 
-Acest plan vizează eliminarea oricărei referințe la "Revolut" sau "Donate" din sistemul de traduceri și interfața aplicației, pentru a asigura conformitatea cu politicile Play Store.
+Acest plan vizează activarea modelului **Claude 3.5 Sonnet** de la Anthropic ca motor principal pentru modulul **AI Analist** din aplicație, utilizând cheia API furnizată.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> Voi redenumi cheia de traducere `donate` în **`upgrade_btn`** și voi actualiza toate textele din cele 12 limbi pentru a reflecta exclusiv acțiunea de **Upgrade Elite / Premium**, eliminând cuvintele "Donate" sau "Revolut".
+> [!CAUTION]
+> Cheia API furnizată va fi stocată în codul sursă al aplicației (front-end). Deși acest lucru permite funcționarea imediată, este o practică nesigură pentru aplicații publice. Recomandăm mutarea acestei logici pe un server backend în viitor.
 
 ## Propuneri de modificări
 
-### 1. Actualizare Traduceri [MODIFY] [script.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/script.js)
-Voi înlocui cheia `donate` cu `upgrade_btn` și voi seta următoarele valori (exemple):
-*   `en`: "UPGRADE ELITE"
-*   `ro`: "FĂ-ȚI UPGRADE!"
-*   `it`: "PASSA A ELITE"
-*   `es`: "MEJORAR A ELITE"
-*   ... și restul limbilor în mod similar.
+### 1. Configurare Sistem [NEW]
+*   Voi crea fișierul `C:\Users\kretzu\.claude\config.json` cu cheia ta, pentru a permite uneltelor locale (CLI/IDE) să recunoască modelul Claude.
 
-### 2. Actualizare Interfață [MODIFY] [index.html](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/index.html)
-*   Redenumirea ID-ului `donateBtn` în `upgradeBtn`.
-*   Schimbarea clasei CSS `.btn-donate` în `.btn-upgrade-elite`.
-*   Actualizarea atributului `data-i18n="donate"` la `data-i18n="upgrade_btn"`.
+### 2. Actualizare `ai-analyst.js` [MODIFY]
+Voi rescrie funcția `callAI` pentru a face apeluri către Anthropic API în loc de Gemini:
+*   **URL**: `https://api.anthropic.com/v1/messages`
+*   **Model**: `claude-3-5-sonnet-20240620`
+*   **Headers**: Includerea `x-api-key` și `anthropic-version`.
+*   **Adaptare Stream**: Conversia formatului de răspuns de la Gemini la formatul Anthropic (Message API).
 
-### 3. Actualizare Stiluri [MODIFY] [style.css](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/style.css)
-*   Redenumirea tuturor regulilor care vizează `.btn-donate` pentru a folosi noul nume `.btn-upgrade-elite`.
-
-### 4. Sincronizare Scripturi [MODIFY] [script.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/script.js)
-*   Actualizarea oricărei referințe JS la elementul `donateBtn` (dacă există) pentru a folosi `upgradeBtn`.
+### 3. Sincronizare `docs/`
+*   Actualizarea folderului de publicare pentru a activa motorul Claude și pe varianta web.
 
 ## Plan de Verificare
 
-### Verificare Vizuală
-*   Confirmarea faptului că butonul galben de pe Home afișează acum "FĂ-ȚI UPGRADE!" (sau echivalentul în limba selectată) și nu mai conține textul "Revolut".
-*   Verificarea aspectului butonului după redenumirea clasei CSS.
-
 ### Verificare Funcțională
-*   Asigurarea că butonul încă deschide fluxul de upgrade prin `openUpgradeAction()`.
+*   **Analiză Meci**: Introducerea unui meci în pagina AI și verificarea dacă răspunsul vine de la Claude (ar trebui să fie mai detaliat și să respecte promptul de sistem).
+*   **Logs**: Verificarea consolei pentru a asigura că nu există erori de tip CORS (Anthropic ar putea necesita un proxy pe web, dar voi încerca implementarea directă mai întâi).
 
-### Sincronizare Cloud
-*   Sincronizarea folderului `docs/` pentru a propaga curățenia pe GitHub Pages.
+## Notă despre Android Studio
+Pentru a avea Claude AI ca asistent *în interiorul* editorului Android Studio (nu în aplicația ta), va trebui să instalezi manual un plugin precum **"Claude Dev"** sau **"Continue"** din *File > Settings > Plugins*, deoarece eu pot modifica doar codul proiectului, nu și funcționalitățile IDE-ului.

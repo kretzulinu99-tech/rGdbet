@@ -1,14 +1,8 @@
+- `[x]` Fix Script Loading Order in `index.html` (v10.1)
+    - `[x]` Add missing scripts: `auth.js`, `premium.js`, `ai-analyst.js`, `streak-effects.js`, `flashscore-sync.js`
+    - `[x]` Move `firebase-auth.js` and `social.js` before `script.js`
+    - `[/]` Sync changes to `docs/` folder
 - `[x]` Implement Apex Engagement Engine (v9.0)
-    - `[x]` Create `quests.js` for Daily Missions and Login Streaks
-    - `[x]` Add UI "Juice" (neon ripples, particles, liquid bars) to `style.css`
-    - `[x]` Implement Full-screen "Level Up" Interface
-    - `[delete]` Removed Leaderboard Global (Simulated) per user request
-    - `[x]` Add "AI Wisdom Nuggets" to `dna-engine.js`
-- `[x]` UI Tweak: Relocate Daily Missions & New Touch Effect (v9.1)
-    - `[x]` Move `daily-quests-container` between Calendar and RG Banner
-    - `[x]` Replace 3D Rotation with "Quantum Pulse & Expand" effect for Quests
-
+- `[x]` Relocate Daily Missions UI (v9.1)
 - `[x]` Redesign Ticket Status Change (Apex Action Dock 2.0)
-- `[x]` Implement Unique Pillar Biometrics (AI Apex DNA 4.1)
-- `[x]` Upgrade AI Apex DNA to 4.0 (Quantum Intelligence)
-- `[x]` Add "Event Start Time" field to Add Ticket page
+- `[x]` Upgrade AI Apex DNA to 4.0

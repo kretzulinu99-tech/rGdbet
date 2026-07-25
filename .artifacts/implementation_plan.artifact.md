@@ -1,28 +1,45 @@
-# Plan de Implementare: Monitorizarea Orei de Începere a Evenimentelor
+# Plan de Implementare: Corecție Încărcare Scripturi (v10.1)
 
-Acest plan vizează adăugarea unui câmp pentru ora de începere a fiecărui eveniment de pe bilet. Această informație va permite o analiză mult mai precisă în motorul **AI Apex DNA**, facilitând detectarea pattern-urilor de profit în funcție de momentul zilei.
+Acest plan vizează includerea tuturor scripturilor lipsă în `index.html` și corectarea ordinii de încărcare a acestora pentru a asigura funcționarea corectă a modulelor de Autentificare, AI, Premium și Social.
 
 ## User Review Required
 
-> [!NOTE]
-> Ora de începere va fi stocată pentru fiecare eveniment individual de pe bilet. Dacă un bilet are mai multe evenimente, fiecare poate avea propria oră.
+> [!IMPORTANT]
+> Scripturile esențiale (Auth, Firebase, Social, AI) vor fi mutate **ÎNAINTE** de `script.js`. Această schimbare este critică deoarece `script.js` inițializează aplicația și are nevoie ca funcțiile din aceste module să fie deja disponibile în memorie.
 
 ## Propuneri de modificări
 
-### 1. Interfața de Adăugare [MODIFY] [index.html](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/index.html)
-*   Adăugarea unui câmp de tip `time` cu id-ul `event-time` sub rândul de pronostic și cotă.
-*   Etichetarea câmpului ca „Ora de începere”.
+### 1. Actualizare `index.html` [MODIFY]
+Voi rearanja și adăuga scripturile în următoarea ordine optimă pentru a asigura disponibilitatea globalelor:
 
-### 2. Logica de Stocare și Afișare [MODIFY] [script.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/script.js)
-*   **`addEventToTicket()`**: Va colecta valoarea din `event-time` și o va salva în obiectul evenimentului.
-*   **`renderEvents()`**: Va afișa ora în lista temporară a evenimentelor de pe biletul în curs de creare.
-*   **`render()`**: Va actualiza vizualizarea biletelor finale pentru a afișa ora lângă fiecare eveniment (ex: `14:30 ⚽ Real Madrid - Barca`).
-
-### 3. Pregătire pentru DNA [FUTURE]
-*   Datele despre oră vor fi disponibile automat pentru motorul DNA pentru a rafina analiza de tip "Nocturnal Blindspot".
+1.  `age-gate.js`
+2.  `auth.js` [NEW]
+3.  `firebase-auth.js` [MOVE]
+4.  `premium.js` [NEW]
+5.  `gamification.js`
+6.  `quests.js`
+7.  `dna-engine.js`
+8.  `ai-analyst.js` [NEW]
+9.  `social.js` [MOVE]
+10. `streak-effects.js` [NEW]
+11. `flashscore-sync.js` [NEW]
+12. `script.js?v=17.0` (Main app logic)
+13. `simulator.js`
+14. `themes.js`
+15. `streak-mode.js`
+16. `cloud-sync.js`
+17. `messages.js`
+18. `profile-viewer.js`
+19. `badges.js`
+20. `notifications.js`
+21. `gambling-test.js`
 
 ## Plan de Verificare
 
-### Verificare Manuală
-*   Adăugarea unui bilet cu oră specifică și verificarea dacă aceasta apare corect în lista biletelor.
-*   Verificarea resetării câmpului de oră după adăugarea unui eveniment.
+### Verificare Funcțională
+*   Verificarea în consolă a erorilor de tip "ReferenceError".
+*   Testarea butonului de Login/Register.
+*   Verificarea inițializării modulului AI.
+
+### Sincronizare Cloud
+*   După aplicare, voi sincroniza folderul `docs/` pentru ca schimările să fie live și pe GitHub Pages.

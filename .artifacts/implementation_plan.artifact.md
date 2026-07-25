@@ -1,43 +1,33 @@
-# Plan de Refactorizare CSS: Specificitate și Conflicte (v16.0)
+# Plan de Unificare a Funcțiilor de Hashing (v18.0)
 
-Acest plan vizează rezolvarea conflictelor de specificitate cauzate de utilizarea claselor generice (`.active`, `.open`, `.nav-label`) în multiple secțiuni ale aplicației, asigurând un comportament vizual consistent.
+Acest plan vizează centralizarea logicii de hashing (algoritmul djb2) într-o singură funcție globală definită în `utils.js`, eliminând redundanța și riscul de inconsistență între modulele `auth.js` și `social.js`.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> Voi trece de la clase generice la clase "scopate" (combinate sau renumite). Acest lucru necesită actualizarea simultană a fișierelor CSS (`style.css`), HTML (`index.html`) și a logicii JavaScript care manipulează aceste clase (ex: `script.js`, `social.js`, `auth.js`).
+> Toate instanțele funcției `authHash` vor fi redenumite în **`hashStr`**. Logica rămâne identică, deci datele salvate anterior (hash-urile parolelor) vor rămâne valide.
 
 ## Propuneri de modificări
 
-### 1. Refactorizare `.active` [CSS/HTML/JS]
-Voi înlocui utilizarea simplă a clasei `.active` cu variante specifice în selectori:
-*   **Navigație**: Utilizarea selectorului `.nav-btn.active` în loc de `.active` general.
-*   **Pagini SPA**: Utilizarea `.spa-page.active`.
-*   **Tab-uri/Panouri Auth**: Utilizarea `.auth-tab.active` și `.auth-panel.active`.
-*   **Filtre**: Utilizarea `.filter-btn.active`.
-*   **Ecrane Speciale**: `.level-up-screen.active`.
+### 1. Definire `hashStr` în `utils.js` [MODIFY] [utils.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/utils.js)
+*   Voi adăuga funcția `window.hashStr(str)` în nucleul de utilitare. Aceasta va folosi algoritmul djb2 și va returna un string hexazecimal.
 
-### 2. Refactorizare `.open` [CSS/HTML/JS]
-Voi unifica sau scopura utilizarea clasei `.open` pentru elementele de tip overlay/modal:
-*   **Modale Profil/Share**: `.prof-edit-modal.open`, `.share-modal-overlay.open`.
-*   **Acordion/Secțiuni**: `.lab-card-body.open`, `.ai-accordion-body.open`.
+### 2. Curățare `auth.js` [MODIFY] [auth.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/auth.js)
+*   Voi șterge definiția locală a funcției `authHash`.
+*   Voi înlocui toate apelurile `authHash(...)` cu `hashStr(...)`.
 
-### 3. Redenumire `.nav-label` [CSS/HTML]
-*   Voi redenumi clasa `.nav-label` în **`.nav-label-text`** în `index.html` și în toți selectorii din `style.css` pentru a evita suprapunerile cu alte etichete din aplicație.
+### 3. Curățare `social.js` [MODIFY] [social.js](file:///C:/Users/kretzu/AndroidStudioProjects/rGdbet2/app/src/main/assets/social.js)
+*   Voi șterge definiția redundantă a funcției `hashStr` (care oricum nu era folosită activ în versiunea curentă a acestui fișier, dar genera confuzie).
 
-### 4. Curățare `style.css` [MODIFY]
-*   Voi elimina definițiile redundante și contradictorii ale acestor clase (ex: unde `.nav-label` era definit de 7 ori cu dimensiuni diferite).
-*   Voi păstra o singură definiție clară per componentă.
+### 4. Sincronizare `docs/`
+*   Actualizarea folderului de publicare pentru a propaga noua arhitectură pe GitHub Pages.
 
 ## Plan de Verificare
 
-### Verificare Vizuală
-*   Testarea meniului de jos (**Bottom Nav**) pentru a asigura că iconițele și textele se colorează corect la navigare.
-*   Verificarea deschiderii modalelor (**Share**, **Edit Profil**) și a panourilor expandabile din **LAB**.
-*   Verificarea tab-urilor de **Login/Register** (asigurarea că panoul activ este vizibil).
-
-### Verificare Funcțională (JS)
-*   Asigurarea că funcția `navigateTo` și alte scripturi de tip `classList.toggle('active')` încă găsesc elementele corecte sau folosesc noile denumiri.
+### Verificare Funcțională
+*   **Login**: Verificarea dacă logarea mai funcționează pentru un cont existent (confirmă că `hashStr` produce aceleași rezultate ca `authHash`).
+*   **Register**: Crearea unui cont nou și verificarea salvării hash-ului.
+*   **Change Password**: Verificarea funcționalității de schimbare a parolei în profil.
 
 ### Sincronizare Cloud
-*   După aplicare, voi sincroniza folderul `docs/` pentru a propaga reparațiile pe link-ul web.
+*   Confirmarea faptului că nu există erori în consolă legate de lipsa funcției `authHash`.

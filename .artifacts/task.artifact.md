@@ -1,8 +1,13 @@
+- `[/]` Unify Hashing Functions (v18.0)
+    - `[ ]` Define `window.hashStr` in `utils.js`
+    - `[ ]` Replace `authHash` with `hashStr` in `auth.js`
+    - `[ ]` Remove `authHash` from `auth.js`
+    - `[ ]` Remove `hashStr` from `social.js`
+    - `[ ]` Sync changes to `docs/` folder
+- `[x]` Production Optimization & Memory Shield (v17.0)
 - `[x]` Refactor CSS Class Specificity (v16.0)
-    - `[x]` Rename `.nav-label` to `.nav-label-text` in `index.html`, `style.css`, and JS files
-    - `[x]` Implement a "Specificity Shield" at the end of `style.css`
-    - `[x]` Scope `.active` and `.open` in the shield for critical components (Nav, Pages, Modals)
-    - `[x]` Cleanup redundant CSS definitions in `style.css`
-    - `[x]` Sync changes to `docs/` folder
 - `[x]` Implement Ticket Monthly Limit (v15.0)
 - `[x]` Unified Storage Access (v14.0)
+- `[x]` Consolidate Auth Logic (v12.0)
+- `[x]` Unify Share System (v11.0)
+- `[x]` Fix Script Loading Order (v10.1)

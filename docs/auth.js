@@ -8,18 +8,8 @@
 'use strict';
 
 /* ─────────────────────────────────────────────
-   1. UTILITARE
+   1. UTILITARE (Unified in utils.js v18.0)
 ───────────────────────────────────────────── */
-
-// Hash simplu djb2 (nu criptografie reala — suficient pt localStorage local)
-function authHash(str) {
-  let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
-    hash = hash >>> 0;
-  }
-  return hash.toString(16);
-}
 
 function authGetUsers() {
   try { return JSON.parse(localStorage.getItem('rgb_users_db') || '{}'); } catch { return {}; }
@@ -108,7 +98,7 @@ window.authRegister = function() {
   const newUser = {
     username,
     email,
-    passwordHash: authHash(pass),
+    passwordHash: hashStr(pass),
     createdAt:    new Date().toISOString(),
     avatar:       null,      // null = initiale generate
     theme:        'standard',
@@ -136,7 +126,7 @@ window.authLogin = function() {
   let found = users[raw] || Object.values(users).find(u => u.email === raw);
 
   if (!found)                              return authShowError('Utilizatorul sau email-ul nu există.');
-  if (found.passwordHash !== authHash(pass)) return authShowError('Parolă incorectă.');
+  if (found.passwordHash !== hashStr(pass)) return authShowError('Parolă incorectă.');
 
   authStartSession(found);
 };
@@ -449,10 +439,10 @@ window.authSaveEdit = function() {
     const oldPass  = document.getElementById('edit-input-0')?.value || '';
     const newPass  = document.getElementById('edit-input-1')?.value || '';
     const newPass2 = document.getElementById('edit-input-2')?.value || '';
-    if (authHash(oldPass) !== user.passwordHash) return showEditError('Parola actuală este incorectă.');
+    if (hashStr(oldPass) !== user.passwordHash) return showEditError('Parola actuală este incorectă.');
     if (newPass.length < 6)                      return showEditError('Parola nouă — minim 6 caractere.');
     if (newPass !== newPass2)                    return showEditError('Parolele noi nu coincid.');
-    user.passwordHash = authHash(newPass);
+    user.passwordHash = hashStr(newPass);
     users[userKey] = user;
     authSaveUsers(users);
     authCloseEditModal();

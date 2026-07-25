@@ -13,12 +13,6 @@ const SK = {
   gamb:    'rgb_gamb_test',
 };
 
-function hashStr(s) {
-  let h = 5381;
-  for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
-  return (h >>> 0).toString(16);
-}
-
 /* ── DATA CORE (Migrated to utils.js v14.0) ── */
 // Using window.getUsers, window.getCurrentUser, window.getPosts, etc.
 

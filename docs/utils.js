@@ -26,6 +26,16 @@ window.log = function(...args) {
     }
 };
 
+// --- HASH ENGINE (djb2) ---
+window.hashStr = function(str) {
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+        hash = hash >>> 0;
+    }
+    return hash.toString(16);
+};
+
 // --- INTERVAL MANAGER (Leak Shield) ---
 window.setApexInterval = function(fn, delay) {
     const id = setInterval(fn, delay);

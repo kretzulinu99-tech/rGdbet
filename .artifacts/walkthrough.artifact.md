@@ -1,32 +1,30 @@
-# Walkthrough — Refactorizare Specificitate CSS (v16.0)
+# Walkthrough — Optimizare Producție & Protecție Memorie (v17.0)
 
-Am rezolvat conflictele vizuale cauzate de redefinirea multiplă a claselor generice. Acum, interfața este stabilă, iar elementele de navigare și modalurile au un aspect consistent pe toate paginile.
+Am implementat un set de măsuri de securitate și performanță pentru a pregăti aplicația de lansarea finală, eliminând scurgerile de memorie și protejând informațiile sensibile din consolă.
 
 ## Modificări realizate
 
-### 1. Unificare Etichete Navigație [RENAMED]
-*   Am redenumit clasa generică `.nav-label` în **`.nav-label-text`** în toate fișierele proiectului (`index.html`, `style.css`, `script.js`, `social.js`, `auth.js`).
-*   Această schimbare elimină suprapunerile cu alte elemente care foloseau denumiri similare pentru etichete.
+### 1. Eliminare `console.log` în Producție [SECURITY]
+*   Am introdus un sistem de logging controlat prin variabila globală **`APEX_DEBUG`** (dezactivată implicit).
+*   Toate apelurile `console.log` din fișierele JavaScript au fost înlocuite cu funcția protejată **`log()`**.
+*   Această schimbare previne expunerea datelor utilizatorilor și a token-urilor Firebase în DevTools-ul browserului.
 
-### 2. Implementare "Specificity Shield" [ENFORCED]
-*   Am adăugat o secțiune de siguranță la finalul `style.css` care forțează utilizarea selectorilor combinați.
-*   **Selectori protejați**:
-    *   `.nav-btn.active .nav-label-text` (Culori consistente în meniu)
-    *   `.spa-page.active` (Afișare corectă a paginilor active)
-    *   `.modal.open`, `.share-modal-overlay.open` (Funcționare garantată pentru modale)
-    *   `.auth-tab.active`, `.auth-panel.active` (Tab-uri de Login clare)
+### 2. Scut împotriva Scurgerilor de Memorie [PERFORMANCE]
+*   Am implementat un **Manager de Intervale** în `utils.js`.
+*   **Funcții noi**: `setApexInterval()` și `clearApexIntervals()`.
+*   Am modificat procesul de navigare (**SPA Navigation**) astfel încât, la fiecare schimbare de pagină, toate intervalele pornite de pagina anterioară să fie curățate automat.
+*   Acest lucru previne acumularea proceselor în fundal care încetineau aplicația după o utilizare prelungită.
 
-### 3. Curățare și Sincronizare [SYNCED]
-*   Am eliminat definițiile contradictorii care setau dimensiuni sau culori diferite pentru aceleași stări active.
-*   Am sincronizat totul pe GitHub Pages pentru o experiență web fluidă.
+### 3. Refactorizare Module Critice
+*   Fișierele `ai-analyst.js`, `script.js`, `streak-effects.js`, `streak-mode.js` și altele au fost actualizate pentru a folosi noul sistem de management al resurselor.
 
 ## Cum să verifici
-1.  **Navigație**: Treci prin toate paginile (Home, Lab, DNA, Add, Sim, Social) și verifică dacă butonul activ din meniul de jos se colorează corect (Neon Blue) și dacă textul este lizibil.
-2.  **Modale**: Deschide un modal de Share sau Edit Profil și verifică dacă se afișează imediat (fără erori de display).
-3.  **Login**: Verifică dacă tab-urile "INTRĂ" și "CONT NOU" se schimbă vizual corect la click.
+1.  **Consolă**: Deschide DevTools (F12) în browser și verifică dacă mai apar mesaje de log. În mod normal, consola ar trebui să fie acum curată.
+2.  **Navigare**: Navighează rapid între pagini și observă dacă aplicația rămâne fluidă. Sistemul de curățare funcționează acum "la fiecare pas".
+3.  **Debug Mode**: Dacă vrei să vezi din nou logurile pentru testare, poți scrie în consolă: `window.APEX_DEBUG = true;`.
 
 > [!IMPORTANT]
-> Folosirea clasei `.nav-label-text` în loc de `.nav-label` este acum obligatorie pentru orice element nou de navigație.
+> Această actualizare transformă rGdbet dintr-un prototip într-o aplicație stabilă de nivel Enterprise, optimizată pentru consum redus de baterie pe mobil.
 
 > [!TIP]
-> Versiunea cu CSS stabilizat este live la: [https://kretzulinu99-tech.github.io/rGdbet/](https://kretzulinu99-tech.github.io/rGdbet/)
+> Versiunea optimizată este live pe [GitHub Pages](https://kretzulinu99-tech.github.io/rGdbet/).

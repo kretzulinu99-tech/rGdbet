@@ -1,7 +1,8 @@
-- `[/]` Consolidate Auth Logic (v12.0)
-    - `[ ]` Remove `authLogout` from `social.js`
-    - `[ ]` Audit `social.js` for `authLogin`, `authRegister`, `authSwitchTab` and remove if found
-    - `[ ]` Ensure `social.js` uses `auth.js` helper functions for user data access
+- `[/]` Implement Unified Async Logout (v13.0)
+    - `[ ]` Update `authLogout` to `async` in `auth.js`
+    - `[ ]` Add Firebase `signOut` logic to unified logout
+    - `[ ]` Add final `cloudPushData` call before sign out
+    - `[ ]` Ensure no overrides exist in `firebase-auth.js`
     - `[ ]` Sync changes to `docs/` folder
+- `[x]` Consolidate Auth Logic (v12.0)
 - `[x]` Unify Share System (v11.0)
-- `[x]` Fix Script Loading Order (v10.1)

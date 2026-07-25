@@ -1,27 +1,35 @@
-# Plan de Curățare și Consolidare Logica Autentificare (v12.0)
+# Plan de Unificare și Sincronizare Logout (v13.0)
 
-Acest plan vizează eliminarea funcțiilor de autentificare duplicate din `social.js` pentru a asigura că logica robustă (cu hash și validări) din `auth.js` este singura utilizată de aplicație.
+Acest plan vizează transformarea funcției `authLogout` dintr-o simplă procedură locală într-o funcție asincronă hibridă care gestionează simultan deconectarea din mediul local (LocalStorage), Cloud (Firebase) și mediul Nativ (Android), asigurând totodată salvarea finală a datelor.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> Voi elimina funcția `authLogout` din `social.js`. Deși nu am identificat în versiunea curentă a fișierului `authLogin`, `authRegister` și `authSwitchTab`, voi face o scanare amănunțită pentru a elimina orice altă logică redundantă care ar putea suprascrie modulele din `auth.js`.
+> Funcția `authLogout` va deveni **`async`**. Voi implementa un lanț de execuție care garantează că datele sunt salvate în Cloud *înainte* ca sesiunea Firebase să fie închisă, prevenind astfel desincronizarea semnalată.
 
 ## Propuneri de modificări
 
-### 1. Curățare `social.js` [MODIFY]
-*   **Eliminare `authLogout`**: Voi șterge definiția acestei funcții, lăsând varianta din `auth.js` (care include și salvarea datelor înainte de deconectare) să fie cea activă.
-*   **Scanare pentru Duplicare Logică**: Voi verifica dacă `getUsers`, `saveUsers`, `getCurrentUser` și `saveCurrentUser` din `social.js` intră în conflict cu funcțiile din `auth.js` și le voi unifica dacă este necesar.
+### 1. Actualizare `auth.js` [MODIFY]
+Voi înlocui implementarea curentă a `window.authLogout` cu una asincronă care include:
+1.  **Persistare**: Apel către `authPersistUserData` și `cloudPushData` (dacă sunt disponibile).
+2.  **Firebase**: `await fbAuth.signOut()` (dacă `fbAuth` este inițializat).
+3.  **Android**: Apel către bridge-ul nativ pentru curățarea cache-ului aplicației.
+4.  **Local**: Ștergerea tuturor cheilor de sesiune (`rgb_user`, `rgd_session` etc.).
+5.  **UI**: Revenirea la ecranul de Login.
 
-### 2. Verificare Ordine Scripturi în `index.html` [VERIFY]
-*   Mă voi asigura că `auth.js` este încărcat **după** `social.js` sau că `social.js` nu mai definește deloc aceste funcții globale, astfel încât ordinea să nu mai cauzeze suprascrieri accidentale.
-*   *Corecție*: În planul anterior (v10.1), am mutat `auth.js` la început. Dacă `social.js` (încărcat mai târziu) ar avea aceleași funcții, le-ar suprascrie. Eliminarea lor din `social.js` rezolvă problema definitiv.
+### 2. Eliminare Suprascrieri Redundante [CLEANUP]
+*   Voi verifica din nou `firebase-auth.js` și `social.js` pentru a mă asigura că nicio altă funcție nu încearcă să redefească `authLogout`.
+*   Voi elimina orice logică de tip `_origLogout` care cauza confuzie asincronă.
+
+### 3. Sincronizare Scripturi
+*   Actualizarea folderului `docs/` pentru a reflecta noul flux de logout pe varianta live.
 
 ## Plan de Verificare
 
 ### Verificare Funcțională
-*   Testarea butonului de **Logout** din profil pentru a vedea dacă se execută logica completă din `auth.js` (save data + redirect).
-*   Testarea funcționalităților sociale pentru a asigura că încă pot citi utilizatorul curent folosind funcțiile din `auth.js` (dacă au fost unificate) sau că referințele sunt corecte.
+*   **Logout Cloud**: Autentificare cu un cont Firebase, efectuarea unor modificări, apoi Logout. Verificarea dacă datele au fost salvate pe server înainte de deconectare.
+*   **Logout Local**: Verificarea dacă `localStorage` este curățat complet de cheile sensibile.
+*   **Erori Asincrone**: Verificarea consolei pentru a asigura că `signOut()` nu blochează restul procesului în caz de eroare de rețea.
 
-### Sincronizare Cloud
-*   Sincronizarea folderului `docs/` pentru a propaga curățenia pe GitHub Pages.
+### Sincronizare
+*   `git commit` și `git push` pentru propagarea fix-ului.

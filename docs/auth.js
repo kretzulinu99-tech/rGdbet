@@ -178,30 +178,56 @@ function authStartSession(user) {
 }
 
 /* ─────────────────────────────────────────────
-   7. LOGOUT
+   7. LOGOUT — UNIFIED ASYNC (v13.0 Apex Sovereign)
 ───────────────────────────────────────────── */
-window.authLogout = function() {
-  // Salveaza datele curente înainte de logout
+window.authLogout = async function() {
+  console.log('[Auth] Inițiere proces deconectare hibridă (Local + Cloud)...');
+
+  // 1. Salvează datele curente înainte de logout
   const session = authGetSession();
-  if (session) authPersistUserData(session.username);
+  if (session) {
+    try {
+      authPersistUserData(session.username);
+      // Dacă avem sistem de cloud sync, îl forțăm o ultimă dată pentru a nu pierde progresul
+      if (typeof window.cloudPushData === 'function') {
+        console.log('[Auth] Push final de date către cloud...');
+        await window.cloudPushData();
+      }
+    } catch(e) {
+      console.warn('[Auth] Eroare la salvarea datelor înainte de logout:', e);
+    }
+  }
 
-  // Clearing all potential session keys
-  localStorage.removeItem('rgd_session');
-  localStorage.removeItem('rgb_session');
-  localStorage.removeItem('rgb_user');
-  localStorage.removeItem('rgd_user');
+  // 2. Firebase SignOut (Dacă SDK-ul e prezent și utilizatorul e logat în cloud)
+  if (typeof fbAuth !== 'undefined' && fbAuth) {
+    try {
+      await fbAuth.signOut();
+      console.log('[Auth] Sesiune Cloud (Firebase) închisă cu succes.');
+    } catch(e) {
+      console.error('[Auth] Eroare la deconectarea Firebase:', e);
+    }
+  }
 
+  // 3. Android Native Logout (Bridge)
   if (window.Android && typeof window.Android.logout === 'function') {
     window.Android.logout();
     return;
   }
 
-  // Reseteaza app-ul vizual
+  // 4. Curățare sesiune și utilizator local (LocalStorage + SessionStorage)
+  localStorage.removeItem('rgd_session');
+  localStorage.removeItem('rgb_session');
+  localStorage.removeItem('rgb_user');
+  localStorage.removeItem('rgd_user');
+  sessionStorage.removeItem('rgb_user');
+  sessionStorage.removeItem('rgd_user');
+
+  // 5. Reset Vizual Interfață
   const screen = document.getElementById('auth-screen');
   if (screen) {
     screen.style.display = 'flex';
     screen.classList.remove('hiding');
-    // Reset form
+    // Reset formulare
     ['login-user','login-pass','reg-username','reg-email','reg-pass','reg-pass2'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
@@ -210,8 +236,12 @@ window.authLogout = function() {
     authSwitchTab('login');
   }
 
-  // Navigheaza la home
-  if (typeof navigateTo === 'function') navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
+  // 6. Redirecționare finală
+  if (typeof navigateTo === 'function') {
+    navigateTo('home', document.querySelector('.nav-btn[data-page="home"]'));
+  } else {
+    window.location.reload();
+  }
 };
 
 /* ─────────────────────────────────────────────

@@ -117,8 +117,9 @@
       }
     }
 
-    if (wins   >= THRESHOLD) activate('hot');
-    else if (losses >= THRESHOLD) activate('cold');
+    // HOT STREAK animation disabled per user request (v28.0)
+    // if (wins   >= THRESHOLD) activate('hot');
+    if (losses >= THRESHOLD) activate('cold');
     else deactivate();
   }
 

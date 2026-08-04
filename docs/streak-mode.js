@@ -277,8 +277,9 @@ function _doDetect() {
     }
   }
 
-  if      (wins   >= STREAK_THRESHOLD) _activateMode('win',  wins);
-  else if (losses >= STREAK_THRESHOLD) _activateMode('loss', losses);
+  // WIN STREAK animation disabled per user request (v28.0)
+  // if      (wins   >= STREAK_THRESHOLD) _activateMode('win',  wins);
+  if (losses >= STREAK_THRESHOLD) _activateMode('loss', losses);
   else                                  _clearMode();
 }
 

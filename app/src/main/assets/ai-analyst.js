@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    ai-analyst.js  — Analist AI pentru meciuri de fotbal
-   Folosește Anthropic API (claude-sonnet-4-6) cu web_search
+   Folosește Gemini 2.0 API cu Google Search grounding
    Pagina se construiește dinamic la prima navigare spre 'ai'
 ═══════════════════════════════════════════════════════════════ */
 'use strict';
@@ -35,8 +35,8 @@ function buildAiPage() {
             <span class="ai-logo-pulse"></span>
           </div>
           <div>
-            <div class="ai-header-title">AI ANALIST ELITE</div>
-            <div class="ai-header-sub">Powered by Claude 3.5 Sonnet · Analiză matematică avansată</div>
+            <div class="ai-header-title">AI ANALIST</div>
+            <div class="ai-header-sub">Powered by Gemini 2.0 · Analiză matematică fotbal</div>
           </div>
         </div>
         <button class="ai-new-btn" onclick="aiNewSession()" title="Conversație nouă">
@@ -339,7 +339,7 @@ function buildMatchPrompt(quickType) {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   5. API CALL — Anthropic API cu web_search
+   5. API CALL — Gemini 2.0 (Google AI)
 ══════════════════════════════════════════════════════════════ */
 async function callAI(userMessage, isFollowUp = false) {
   if (AI.loading) return;
@@ -354,49 +354,53 @@ async function callAI(userMessage, isFollowUp = false) {
   const msgId = 'ai-msg-' + Date.now();
   appendMessage('assistant', '', msgId);
 
-  // ── Anthropic API Configuration (v20.0 Sovereign) ──────────────────
-  let CLAUDE_KEY = 'AICI_PUNE_CHEIA_CLAUDE_DACA_NU_FOLOSESTI_ANDROID';
+  // ── Construiește conversația în formatul Gemini ──────────────────────
+  // Gemini: roles = 'user' | 'model'  (nu 'assistant')
+  const geminiHistory = AI.history.map(m => ({
+    role:  m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }],
+  }));
+  // Adaugă mesajul curent
+  geminiHistory.push({ role: 'user', parts: [{ text: userMessage }] });
 
-  // Try to get key from global variable (set by user) or native bridge
-  if (window.CLAUDE_API_KEY) CLAUDE_KEY = window.CLAUDE_API_KEY;
-  else if (window.Android && typeof window.Android.getAiKey === 'function') {
-    try {
-      const nativeKey = window.Android.getAiKey();
-      if (nativeKey && nativeKey.startsWith('sk-ant')) CLAUDE_KEY = nativeKey;
-    } catch(e) { log("Native key error:", e); }
-  }
-
-  const CLAUDE_URL = 'https://api.anthropic.com/v1/messages';
+  // ── System instruction (injectat în primul turn user dacă history e gol) ──
   const systemText = buildSystemPrompt();
 
-  // ── Message History ────────────────────────────────────────────────
-  const messages = AI.history.map(m => ({
-    role: m.role === 'assistant' ? 'assistant' : 'user',
-    content: m.content
-  }));
-  messages.push({ role: 'user', content: userMessage });
+  // ── Payload Gemini ───────────────────────────────────────────────────
+  // Gemini 2.0 Flash cu Google Search grounding pentru date live
+  let GEMINI_KEY = 'AIzaSyCxhvk4QcFsdP9yZdJzjvQ6uAUo1Qv7rXc'; // Fallback key
+
+  // Încercăm să luăm cheia din bridge-ul nativ pentru securitate
+  if (window.Android && typeof window.Android.getAiKey === 'function') {
+    try {
+      const nativeKey = window.Android.getAiKey();
+      if (nativeKey) GEMINI_KEY = nativeKey;
+    } catch(e) { console.error("Native key error:", e); }
+  }
+
+  const GEMINI_URL =
+    'https://generativelanguage.googleapis.com/v1beta/models/' +
+    'gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
 
   const payload = {
-    model: 'claude-3-5-sonnet-20240620',
-    max_tokens: 2048,
-    system: systemText,
-    messages: messages,
-    stream: false // Using non-streaming for simplicity in this bridge
+    system_instruction: {
+      parts: [{ text: systemText }],
+    },
+    contents: geminiHistory,
+    tools: [{ googleSearch: {} }],           // Google Search grounding — date live
+    generationConfig: {
+      temperature:     1.0,
+      maxOutputTokens: 2048,
+      topP:            0.95,
+    },
   };
 
   try {
     AI.abortCtrl = new AbortController();
 
-    // WARNING: Browser-side calls to Anthropic may fail due to CORS.
-    // In Android WebView with proper permissions, it might work.
-    const resp = await fetch(CLAUDE_URL, {
+    const resp = await fetch(GEMINI_URL, {
       method:  'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': CLAUDE_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true' // Mandatory for browser-side calls
-      },
+      headers: { 'Content-Type': 'application/json' },
       signal:  AI.abortCtrl.signal,
       body:    JSON.stringify(payload),
     });
@@ -408,18 +412,43 @@ async function callAI(userMessage, isFollowUp = false) {
     }
 
     const data = await resp.json();
-    let fullText = '';
 
-    if (data.content && data.content[0] && data.content[0].text) {
-      fullText = data.content[0].text;
+    // ── Extrage textul din răspunsul Gemini ──────────────────────────
+    let fullText = '';
+    try {
+      const candidates = data.candidates || [];
+      for (const cand of candidates) {
+        const parts = cand?.content?.parts || [];
+        for (const part of parts) {
+          if (part.text) fullText += part.text;
+        }
+      }
+    } catch (_) {}
+
+    if (!fullText) {
+      // Safety block sau răspuns gol
+      const reason = data.candidates?.[0]?.finishReason || 'UNKNOWN';
+      throw new Error('Răspuns gol de la Gemini. Motiv: ' + reason +
+        '. Încearcă o formulare diferită a întrebării.');
     }
 
-    if (!fullText) throw new Error('Răspuns gol de la Claude.');
+    // ── Extrage sursele Google Search (dacă există) ──────────────────
+    let sourcesHtml = '';
+    try {
+      const sources = data.candidates?.[0]
+        ?.groundingMetadata?.searchEntryPoint?.renderedContent || '';
+      if (sources) {
+        // Gemini returnează HTML pentru search sources — îl adaptăm
+        sourcesHtml = '<div class="ai-sources"><i class="fa-solid fa-magnifying-glass"></i> '
+          + 'Surse web căutate de AI</div>';
+      }
+    } catch (_) {}
 
     // ── Actualizează mesajul ─────────────────────────────────────────
     const msgEl = document.getElementById(msgId);
     if (msgEl) {
-      msgEl.querySelector('.ai-msg-content').innerHTML = renderMarkdown(fullText);
+      msgEl.querySelector('.ai-msg-content').innerHTML =
+        renderMarkdown(fullText) + sourcesHtml;
       msgEl.classList.add('ai-msg-done');
       appendResponseActions(msgEl, fullText);
     }
@@ -439,14 +468,23 @@ async function callAI(userMessage, isFollowUp = false) {
       msgEl.querySelector('.ai-msg-content').innerHTML =
         '<span style="color:rgba(255,255,255,.4);font-style:italic;">Analiză anulată.</span>';
     } else {
+      // Mesaj de eroare detaliat
+      let hint = '';
+      if (err.message.includes('API_KEY') || err.message.includes('403')) {
+        hint = 'Cheia API este invalidă sau expirată.';
+      } else if (err.message.includes('quota') || err.message.includes('429')) {
+        hint = 'Limita de cereri a fost atinsă. Încearcă din nou în câteva minute.';
+      } else if (err.message.includes('fetch') || err.message.includes('network') || err.message.includes('Failed')) {
+        hint = 'Problemă de rețea. Verifică conexiunea la internet.';
+      } else {
+        hint = err.message;
+      }
+
       msgEl.querySelector('.ai-msg-content').innerHTML = `
         <div class="ai-error-msg">
           <i class="fa-solid fa-triangle-exclamation"></i>
-          <strong>Eroare Claude API:</strong><br/>
-          ${escHtml(err.message)}
-          <p style="font-size:9px; margin-top:8px; opacity:0.7;">
-            Notă: Anthropic API necesită acces direct din browser activat sau un proxy server.
-          </p>
+          <strong>Eroare Gemini API:</strong><br/>
+          ${escHtml(hint)}
         </div>`;
     }
   } finally {

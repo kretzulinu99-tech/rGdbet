@@ -498,11 +498,8 @@ class="bg-fix bg-home" alt="">
   <!-- PROFIL -->
   <div id="page-profile" class="spa-page"><!-- buildProfilePage() --></div>
 
-  <!-- CLAUDE AI -->
-  <div id="page-ai" class="spa-page"></div>
-
   <!-- NAV — 6 butoane + central -->
-  <nav class="bottom-nav bottom-nav-6" id="bottomNav">
+  <nav class="bottom-nav" id="bottomNav">
     <button class="nav-btn active" data-page="home" onclick="navigateTo('home',this)">
       <div class="nav-icon-wrap"><i class="fa-solid fa-house"></i><div class="nav-active-dot"></div></div>
       <span class="nav-label-text">ACASĂ</span>
@@ -514,10 +511,6 @@ class="bg-fix bg-home" alt="">
     <button class="nav-btn" data-page="dna" onclick="navigateTo('dna',this)">
       <div class="nav-icon-wrap"><i class="fa-solid fa-dna"></i><div class="nav-active-dot"></div></div>
       <span class="nav-label-text">DNA</span>
-    </button>
-    <button class="nav-btn" data-page="ai" onclick="navigateTo('ai',this)">
-      <div class="nav-icon-wrap"><i class="fa-solid fa-robot"></i><div class="nav-active-dot"></div></div>
-      <span class="nav-label-text">AI</span>
     </button>
     <button class="nav-btn-center" onclick="navigateTo('addbet',null)" aria-label="Bilete">
       <div class="nav-center-inner">
@@ -665,7 +658,7 @@ class="bg-fix bg-home" alt="">
 /* ══ SPA NAVIGATION ══ */
 let currentPage = 'home';
 let _navLock    = false;
-const NAV_ORDER = ['home','lab','dna','ai','addbet','match','social','messages','profile'];
+const NAV_ORDER = ['home','lab','dna','addbet','match','social','messages','profile'];
 
 function navigateTo(pageId, btnEl, fromPopState) {
   if (_navLock) return;
@@ -739,7 +732,6 @@ function navigateTo(pageId, btnEl, fromPopState) {
   if (pageId==='profile'  && typeof buildProfilePage==='function') buildProfilePage();
   if (pageId==='social'   && typeof buildSocialPage ==='function') buildSocialPage();
   if (pageId==='messages' && typeof buildMessagesPage==='function') buildMessagesPage();
-  if (pageId==='ai'       && typeof buildAiPage      ==='function') buildAiPage();
 }
 
 /* Tasta fizica Inapoi (Android/Chrome) — daca suntem in Profil, navigam la Acasa
